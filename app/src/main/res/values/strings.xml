@@ -1,0 +1,31 @@
+<resources>
+    <string name="app_name">Zing</string>
+    <string name="login">Login</string>
+    <string name="password">Password</string>
+    <string name="email">Email</string>
+    <string name="register">Register</string>
+    <string name="create_new_account">Create New Account</string>
+    <string name="already_have_an_account">Already have an Account?</string>
+    <string name="login_here">Login Here</string>
+    <string name="new_user">New User?</string>
+    <string name="register_here">Register Here</string>
+    <string name="liked_by_riyazuddin515">Liked by riyazuddin515</string>
+    <string name="add_a_comment">Add a comment</string>
+    <string name="comment">Comment</string>
+    <string name="like">Like</string>
+    <string name="postimage">PostImage</string>
+    <string name="riyazuddin515">riyazuddin515</string>
+    <string name="search_user">Search User</string>
+    <string name="createpostimageview">CreatePostImageView</string>
+    <string name="select_image">Select Image</string>
+    <string name="enter_caption">Enter Caption</string>
+    <string name="bio">bio</string>
+    <string name="follow">Follow</string>
+    <string name="forgot_password">Forgot Password?</string>
+    <string name="trashimage">TrashImage</string>
+    <string name="home">Home</string>
+    <string name="search">Search</string>
+    <string name="post">Post</string>
+    <string name="profile">Profile</string>
+    <string name="settings">Settings</string>
+</resources>
