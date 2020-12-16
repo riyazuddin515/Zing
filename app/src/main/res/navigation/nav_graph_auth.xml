@@ -23,11 +23,20 @@
         <action
             android:id="@+id/action_registerFragment_to_loginFragment"
             app:destination="@id/loginFragment" />
+        <action
+            android:id="@+id/action_registerFragment_to_checkMailFragment"
+            app:destination="@id/checkMailFragment"
+            app:popUpTo="@id/loginFragment"
+            app:popUpToInclusive="false"/>
     </fragment>
     <fragment
         android:id="@+id/forgotPassword"
         android:name="com.riyazuddin.zing.ui.auth.fragments.ForgotPassword"
         android:label="ForgotPassword" />
+    <fragment
+        android:id="@+id/checkMailFragment"
+        android:name="com.riyazuddin.zing.ui.auth.fragments.CheckMailFragment"
+        android:label="CheckMailFragment" />
 
 
 </navigation>

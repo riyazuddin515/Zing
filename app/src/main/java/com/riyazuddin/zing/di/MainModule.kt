@@ -1,7 +1,7 @@
 package com.riyazuddin.zing.di
 
-import com.riyazuddin.zing.repositories.AuthRepository
-import com.riyazuddin.zing.repositories.DefaultAuthRepository
+import com.riyazuddin.zing.repositories.DefaultMainRepository
+import com.riyazuddin.zing.repositories.MainRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -10,9 +10,9 @@ import dagger.hilt.android.scopes.ActivityScoped
 
 @Module
 @InstallIn(ActivityComponent::class)
-object AuthModule {
+object MainModule {
 
     @ActivityScoped
     @Provides
-    fun provideAuthRepository() = DefaultAuthRepository() as AuthRepository
+    fun provideMainRepository() = DefaultMainRepository() as MainRepository
 }

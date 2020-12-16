@@ -9,14 +9,16 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.AuthResult
 import com.riyazuddin.zing.R
+import com.riyazuddin.zing.data.entities.User
 import com.riyazuddin.zing.other.Constants.MAX_PASSWORD
+import com.riyazuddin.zing.other.Constants.MAX_USERNAME
 import com.riyazuddin.zing.other.Constants.MIN_PASSWORD
+import com.riyazuddin.zing.other.Constants.MIN_USERNAME
 import com.riyazuddin.zing.other.Event
 import com.riyazuddin.zing.other.Resource
 import com.riyazuddin.zing.repositories.AuthRepository
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 class AuthViewModel @ViewModelInject constructor(
     private val repository: AuthRepository,
@@ -33,10 +35,18 @@ class AuthViewModel @ViewModelInject constructor(
     private val _passwordResetStatus = MutableLiveData<Event<Resource<String>>>()
     val passwordResetStatus: LiveData<Event<Resource<String>>> = _passwordResetStatus
 
-    fun register(email: String, password: String, repeatPassword: String) {
+    private val _isUsernameAvailable = MutableLiveData<Event<Resource<Boolean>>>()
+    val isUsernameAvailable: LiveData<Event<Resource<Boolean>>> = _isUsernameAvailable
+
+
+    fun register(name: String, username: String, email: String, password: String, repeatPassword: String) {
         val error =
-            if (email.isEmpty() || password.isEmpty())
+            if (name.isEmpty() || username.isEmpty() || email.isEmpty() || password.isEmpty())
                 applicationContext.getString(R.string.error_fields_can_not_be_empty)
+            else if (username.length < MIN_USERNAME)
+                applicationContext.getString(R.string.error_username_too_short)
+            else if (username.length > MAX_USERNAME)
+                applicationContext.getString(R.string.error_username_too_long)
             else if (!Patterns.EMAIL_ADDRESS.matcher(email).matches())
                 applicationContext.getString(R.string.error_not_a_valid_email)
             else if (password.length < MIN_PASSWORD)
@@ -54,7 +64,7 @@ class AuthViewModel @ViewModelInject constructor(
 
         _registerStatus.postValue(Event(Resource.Loading()))
         viewModelScope.launch(dispatcher) {
-            val result = repository.register(email, password)
+            val result = repository.register(name, username, email, password)
             _registerStatus.postValue(Event(result))
         }
     }
@@ -100,6 +110,19 @@ class AuthViewModel @ViewModelInject constructor(
         viewModelScope.launch {
             val result = repository.sendPasswordResetLink(email)
             _passwordResetStatus.postValue(Event(result))
+        }
+    }
+
+    fun searchUsername(query: String) {
+        if (query.isEmpty())
+            return
+
+        _isUsernameAvailable.postValue(Event(Resource.Loading()))
+        viewModelScope.launch {
+            val result = repository.searchUsername(query)
+            if (result.data!!.isEmpty)
+                _isUsernameAvailable.postValue(Event(Resource.Success(true)))
+            else _isUsernameAvailable.postValue(Event(Resource.Error("Already taken")))
         }
     }
 

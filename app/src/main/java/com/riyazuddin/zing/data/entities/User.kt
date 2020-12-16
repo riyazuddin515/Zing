@@ -6,12 +6,12 @@ import com.riyazuddin.zing.other.Constants.DEFAULT_PROFILE_PICTURE_URL
 
 @IgnoreExtraProperties
 data class User(
+    val name: String = "",
     val uid: String = "",
     val username: String = "",
-    val profilePic: String = DEFAULT_PROFILE_PICTURE_URL,
-    val isEmailVerified: Boolean = false,
+    val profilePicUrl: String = DEFAULT_PROFILE_PICTURE_URL,
     val follows: List<String> = listOf(),
-    val bio: String = "",
+    val bio: String = "I'm on Zing now",
     @get:Exclude
     val isFollowing: Boolean = false,
 )

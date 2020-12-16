@@ -65,9 +65,6 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
                  user.reload()
                  if (user.isEmailVerified){
 
-
-
-
                      Intent(requireActivity(), MainActivity::class.java).apply {
                          startActivity(this)
                          requireActivity().finish()

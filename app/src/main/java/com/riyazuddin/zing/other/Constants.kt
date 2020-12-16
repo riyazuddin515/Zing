@@ -7,9 +7,10 @@ object Constants {
     const val USERS_COLLECTION = "users"
     const val POSTS_COLLECTION = "posts"
 
-
     const val MIN_PASSWORD = 8
     const val MAX_PASSWORD = 15
-    const val MIN_USERNAME = 5
+    const val MIN_USERNAME = 1
     const val MAX_USERNAME = 20
+
+    const val SEARCH_TIME_DELAY = 500L
 }

@@ -44,4 +44,8 @@
     <string name="username">Username</string>
     <string name="update_details">Update Details</string>
     <string name="submit">Submit</string>
+    <string name="successfully_updated">Successfully Updated</string>
+    <string name="name">Name</string>
+    <string name="an_email_with_a_verification_link_has_been_sent_to_you_mail_id_please_verify_your_mail_id_by_clicking_on_the_link">An email with a verification link has been sent to you mail id. Please verify your mail id by clicking on the link.</string>
+    <string name="mail_icon">mail_icon</string>
 </resources>

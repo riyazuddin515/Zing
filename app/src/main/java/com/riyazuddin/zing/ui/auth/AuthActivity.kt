@@ -19,8 +19,7 @@ class AuthActivity : AppCompatActivity() {
         binding = ActivityAuthBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        val currentUser = Firebase.auth.currentUser
-        currentUser?.let {
+        Firebase.auth.currentUser?.let {
             it.reload()
             if (it.isEmailVerified){
                 Intent(this, MainActivity::class.java).apply {
