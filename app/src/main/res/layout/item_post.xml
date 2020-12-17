@@ -86,6 +86,16 @@
             app:layout_constraintStart_toStartOf="@+id/imageButton"
             app:layout_constraintTop_toBottomOf="@+id/imageButton"/>
 
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/tvCaption"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/caption"
+            android:textColor="@android:color/black"
+            android:layout_marginTop="5dp"
+            app:layout_constraintTop_toBottomOf="@+id/tvLikedBy"
+            app:layout_constraintStart_toStartOf="@+id/tvLikedBy"/>
+
         <de.hdodenhof.circleimageview.CircleImageView
             android:id="@+id/CIVCommentImage"
             android:layout_width="36dp"
@@ -94,8 +104,8 @@
             android:layout_marginBottom="8dp"
             android:src="@drawable/default_profile_pic"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="@id/tvLikedBy"
-            app:layout_constraintTop_toBottomOf="@id/tvLikedBy" />
+            app:layout_constraintStart_toStartOf="@id/tvCaption"
+            app:layout_constraintTop_toBottomOf="@id/tvCaption" />
 
         <com.google.android.material.textview.MaterialTextView
             android:layout_width="wrap_content"

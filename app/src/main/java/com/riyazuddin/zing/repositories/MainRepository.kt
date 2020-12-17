@@ -1,9 +1,9 @@
 package com.riyazuddin.zing.repositories
 
-import com.riyazuddin.zing.data.entities.User
+import android.net.Uri
 import com.riyazuddin.zing.other.Resource
 
 interface MainRepository {
 
-    suspend fun getUser() : Resource<User>
+    suspend fun createPost(imageUri: Uri, caption: String?): Resource<Any>
 }
