@@ -50,4 +50,10 @@
     <string name="mail_icon">mail_icon</string>
     <string name="error_select_an_image">Please select an Image</string>
     <string name="caption">caption</string>
+    <string name="delete_post_dialog_title">Do you want to delete that post?</string>
+    <string name="delete_post_dialog_message">This action cannot be undone.</string>
+    <string name="delete_post_dialog_positive">Yes</string>
+    <string name="delete_post_dialog_negative">No</string>
+    <string name="unfollow">UnFollow</string>
+    <string name="log_out">Log Out</string>
 </resources>

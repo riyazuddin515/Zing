@@ -1,7 +1,8 @@
 package com.riyazuddin.zing.ui.main
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.View
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.fragment.findNavController
@@ -20,7 +21,8 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        val navHostFragment = supportFragmentManager.findFragmentById(R.id.mainNavHost) as NavHostFragment
+        val navHostFragment =
+            supportFragmentManager.findFragmentById(R.id.mainNavHost) as NavHostFragment
 
         binding.bottomNavigation.apply {
             background = null
@@ -28,5 +30,21 @@ class MainActivity : AppCompatActivity() {
             setOnNavigationItemReselectedListener { }
         }
 
+        navHostFragment.findNavController().addOnDestinationChangedListener { _, destination, _ ->
+            when (destination.id) {
+                R.id.homeFragment, R.id.searchFragment, R.id.createPostFragment, R.id.profileFragment, R.id.settingsFragment, R.id.othersProfileFragment ->
+                    binding.bottomNavigation.visibility = View.VISIBLE
+                else -> binding.bottomNavigation.visibility = View.GONE
+            }
+        }
+
+    }
+
+    fun showBottomNavigation() {
+        binding.bottomNavigation.isVisible = true
+    }
+
+    fun hideBottomNavigation() {
+        binding.bottomNavigation.isVisible = false
     }
 }

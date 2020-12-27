@@ -3,11 +3,12 @@ package com.riyazuddin.zing.data.entities
 import com.google.firebase.firestore.Exclude
 
 data class Post(
-    val postId: String? = null,
-    val uid: String? = null,
+    val postId: String = "",
+    val authorUid: String = "",
     val date: Long = 0L,
-    val imageUrl: String? = null,
-    val caption: String? = null,
+    val imageUrl: String = "",
+    val caption: String = "",
+    var likedBy: List<String> = listOf(),
     @get:Exclude var username: String? = null,
     @get:Exclude var userProfilePic: String? = null,
     @get:Exclude var isLiking: Boolean = false,

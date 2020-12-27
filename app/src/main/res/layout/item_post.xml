@@ -11,7 +11,7 @@
         android:layout_height="match_parent">
 
         <de.hdodenhof.circleimageview.CircleImageView
-            android:id="@+id/circleImageView3"
+            android:id="@+id/CIVProfilePic"
             android:layout_width="50dp"
             android:layout_height="50dp"
             android:src="@drawable/default_profile_pic"
@@ -21,28 +21,29 @@
             app:layout_constraintTop_toTopOf="parent" />
 
         <com.google.android.material.textview.MaterialTextView
-            android:id="@+id/materialTextView5"
+            android:id="@+id/tvUsername"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="5dp"
             android:text="@string/riyazuddin515"
-            app:layout_constraintBottom_toBottomOf="@+id/circleImageView3"
-            app:layout_constraintStart_toEndOf="@+id/circleImageView3"
-            app:layout_constraintTop_toTopOf="@+id/circleImageView3" />
+            app:layout_constraintBottom_toBottomOf="@+id/CIVProfilePic"
+            app:layout_constraintStart_toEndOf="@+id/CIVProfilePic"
+            app:layout_constraintTop_toTopOf="@+id/CIVProfilePic" />
 
         <ImageButton
+            android:id="@+id/ibDelete"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="@android:color/transparent"
             android:src="@drawable/ic_outline_delete"
             android:layout_marginEnd="16dp"
             android:contentDescription="@string/trashimage"
-            app:layout_constraintBottom_toTopOf="@+id/imageView"
+            app:layout_constraintBottom_toTopOf="@+id/ivPostImage"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
         <ImageView
-            android:id="@+id/imageView"
+            android:id="@+id/ivPostImage"
             android:layout_width="match_parent"
             android:layout_height="250dp"
             android:layout_marginTop="10dp"
@@ -51,30 +52,31 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/circleImageView3" />
+            app:layout_constraintTop_toBottomOf="@+id/CIVProfilePic" />
 
         <ImageButton
-            android:id="@+id/imageButton"
+            android:id="@+id/ibLike"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
             android:layout_marginTop="8dp"
             android:contentDescription="@string/like"
             android:background="@android:color/transparent"
-            android:src="@drawable/ic_outline_favorite_border"
+            android:src="@drawable/ic_outline_like"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/imageView" />
+            app:layout_constraintTop_toBottomOf="@+id/ivPostImage" />
 
         <ImageButton
+            android:id="@+id/ibComment"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="@android:color/transparent"
             android:src="@drawable/ic_outline_comment"
             android:layout_marginStart="10dp"
             android:contentDescription="@string/comment"
-            app:layout_constraintBottom_toBottomOf="@+id/imageButton"
-            app:layout_constraintStart_toEndOf="@+id/imageButton"
-            app:layout_constraintTop_toTopOf="@+id/imageButton" />
+            app:layout_constraintBottom_toBottomOf="@+id/ibLike"
+            app:layout_constraintStart_toEndOf="@+id/ibLike"
+            app:layout_constraintTop_toTopOf="@+id/ibLike" />
 
         <com.google.android.material.textview.MaterialTextView
             android:id="@+id/tvLikedBy"
@@ -83,38 +85,20 @@
             android:text="@string/liked_by_riyazuddin515"
             android:textColor="@android:color/black"
             android:layout_marginTop="5dp"
-            app:layout_constraintStart_toStartOf="@+id/imageButton"
-            app:layout_constraintTop_toBottomOf="@+id/imageButton"/>
+            app:layout_constraintStart_toStartOf="@+id/ibLike"
+            app:layout_constraintTop_toBottomOf="@+id/ibLike"/>
 
         <com.google.android.material.textview.MaterialTextView
             android:id="@+id/tvCaption"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:layout_marginBottom="5dp"
             android:text="@string/caption"
             android:textColor="@android:color/black"
-            android:layout_marginTop="5dp"
-            app:layout_constraintTop_toBottomOf="@+id/tvLikedBy"
-            app:layout_constraintStart_toStartOf="@+id/tvLikedBy"/>
-
-        <de.hdodenhof.circleimageview.CircleImageView
-            android:id="@+id/CIVCommentImage"
-            android:layout_width="36dp"
-            android:layout_height="36dp"
-            android:layout_marginTop="5dp"
-            android:layout_marginBottom="8dp"
-            android:src="@drawable/default_profile_pic"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="@id/tvCaption"
-            app:layout_constraintTop_toBottomOf="@id/tvCaption" />
-
-        <com.google.android.material.textview.MaterialTextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/add_a_comment"
-            android:layout_marginStart="8dp"
-            app:layout_constraintStart_toEndOf="@id/CIVCommentImage"
-            app:layout_constraintTop_toTopOf="@id/CIVCommentImage"
-            app:layout_constraintBottom_toBottomOf="@id/CIVCommentImage"/>
+            app:layout_constraintStart_toStartOf="@+id/tvLikedBy"
+            app:layout_constraintTop_toBottomOf="@+id/tvLikedBy" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

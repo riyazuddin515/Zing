@@ -13,5 +13,5 @@ data class User(
     val follows: List<String> = listOf(),
     val bio: String = "I'm on Zing now",
     @get:Exclude
-    val isFollowing: Boolean = false,
+    var isFollowing: Boolean = false,
 )

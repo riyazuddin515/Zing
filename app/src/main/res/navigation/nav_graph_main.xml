@@ -2,27 +2,84 @@
 <navigation
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_graph_main"
     app:startDestination="@id/homeFragment">
 
     <fragment
         android:id="@+id/homeFragment"
         android:name="com.riyazuddin.zing.ui.main.fragments.HomeFragment"
-        android:label="HomeFragment" />
+        android:label="HomeFragment"
+        tools:layout="@layout/fragment_home">
+        <action
+            android:id="@+id/action_homeFragment_to_commentsFragment"
+            app:destination="@id/commentsFragment" />
+        <action
+            android:id="@+id/action_homeFragment_to_likedByFragment"
+            app:destination="@id/likedByFragment" />
+    </fragment>
+
     <fragment
         android:id="@+id/searchFragment"
         android:name="com.riyazuddin.zing.ui.main.fragments.SearchFragment"
-        android:label="SearchFragment" />
+        android:label="SearchFragment"
+        tools:layout="@layout/fragment_search"/>
+
     <fragment
         android:id="@+id/createPostFragment"
         android:name="com.riyazuddin.zing.ui.main.fragments.CreatePostFragment"
-        android:label="CreatePostFragment" />
+        android:label="CreatePostFragment"
+        tools:layout="@layout/fragment_create_post"/>
+
     <fragment
         android:id="@+id/profileFragment"
         android:name="com.riyazuddin.zing.ui.main.fragments.ProfileFragment"
-        android:label="ProfileFragment" />
+        android:label="ProfileFragment"
+        tools:layout="@layout/fragment_profile">
+        <action
+            android:id="@+id/action_profileFragment_to_commentsFragment"
+            app:destination="@id/commentsFragment" />
+        <action
+            android:id="@+id/action_profileFragment_to_likedByFragment"
+            app:destination="@id/likedByFragment" />
+    </fragment>
+
     <fragment
         android:id="@+id/settingsFragment"
         android:name="com.riyazuddin.zing.ui.main.fragments.SettingsFragment"
-        android:label="SettingsFragment" />
+        android:label="SettingsFragment"
+        tools:layout="@layout/fragment_settings"/>
+
+    <fragment
+        android:id="@+id/othersProfileFragment"
+        android:name="com.riyazuddin.zing.ui.main.fragments.OthersProfileFragment"
+        android:label="OthersProfileFragment"
+        tools:layout="@layout/fragment_profile_anim">
+        <argument
+            android:name="uid"
+            app:argType="string"/>
+        <action
+            android:id="@+id/action_othersProfileFragment_to_commentsFragment"
+            app:destination="@id/commentsFragment" />
+        <action
+            android:id="@+id/action_othersProfileFragment_to_likedByFragment"
+            app:destination="@id/likedByFragment" />
+    </fragment>
+
+    <action android:id="@+id/globalActionToOthersProfileFragment"
+        app:destination="@id/othersProfileFragment"/>
+    <fragment
+        android:id="@+id/commentsFragment"
+        android:name="com.riyazuddin.zing.ui.main.fragments.CommentsFragment"
+        android:label="CommentsFragment" />
+    <fragment
+        android:id="@+id/likedByFragment"
+        android:name="com.riyazuddin.zing.ui.main.fragments.LikedByFragment"
+        android:label="LikedByFragment" >
+        <argument
+            android:name="userAdapter"
+            app:argType="com.riyazuddin.zing.adapters.UserAdapter" />
+    </fragment>
+
+
 </navigation>
