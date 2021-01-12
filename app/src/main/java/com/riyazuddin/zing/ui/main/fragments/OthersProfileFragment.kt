@@ -17,22 +17,23 @@ import com.riyazuddin.zing.other.EventObserver
 
 class OthersProfileFragment : ProfileFragment() {
 
-    override val sourceToDestinationLayoutId: Int
-        get() = R.id.action_othersProfileFragment_to_likedByFragment
+    override val source: String
+        get() = (R.id.othersProfileFragment).toString()
 
-    private lateinit var binding: FragmentProfileBinding
     private val args: OthersProfileFragmentArgs by navArgs()
-
     override val uid: String
         get() = args.uid
 
     private var curUser: User? = null
+
+    private lateinit var binding: FragmentProfileBinding
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding = FragmentProfileBinding.bind(view)
 
         subscribeToObservers()
+
         binding.btnToggleFollow.setOnClickListener {
             viewModel.toggleFollowForUser(uid)
         }

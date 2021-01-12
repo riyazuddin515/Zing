@@ -8,8 +8,6 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.RequestManager
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.ktx.auth
-import com.google.firebase.ktx.Firebase
 import com.riyazuddin.zing.R
 import com.riyazuddin.zing.adapters.PostAdapter
 import com.riyazuddin.zing.adapters.UserAdapter
@@ -18,13 +16,15 @@ import com.riyazuddin.zing.other.snackBar
 import com.riyazuddin.zing.ui.dialogs.CustomDialog
 import com.riyazuddin.zing.ui.main.viewmodels.BasePostViewModel
 import javax.inject.Inject
+import kotlin.properties.Delegates
 
 abstract class BasePostFragment(layoutId: Int) : Fragment(layoutId) {
 
     protected abstract val postProgressBar: ProgressBar
     protected abstract val basePostViewModel: BasePostViewModel
 
-    protected abstract val sourceToDestinationLayoutId: Int
+    protected abstract val source: String
+    private var sourceToDestinationLayoutId by Delegates.notNull<Int>()
 
     @Inject
     lateinit var postAdapter: PostAdapter
@@ -58,6 +58,23 @@ abstract class BasePostFragment(layoutId: Int) : Fragment(layoutId) {
 
         postAdapter.setOnLikedByClickListener {
             basePostViewModel.getUsers(it.likedBy)
+            when (source) {
+                (R.id.homeFragment).toString() -> sourceToDestinationLayoutId = R.id.action_homeFragment_to_likedByFragment
+                (R.id.profileFragment).toString() -> sourceToDestinationLayoutId = R.id.action_profileFragment_to_likedByFragment
+                (R.id.othersProfileFragment).toString() -> sourceToDestinationLayoutId = R.id.action_othersProfileFragment_to_likedByFragment
+            }
+        }
+
+        postAdapter.setOnCommentClickListener {
+            when (source) {
+                (R.id.homeFragment).toString() -> sourceToDestinationLayoutId = R.id.action_homeFragment_to_commentsFragment
+                (R.id.profileFragment).toString() -> sourceToDestinationLayoutId = R.id.action_profileFragment_to_commentsFragment
+                (R.id.othersProfileFragment).toString() -> sourceToDestinationLayoutId = R.id.action_othersProfileFragment_to_commentsFragment
+            }
+            val bundle = Bundle().apply {
+                putString("postId",it.postId)
+            }
+            findNavController().navigate(sourceToDestinationLayoutId,bundle)
         }
     }
 
@@ -113,6 +130,7 @@ abstract class BasePostFragment(layoutId: Int) : Fragment(layoutId) {
 
 
         basePostViewModel.likedByStatus.observe(viewLifecycleOwner, EventObserver(
+            forIsLikedBy = true,
             onError = { snackBar(it) }
         ) { users ->
             val userAdapter = UserAdapter(glide)

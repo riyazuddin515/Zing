@@ -9,7 +9,6 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import com.riyazuddin.zing.R
@@ -67,6 +66,7 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
 
     private fun subscribeToObservers() {
         viewModel.searchUserStatus.observe(viewLifecycleOwner, EventObserver(
+            onError = { binding.progressBar.isVisible = false },
             onLoading = { binding.progressBar.isVisible = true }
         ) { users ->
             binding.progressBar.isVisible = false

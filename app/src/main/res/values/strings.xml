@@ -19,14 +19,13 @@
     <string name="createpostimageview">CreatePostImageView</string>
     <string name="select_image">Select Image</string>
     <string name="enter_caption">Enter Caption</string>
-    <string name="bio">bio</string>
+    <string name="bio">Bio</string>
     <string name="follow">Follow</string>
     <string name="forgot_password">Forgot Password?</string>
     <string name="trashimage">TrashImage</string>
     <string name="home">Home</string>
     <string name="search">Search</string>
     <string name="post">Post</string>
-    <string name="profile">Profile</string>
     <string name="settings">Settings</string>
     <string name="error_fields_can_not_be_empty">Fields can not be Empty</string>
     <string name="error_not_a_valid_email">Enter Valid Email Address</string>
@@ -46,7 +45,7 @@
     <string name="submit">Submit</string>
     <string name="successfully_updated">Successfully Updated</string>
     <string name="name">Name</string>
-    <string name="an_email_with_a_verification_link_has_been_sent_to_you_mail_id_please_verify_your_mail_id_by_clicking_on_the_link">An email with a verification link has been sent to you mail id. Please verify your mail id by clicking on the link.</string>
+    <string name="email_verification">An email with a verification link has been sent to you mail id. Please verify your mail id by clicking on the link. If you can not find it in inbox then please check spam</string>
     <string name="mail_icon">mail_icon</string>
     <string name="error_select_an_image">Please select an Image</string>
     <string name="caption">caption</string>
@@ -56,4 +55,12 @@
     <string name="delete_post_dialog_negative">No</string>
     <string name="unfollow">UnFollow</string>
     <string name="log_out">Log Out</string>
+    <string name="send">send</string>
+    <string name="profile">Profile</string>
+    <string name="personal_information">Personal Information</string>
+    <string name="change_email">Change Email</string>
+    <string name="change_password">Change Password</string>
+    <string name="change_profile_image">Change Profile Image</string>
+    <string name="update">Update</string>
+    <string name="open_mail">Open Mail</string>
 </resources>

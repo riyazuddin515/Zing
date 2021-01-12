@@ -129,10 +129,10 @@
         android:id="@+id/btnRegister"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
         android:text="@string/register"
         android:textAllCaps="false"
         android:textSize="24sp"
-        android:layout_marginTop="8dp"
         app:layout_constraintEnd_toEndOf="@+id/TILRepeatPassword"
         app:layout_constraintTop_toBottomOf="@+id/TILRepeatPassword" />
 

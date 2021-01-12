@@ -12,11 +12,19 @@
         android:label="HomeFragment"
         tools:layout="@layout/fragment_home">
         <action
-            android:id="@+id/action_homeFragment_to_commentsFragment"
-            app:destination="@id/commentsFragment" />
-        <action
             android:id="@+id/action_homeFragment_to_likedByFragment"
-            app:destination="@id/likedByFragment" />
+            app:destination="@id/likedByFragment"
+            app:enterAnim="@anim/slide_in_from_left"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/slide_out_to_left" />
+        <action
+            android:id="@+id/action_homeFragment_to_commentsFragment"
+            app:destination="@id/commentsFragment"
+            app:enterAnim="@anim/slide_in_from_left"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/slide_out_to_left"/>
     </fragment>
 
     <fragment
@@ -37,18 +45,55 @@
         android:label="ProfileFragment"
         tools:layout="@layout/fragment_profile">
         <action
-            android:id="@+id/action_profileFragment_to_commentsFragment"
-            app:destination="@id/commentsFragment" />
-        <action
             android:id="@+id/action_profileFragment_to_likedByFragment"
-            app:destination="@id/likedByFragment" />
+            app:destination="@id/likedByFragment"
+            app:enterAnim="@anim/slide_in_from_left"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/slide_out_to_left" />
+        <action
+            android:id="@+id/action_profileFragment_to_commentsFragment"
+            app:destination="@id/commentsFragment"
+            app:enterAnim="@anim/slide_in_from_left"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/slide_out_to_left"/>
     </fragment>
 
     <fragment
         android:id="@+id/settingsFragment"
-        android:name="com.riyazuddin.zing.ui.main.fragments.SettingsFragment"
+        android:name="com.riyazuddin.zing.ui.main.fragments.settings.SettingsFragment"
         android:label="SettingsFragment"
-        tools:layout="@layout/fragment_settings"/>
+        tools:layout="@layout/fragment_settings">
+        <action
+            android:id="@+id/action_settingsFragment_to_profileInfo"
+            app:destination="@id/profileInfo"
+            app:enterAnim="@anim/slide_in_from_bottom"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/slide_out_to_bottom" />
+        <action
+            android:id="@+id/action_settingsFragment_to_personalInformation22"
+            app:destination="@id/personalInformation"
+            app:enterAnim="@anim/slide_in_from_bottom"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/slide_out_to_bottom" />
+        <action
+            android:id="@+id/action_settingsFragment_to_email"
+            app:destination="@id/email"
+            app:enterAnim="@anim/slide_in_from_bottom"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/slide_out_to_bottom" />
+        <action
+            android:id="@+id/action_settingsFragment_to_password"
+            app:destination="@id/password"
+            app:enterAnim="@anim/slide_in_from_bottom"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/slide_out_to_bottom" />
+    </fragment>
 
     <fragment
         android:id="@+id/othersProfileFragment"
@@ -59,19 +104,33 @@
             android:name="uid"
             app:argType="string"/>
         <action
-            android:id="@+id/action_othersProfileFragment_to_commentsFragment"
-            app:destination="@id/commentsFragment" />
-        <action
             android:id="@+id/action_othersProfileFragment_to_likedByFragment"
-            app:destination="@id/likedByFragment" />
+            app:destination="@id/likedByFragment"
+            app:enterAnim="@anim/slide_in_from_left"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/slide_out_to_left" />
+        <action
+            android:id="@+id/action_othersProfileFragment_to_commentsFragment"
+            app:destination="@id/commentsFragment"
+            app:enterAnim="@anim/slide_in_from_left"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/slide_out_to_left"/>
     </fragment>
 
-    <action android:id="@+id/globalActionToOthersProfileFragment"
+    <action
+        android:id="@+id/globalActionToOthersProfileFragment"
         app:destination="@id/othersProfileFragment"/>
     <fragment
         android:id="@+id/commentsFragment"
         android:name="com.riyazuddin.zing.ui.main.fragments.CommentsFragment"
-        android:label="CommentsFragment" />
+        android:label="CommentsFragment" >
+        <argument
+            android:name="postId"
+            app:argType="string" />
+    </fragment>
+
     <fragment
         android:id="@+id/likedByFragment"
         android:name="com.riyazuddin.zing.ui.main.fragments.LikedByFragment"
@@ -80,6 +139,21 @@
             android:name="userAdapter"
             app:argType="com.riyazuddin.zing.adapters.UserAdapter" />
     </fragment>
-
+    <fragment
+        android:id="@+id/profileInfo"
+        android:name="com.riyazuddin.zing.ui.main.fragments.settings.ProfileInfo"
+        android:label="ProfileInfo" />
+    <fragment
+        android:id="@+id/personalInformation"
+        android:name="com.riyazuddin.zing.ui.main.fragments.settings.PersonalInformation"
+        android:label="PersonalInformation" />
+    <fragment
+        android:id="@+id/password"
+        android:name="com.riyazuddin.zing.ui.main.fragments.settings.Password"
+        android:label="Password" />
+    <fragment
+        android:id="@+id/email"
+        android:name="com.riyazuddin.zing.ui.main.fragments.settings.Email"
+        android:label="Email" />
 
 </navigation>

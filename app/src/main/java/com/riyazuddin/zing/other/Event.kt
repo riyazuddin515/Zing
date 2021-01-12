@@ -18,6 +18,7 @@ class Event<out T>(private val content: T) {
 }
 
 class EventObserver<T>(
+    private val forIsLikedBy: Boolean = false,
     private inline val onError: ((String) -> Unit)? = null,
     private inline val onLoading: (() -> Unit)? = null,
     private inline val onSuccess: ((T) -> Unit)
@@ -25,7 +26,11 @@ class EventObserver<T>(
     override fun onChanged(t: Event<Resource<T>>?) {
         when(val content = t?.peekContent()){
             is Resource.Success -> {
-                t.getContentHasBeenHandled()?.let {
+                if (forIsLikedBy){
+                    t.getContentHasBeenHandled()?.let {
+                        content.data?.let(onSuccess)
+                    }
+                }else{
                     content.data?.let(onSuccess)
                 }
             }

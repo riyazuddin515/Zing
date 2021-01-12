@@ -18,8 +18,8 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 open class ProfileFragment : BasePostFragment(R.layout.fragment_profile) {
 
-    override val sourceToDestinationLayoutId: Int
-        get() = R.id.action_profileFragment_to_likedByFragment
+    override val source: String
+        get() = (R.id.profileFragment).toString()
 
     private lateinit var binding: FragmentProfileBinding
 

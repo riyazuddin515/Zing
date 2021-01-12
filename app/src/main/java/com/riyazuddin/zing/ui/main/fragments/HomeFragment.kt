@@ -6,33 +6,24 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ProgressBar
-import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.navigation.NavDirections
-import androidx.navigation.findNavController
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.bumptech.glide.RequestManager
-import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import com.riyazuddin.zing.R
-import com.riyazuddin.zing.adapters.UserAdapter
 import com.riyazuddin.zing.databinding.FragmentHomeBinding
-import com.riyazuddin.zing.other.EventObserver
-import com.riyazuddin.zing.other.snackBar
 import com.riyazuddin.zing.ui.auth.AuthActivity
 import com.riyazuddin.zing.ui.dialogs.CustomDialog
 import com.riyazuddin.zing.ui.main.viewmodels.BasePostViewModel
 import com.riyazuddin.zing.ui.main.viewmodels.HomeViewModel
 import dagger.hilt.android.AndroidEntryPoint
-import javax.inject.Inject
 
 @AndroidEntryPoint
 class HomeFragment : BasePostFragment(R.layout.fragment_home) {
 
-    override val sourceToDestinationLayoutId: Int
-        get() = R.id.action_homeFragment_to_likedByFragment
+    override val source: String
+        get() = (R.id.homeFragment).toString()
 
     private lateinit var binding: FragmentHomeBinding
 
@@ -76,6 +67,10 @@ class HomeFragment : BasePostFragment(R.layout.fragment_home) {
         super.onViewCreated(view, savedInstanceState)
 
         setUpRecyclerView()
+
+        postAdapter.setOnUserClickListener {
+            findNavController().navigate(HomeFragmentDirections.globalActionToOthersProfileFragment(it.authorUid))
+        }
 
     }
 

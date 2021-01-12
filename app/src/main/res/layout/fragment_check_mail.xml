@@ -9,24 +9,40 @@
         android:layout_width="60dp"
         android:layout_height="60dp"
         android:layout_marginTop="150dp"
-        android:src="@drawable/ic_mail"
         android:contentDescription="@string/mail_icon"
+        android:src="@drawable/ic_mail"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/materialTextView3"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
         android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
         android:layout_marginEnd="16dp"
         android:gravity="center_horizontal"
-        android:text="@string/an_email_with_a_verification_link_has_been_sent_to_you_mail_id_please_verify_your_mail_id_by_clicking_on_the_link"
+        android:text="@string/email_verification"
+        android:textColor="@android:color/black"
+        android:textSize="15sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/imageView2" />
+
+    <com.google.android.material.button.MaterialButton
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/open_mail"
+        android:textAllCaps="false"
+        android:layout_marginTop="10dp"
+        android:background="@color/colorAccent"
+        android:backgroundTint="@color/colorAccent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/materialTextView3" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

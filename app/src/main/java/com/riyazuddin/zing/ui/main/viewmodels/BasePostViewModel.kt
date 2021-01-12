@@ -55,4 +55,6 @@ abstract class BasePostViewModel(
             _deletePostStatus.postValue(Event(result))
         }
     }
+
+
 }

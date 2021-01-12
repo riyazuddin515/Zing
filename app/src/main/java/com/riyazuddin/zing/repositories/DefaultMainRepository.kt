@@ -4,9 +4,14 @@ import android.net.Uri
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
+import com.google.firebase.firestore.QuerySnapshot
 import com.google.firebase.storage.FirebaseStorage
+import com.riyazuddin.zing.data.entities.Comment
 import com.riyazuddin.zing.data.entities.Post
+import com.riyazuddin.zing.data.entities.UpdateProfile
 import com.riyazuddin.zing.data.entities.User
+import com.riyazuddin.zing.other.Constants.COMMENTS_COLLECTION
+import com.riyazuddin.zing.other.Constants.DEFAULT_PROFILE_PICTURE_URL
 import com.riyazuddin.zing.other.Constants.POSTS_COLLECTION
 import com.riyazuddin.zing.other.Constants.USERS_COLLECTION
 import com.riyazuddin.zing.other.Resource
@@ -22,6 +27,7 @@ class DefaultMainRepository : MainRepository {
     private val firestore = FirebaseFirestore.getInstance()
     private val usersCollection = firestore.collection(USERS_COLLECTION)
     private val postsCollection = firestore.collection(POSTS_COLLECTION)
+    private val commentsCollection = firestore.collection(COMMENTS_COLLECTION)
     private val storage = FirebaseStorage.getInstance()
 
     override suspend fun createPost(imageUri: Uri, caption: String) = withContext(Dispatchers.IO) {
@@ -140,11 +146,11 @@ class DefaultMainRepository : MainRepository {
         }
     }
 
-    override suspend fun getPostForFollows() = withContext(Dispatchers.IO){
+    override suspend fun getPostForFollows() = withContext(Dispatchers.IO) {
         safeCall {
             val uid = auth.uid!!
             val followsList = getUserProfile(uid).data!!.follows
-            val allPosts = postsCollection.whereIn("authorUid",followsList)
+            val allPosts = postsCollection.whereIn("authorUid", followsList)
                 .orderBy("date", Query.Direction.DESCENDING)
                 .get()
                 .await()
@@ -159,4 +165,69 @@ class DefaultMainRepository : MainRepository {
         }
     }
 
+    override suspend fun createComment(commentText: String, postId: String) =
+        withContext(Dispatchers.IO) {
+            safeCall {
+                val uid = auth.uid!!
+                val commentId = UUID.randomUUID().toString()
+                val date = System.currentTimeMillis()
+                val comment = Comment(commentId, commentText, postId, date, uid)
+                commentsCollection.document(commentId).set(comment).await()
+                Resource.Success(comment)
+            }
+        }
+
+    override suspend fun getPostComments(postId: String) = withContext(Dispatchers.IO) {
+        safeCall {
+            val comments = commentsCollection.whereEqualTo("postId", postId)
+                .orderBy("date", Query.Direction.DESCENDING)
+                .get()
+                .await()
+                .toObjects(Comment::class.java)
+                .onEach { comment ->
+                    val user = getUserProfile(comment.authorUid).data!!
+                    comment.username = user.username
+                    comment.userProfilePic = user.profilePicUrl
+                }
+            Resource.Success(comments)
+        }
+    }
+
+    override suspend fun updateProfilePic(uid: String, imageUri: Uri) = withContext(Dispatchers.IO){
+        val storageRef = storage.reference.child("profilePics/$uid")
+        val user = getUserProfile(uid).data!!
+        if (user.profilePicUrl != DEFAULT_PROFILE_PICTURE_URL){
+            storage.getReferenceFromUrl(user.profilePicUrl).delete().await()
+        }
+        storageRef.putFile(imageUri).await().metadata?.reference?.downloadUrl?.await().toString()
+    }
+
+    override suspend fun updateProfile(updateProfile: UpdateProfile, imageUri: Uri?) = withContext(Dispatchers.IO) {
+        safeCall {
+            val imageDownloadUrl = imageUri?.let {
+                updateProfilePic(updateProfile.uidToUpdate, it)
+            }
+
+            val map = mutableMapOf(
+                "name" to updateProfile.name,
+                "username" to updateProfile.username,
+                "bio" to updateProfile.bio
+            )
+            imageDownloadUrl?.let {
+                map["profilePicUrl"] = it
+            }
+
+            usersCollection.document(updateProfile.uidToUpdate).update(map.toMap()).await()
+            Resource.Success(Any())
+        }
+    }
+
+    override suspend fun searchUsername(query: String) : Resource<QuerySnapshot> {
+        return withContext(Dispatchers.IO){
+            safeCall {
+                val result = usersCollection.whereEqualTo("username", query).get().await()
+                Resource.Success(result)
+            }
+        }
+    }
 }
