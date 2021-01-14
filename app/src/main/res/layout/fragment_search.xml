@@ -3,13 +3,14 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@color/background">
 
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/appBarLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@android:color/white"
+        android:background="@color/background"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
@@ -19,15 +20,17 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="@string/search_user"
-            app:boxBackgroundColor="@android:color/transparent"
-            app:boxStrokeColor="@color/colorPrimaryDark">
+            android:textColorHint="@color/blackAndWhite"
+            app:hintTextColor="@color/blackAndWhite"
+            app:boxBackgroundColor="@color/background"
+            app:boxStrokeColor="@color/mainTextColor">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/TIESearch"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="text"
-                android:textColor="@android:color/black"
+                android:textColor="@color/blackAndWhite"
                 android:textSize="20sp" />
 
         </com.google.android.material.textfield.TextInputLayout>

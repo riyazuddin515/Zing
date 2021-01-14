@@ -2,13 +2,14 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@color/background">
 
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/appBarLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@android:color/white"
+        android:background="@color/background"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
@@ -18,7 +19,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:navigationIcon="@drawable/ic_arrow_back"
-            app:title="Edit Profile" />
+            app:title="Edit Profile"
+            app:titleTextColor="@color/blackAndWhite"/>
 
     </com.google.android.material.appbar.AppBarLayout>
 
@@ -55,6 +57,10 @@
         android:layout_marginTop="8dp"
         android:layout_marginEnd="16dp"
         android:hint="@string/name"
+        android:textColorHint="@color/blackAndWhite"
+        app:boxBackgroundColor="@color/background"
+        app:boxStrokeColor="@color/blackAndWhite"
+        app:hintTextColor="@color/blackAndWhite"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/tvChangeProfileImage">
@@ -63,7 +69,8 @@
             android:id="@+id/TIEName"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:inputType="textPersonName" />
+            android:inputType="textPersonName"
+            android:textColor="@color/blackAndWhite"/>
 
     </com.google.android.material.textfield.TextInputLayout>
 
@@ -74,6 +81,10 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         android:hint="@string/username"
+        android:textColorHint="@color/blackAndWhite"
+        app:boxBackgroundColor="@color/background"
+        app:boxStrokeColor="@color/blackAndWhite"
+        app:hintTextColor="@color/blackAndWhite"
         app:layout_constraintEnd_toEndOf="@id/TILName"
         app:layout_constraintStart_toStartOf="@+id/TILName"
         app:layout_constraintTop_toBottomOf="@+id/TILName">
@@ -83,7 +94,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="@string/riyazuddin515"
-            android:inputType="text|textNoSuggestions" />
+            android:inputType="text|textNoSuggestions"
+            android:textColor="@color/blackAndWhite"/>
 
     </com.google.android.material.textfield.TextInputLayout>
 
@@ -94,6 +106,10 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         android:hint="@string/bio"
+        android:textColorHint="@color/blackAndWhite"
+        app:boxBackgroundColor="@color/background"
+        app:boxStrokeColor="@color/blackAndWhite"
+        app:hintTextColor="@color/blackAndWhite"
         app:layout_constraintEnd_toEndOf="@id/TILUsername"
         app:layout_constraintStart_toStartOf="@+id/TILUsername"
         app:layout_constraintTop_toBottomOf="@+id/TILUsername">
@@ -102,7 +118,8 @@
             android:id="@+id/TIEBio"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:inputType="textPersonName" />
+            android:inputType="textPersonName"
+            android:textColor="@color/blackAndWhite"/>
 
     </com.google.android.material.textfield.TextInputLayout>
 

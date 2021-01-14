@@ -5,7 +5,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".ui.main.MainActivity"
-    android:fitsSystemWindows="true">
+    android:fitsSystemWindows="true"
+    android:background="@color/background">
 
     <FrameLayout
         android:id="@+id/frameLayout"
@@ -32,8 +33,9 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
-        app:itemIconTint="@color/bottom_navigation"
+        app:itemBackground="@color/background"
         app:itemTextColor="@color/bottom_navigation"
+        app:itemIconTint="@color/bottom_navigation"
         app:menu="@menu/bottom_menu" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

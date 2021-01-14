@@ -61,7 +61,7 @@ open class ProfileFragment : BasePostFragment(R.layout.fragment_profile) {
             }
         ) { user ->
             binding.progressBarProfileMetadata.isVisible = false
-            binding.tvUsername.text = user.name
+            binding.tvName.text = user.name
             binding.toolbar.title = user.username
             glide.load(user.profilePicUrl).into(binding.CIVProfilePic)
             binding.tvBio.text = if (user.bio.isEmpty()) "No Bio" else user.bio
