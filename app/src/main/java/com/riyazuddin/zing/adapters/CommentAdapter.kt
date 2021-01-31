@@ -9,7 +9,6 @@ import com.bumptech.glide.RequestManager
 import com.riyazuddin.zing.R
 import com.riyazuddin.zing.data.entities.Comment
 import com.riyazuddin.zing.databinding.ItemCommentBinding
-import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.*
 import javax.inject.Inject
@@ -17,10 +16,8 @@ import javax.inject.Inject
 class CommentAdapter @Inject constructor(private val glide: RequestManager) :
     RecyclerView.Adapter<CommentAdapter.CommentViewHolder>() {
 
-    inner class CommentViewHolder(binding: ItemCommentBinding) :
-        RecyclerView.ViewHolder(binding.root) {
-        val binding = ItemCommentBinding.bind(itemView)
-    }
+    inner class CommentViewHolder(val binding: ItemCommentBinding) :
+        RecyclerView.ViewHolder(binding.root)
 
     private val differCallback = object : DiffUtil.ItemCallback<Comment>() {
         override fun areItemsTheSame(oldItem: Comment, newItem: Comment): Boolean {
@@ -47,35 +44,32 @@ class CommentAdapter @Inject constructor(private val glide: RequestManager) :
         )
     }
 
-    override fun getItemCount(): Int {
-        return comments.size
-    }
+    override fun getItemCount() = comments.size
 
     override fun onBindViewHolder(holder: CommentViewHolder, position: Int) {
-        val comment = comments[position]
-        holder.apply {
-            glide.load(comment.userProfilePic).into(binding.CIVProfilePic)
-            binding.tvUsername.text = comment.username
-            binding.tvCommentText.text = comment.comment
-            val date = SimpleDateFormat("d MMM yyyy HH:mm", Locale.ENGLISH).format(Date(comment.date))
-            binding.tvTime.text = date
-            binding.ibLike.setImageResource(
+        holder.binding.apply {
+            val comment = comments[position]
+            glide.load(comment.userProfilePic).into(CIVProfilePic)
+            tvUsername.text = comment.username
+            tvCommentText.text = comment.comment
+            val date =
+                SimpleDateFormat("d MMM yyyy HH:mm", Locale.ENGLISH).format(Date(comment.date))
+            tvTime.text = date
+            ibLike.setImageResource(
                 if (comment.isLike) R.drawable.ic_like_red
                 else R.drawable.ic_outline_like
             )
 
-            binding.CIVProfilePic.setOnClickListener {
+            CIVProfilePic.setOnClickListener {
                 onUserClickListener?.let { click ->
                     click(comment)
                 }
             }
-            binding.tvUsername.setOnClickListener {
+            tvUsername.setOnClickListener {
                 onUserClickListener?.let { click ->
                     click(comment)
                 }
             }
-
-
         }
     }
 

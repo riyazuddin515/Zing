@@ -53,7 +53,7 @@ class AuthViewModel @ViewModelInject constructor(
                 applicationContext.getString(R.string.error_password_too_short)
             else if (password.length > MAX_PASSWORD)
                 applicationContext.getString(R.string.error_password_too_long)
-            else if (repeatPassword != repeatPassword)
+            else if (repeatPassword != password)
                 applicationContext.getString(R.string.error_password_not_match)
             else null
 

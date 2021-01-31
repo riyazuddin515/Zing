@@ -37,4 +37,8 @@ interface MainRepository {
     suspend fun updateProfilePic(uid: String, imageUri: Uri) : String
 
     suspend fun searchUsername(query: String) : Resource<QuerySnapshot>
+
+    suspend fun verifyAccount(currentPassword: String): Resource<Any>
+
+    suspend fun changePassword(newPassword: String): Resource<Any>
 }

@@ -154,6 +154,8 @@
         android:text="@string/register"
         android:textAllCaps="false"
         android:textSize="24sp"
+        android:textColor="@color/white"
+        app:backgroundTint="@color/colorPrimaryDark"
         app:layout_constraintEnd_toEndOf="@+id/TILRepeatPassword"
         app:layout_constraintTop_toBottomOf="@+id/TILRepeatPassword" />
 

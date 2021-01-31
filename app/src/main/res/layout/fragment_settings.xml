@@ -36,18 +36,6 @@
         app:layout_constraintTop_toBottomOf="@id/appBarLayout" />
 
     <com.google.android.material.button.MaterialButton
-        android:id="@+id/btnPersonalInformation"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:text="@string/personal_information"
-        android:textAllCaps="false"
-        android:textSize="22sp"
-        app:layout_constraintEnd_toEndOf="@+id/guideline2"
-        app:layout_constraintStart_toStartOf="@+id/guideline1"
-        app:layout_constraintTop_toBottomOf="@id/btnProfileInfo" />
-
-    <com.google.android.material.button.MaterialButton
         android:id="@+id/btnChangeEmail"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -57,7 +45,7 @@
         android:textSize="22sp"
         app:layout_constraintEnd_toEndOf="@+id/guideline2"
         app:layout_constraintStart_toStartOf="@+id/guideline1"
-        app:layout_constraintTop_toBottomOf="@+id/btnPersonalInformation" />
+        app:layout_constraintTop_toBottomOf="@+id/btnProfileInfo" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnChangePassword"

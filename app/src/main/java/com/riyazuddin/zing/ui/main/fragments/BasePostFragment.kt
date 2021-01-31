@@ -9,6 +9,7 @@ import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.RequestManager
 import com.google.firebase.auth.FirebaseAuth
 import com.riyazuddin.zing.R
+import com.riyazuddin.zing.adapters.GridPostAdapter
 import com.riyazuddin.zing.adapters.PostAdapter
 import com.riyazuddin.zing.adapters.UserAdapter
 import com.riyazuddin.zing.other.EventObserver
@@ -28,6 +29,8 @@ abstract class BasePostFragment(layoutId: Int) : Fragment(layoutId) {
 
     @Inject
     lateinit var postAdapter: PostAdapter
+    @Inject
+    lateinit var gridPostAdapter: GridPostAdapter
 
     @Inject
     lateinit var glide: RequestManager
@@ -112,7 +115,7 @@ abstract class BasePostFragment(layoutId: Int) : Fragment(layoutId) {
         basePostViewModel.deletePostStatus.observe(viewLifecycleOwner, EventObserver(
             onError = { snackBar(it) }
         ) { post ->
-            postAdapter.posts - post
+            postAdapter.posts -= post
         })
 
         basePostViewModel.posts.observe(viewLifecycleOwner, EventObserver(
@@ -125,6 +128,7 @@ abstract class BasePostFragment(layoutId: Int) : Fragment(layoutId) {
             }
         ) { posts ->
             postAdapter.posts = posts
+            gridPostAdapter.posts = posts
             postProgressBar.isVisible = false
         })
 

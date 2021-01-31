@@ -17,9 +17,7 @@ import javax.inject.Inject
 class PostAdapter @Inject constructor(val glide: RequestManager) :
     RecyclerView.Adapter<PostAdapter.PostViewHolder>() {
 
-    class PostViewHolder(binding: ItemPostBinding) : RecyclerView.ViewHolder(binding.root) {
-        val binding = ItemPostBinding.bind(itemView)
-    }
+    class PostViewHolder(val binding: ItemPostBinding) : RecyclerView.ViewHolder(binding.root)
 
     private val differCallback = object : DiffUtil.ItemCallback<Post>() {
         override fun areItemsTheSame(oldItem: Post, newItem: Post): Boolean {
@@ -47,52 +45,53 @@ class PostAdapter @Inject constructor(val glide: RequestManager) :
     }
 
     override fun onBindViewHolder(holder: PostViewHolder, position: Int) {
-        val post = posts[position]
-        holder.apply {
-            glide.load(post.userProfilePic).into(binding.CIVProfilePic)
-            glide.load(post.imageUrl).into(binding.ivPostImage)
-            binding.tvUsername.text = post.username
+
+        holder.binding.apply {
+            val post = posts[position]
+            glide.load(post.userProfilePic).into(CIVProfilePic)
+            glide.load(post.imageUrl).into(ivPostImage)
+            tvUsername.text = post.username
             val likeCount = post.likedBy.size
-            binding.tvLikedBy.text = when {
+            tvLikedBy.text = when {
                 likeCount <= 0 -> "No Likes"
                 likeCount == 1 -> "Liked by 1 Person"
                 else -> "Liked by $likeCount persons"
             }
             if (post.caption.isEmpty())
-                binding.tvCaption.isVisible = false
-            else binding.tvCaption.text = post.caption
-            binding.ibDelete.isVisible = (post.authorUid == Firebase.auth.uid!!)
-            binding.ibLike.setImageResource(
+                tvCaption.isVisible = false
+            else tvCaption.text = post.caption
+            ibDelete.isVisible = (post.authorUid == Firebase.auth.uid!!)
+            ibLike.setImageResource(
                 if (post.isLiked) R.drawable.ic_like_red
                 else R.drawable.ic_outline_like
             )
 
-            binding.ibLike.setOnClickListener {
+            ibLike.setOnClickListener {
                 onLikeClickListener?.let { click ->
                     click(post, position)
                 }
             }
-            binding.ibDelete.setOnClickListener {
+            ibDelete.setOnClickListener {
                 onDeleteClickListener?.let { click ->
                     click(post)
                 }
             }
-            binding.CIVProfilePic.setOnClickListener {
+            CIVProfilePic.setOnClickListener {
                 onUserClickListener?.let { click ->
                     click(post)
                 }
             }
-            binding.tvUsername.setOnClickListener {
+            tvUsername.setOnClickListener {
                 onUserClickListener?.let { click ->
                     click(post)
                 }
             }
-            binding.tvLikedBy.setOnClickListener {
+            tvLikedBy.setOnClickListener {
                 onLikedByClickListener?.let { click ->
                     click(post)
                 }
             }
-            binding.ibComment.setOnClickListener {
+            ibComment.setOnClickListener {
                 onCommentClickListener?.let { click ->
                     click(post)
                 }

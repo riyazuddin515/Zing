@@ -5,9 +5,13 @@ import android.view.View
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.RequestManager
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
 import com.riyazuddin.zing.R
 import com.riyazuddin.zing.adapters.CommentAdapter
 import com.riyazuddin.zing.data.entities.User
@@ -39,6 +43,13 @@ class CommentsFragment : Fragment(R.layout.fragment_comments) {
 
         viewModel.getUserProfile()
         viewModel.getComments(args.postId)
+
+        commentAdapter.setOnUserClickListener {
+            if (Firebase.auth.uid == user.uid)
+                findNavController().navigate(R.id.profileFragment)
+            else
+                findNavController().navigate(CommentsFragmentDirections.globalActionToOthersProfileFragment(it.authorUid))
+        }
 
         binding.btnSend.setOnClickListener {
             viewModel.createComment(binding.TIEComment.text.toString(), args.postId)

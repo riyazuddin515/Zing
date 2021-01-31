@@ -64,4 +64,12 @@
     <string name="update">Update</string>
     <string name="open_mail">Open Mail</string>
     <string name="day_or_night">Day or Night</string>
+    <string name="current_password">Current Password</string>
+    <string name="new_password">New Password</string>
+    <string name="re_enter_new_password">Re-enter New Password</string>
+    <string name="verify">Verify</string>
+    <string name="verify_your_password">Verify your Password</string>
+    <string name="close">close</string>
+    <string name="image">Image</string>
+    <string name="button">button</string>
 </resources>

@@ -8,6 +8,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.riyazuddin.zing.data.entities.UpdateProfile
 import com.riyazuddin.zing.data.entities.User
+import com.riyazuddin.zing.other.Constants.MAX_PASSWORD
+import com.riyazuddin.zing.other.Constants.MIN_PASSWORD
 import com.riyazuddin.zing.other.Event
 import com.riyazuddin.zing.other.Resource
 import com.riyazuddin.zing.repositories.MainRepository
@@ -18,7 +20,7 @@ import kotlinx.coroutines.launch
 class SettingsViewModel @ViewModelInject constructor(
     private val repository: MainRepository,
     private val dispatcher: CoroutineDispatcher = Dispatchers.Main
-) : ViewModel(){
+) : ViewModel() {
 
     private val _userProfileStatus = MutableLiveData<Event<Resource<User>>>()
     val userProfileStatus: LiveData<Event<Resource<User>>> = _userProfileStatus
@@ -32,13 +34,20 @@ class SettingsViewModel @ViewModelInject constructor(
     private val _updateProfileStatus = MutableLiveData<Event<Resource<Any>>>()
     val updateProfileStatus: LiveData<Event<Resource<Any>>> = _updateProfileStatus
 
-    fun getUserProfile(uid: String) = viewModelScope.launch{
+    private val _currentPasswordVerificationStatus = MutableLiveData<Event<Resource<Any>>>()
+    val currentPasswordVerificationStatus: LiveData<Event<Resource<Any>>> =
+        _currentPasswordVerificationStatus
+
+    private val _changePasswordStatus = MutableLiveData<Event<Resource<Any>>>()
+    val changePasswordStatus: LiveData<Event<Resource<Any>>> = _changePasswordStatus
+
+    fun getUserProfile(uid: String) = viewModelScope.launch {
         _userProfileStatus.postValue(Event(Resource.Loading()))
         val result = repository.getUserProfile(uid)
         _userProfileStatus.postValue(Event(result))
     }
 
-    fun setImage(uri: Uri){
+    fun setImage(uri: Uri) {
         _imageUri.postValue(uri)
     }
 
@@ -47,7 +56,7 @@ class SettingsViewModel @ViewModelInject constructor(
             return
 
         _isUsernameAvailable.postValue(Event(Resource.Loading()))
-        viewModelScope.launch {
+        viewModelScope.launch(dispatcher) {
             val result = repository.searchUsername(query)
             if (result.data!!.isEmpty)
                 _isUsernameAvailable.postValue(Event(Resource.Success(true)))
@@ -55,12 +64,28 @@ class SettingsViewModel @ViewModelInject constructor(
         }
     }
 
-    fun updateProfile(updateProfile: UpdateProfile, imageUri: Uri?) = viewModelScope.launch{
-        _updateProfileStatus.postValue(Event(Resource.Loading()))
-        val result = repository.updateProfile(updateProfile, imageUri)
-        _updateProfileStatus.postValue(Event(result))
+    fun updateProfile(updateProfile: UpdateProfile, imageUri: Uri?) =
+        viewModelScope.launch(dispatcher) {
+            _updateProfileStatus.postValue(Event(Resource.Loading()))
+            val result = repository.updateProfile(updateProfile, imageUri)
+            _updateProfileStatus.postValue(Event(result))
+        }
+
+    fun verifyAccount(currentPassword: String) {
+        if (currentPassword.isEmpty())
+            return
+        viewModelScope.launch(dispatcher) {
+            _currentPasswordVerificationStatus.postValue(Event(Resource.Loading()))
+            val result = repository.verifyAccount(currentPassword)
+            _currentPasswordVerificationStatus.postValue(Event(result))
+        }
     }
 
-
-
+    fun changePassword(newPassword: String) {
+        _changePasswordStatus.postValue(Event(Resource.Loading()))
+        viewModelScope.launch(dispatcher) {
+            val result = repository.changePassword(newPassword)
+            _changePasswordStatus.postValue(Event(result))
+        }
+    }
 }

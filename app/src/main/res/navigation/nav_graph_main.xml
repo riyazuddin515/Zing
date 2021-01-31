@@ -73,13 +73,6 @@
             app:popEnterAnim="@anim/fade_in"
             app:popExitAnim="@anim/slide_out_to_bottom" />
         <action
-            android:id="@+id/action_settingsFragment_to_personalInformation22"
-            app:destination="@id/personalInformation"
-            app:enterAnim="@anim/slide_in_from_bottom"
-            app:exitAnim="@anim/fade_out"
-            app:popEnterAnim="@anim/fade_in"
-            app:popExitAnim="@anim/slide_out_to_bottom" />
-        <action
             android:id="@+id/action_settingsFragment_to_email"
             app:destination="@id/email"
             app:enterAnim="@anim/slide_in_from_bottom"
@@ -87,12 +80,8 @@
             app:popEnterAnim="@anim/fade_in"
             app:popExitAnim="@anim/slide_out_to_bottom" />
         <action
-            android:id="@+id/action_settingsFragment_to_password"
-            app:destination="@id/password"
-            app:enterAnim="@anim/slide_in_from_bottom"
-            app:exitAnim="@anim/fade_out"
-            app:popEnterAnim="@anim/fade_in"
-            app:popExitAnim="@anim/slide_out_to_bottom" />
+            android:id="@+id/action_settingsFragment_to_currentPasswordVerification"
+            app:destination="@id/currentPasswordVerification" />
     </fragment>
 
     <fragment
@@ -144,16 +133,21 @@
         android:name="com.riyazuddin.zing.ui.main.fragments.settings.ProfileInfo"
         android:label="ProfileInfo" />
     <fragment
-        android:id="@+id/personalInformation"
-        android:name="com.riyazuddin.zing.ui.main.fragments.settings.PersonalInformation"
-        android:label="PersonalInformation" />
-    <fragment
-        android:id="@+id/password"
-        android:name="com.riyazuddin.zing.ui.main.fragments.settings.Password"
-        android:label="Password" />
-    <fragment
         android:id="@+id/email"
         android:name="com.riyazuddin.zing.ui.main.fragments.settings.Email"
         android:label="Email" />
+    <fragment
+        android:id="@+id/currentPasswordVerification"
+        android:name="com.riyazuddin.zing.ui.main.fragments.settings.CurrentPasswordVerification"
+        android:label="CurrentPasswordVerification" >
+        <action
+            android:id="@+id/action_currentPasswordVerification_to_changePassword"
+            app:destination="@id/changePassword"
+            app:popUpTo="@id/settingsFragment"/>
+    </fragment>
+    <fragment
+        android:id="@+id/changePassword"
+        android:name="com.riyazuddin.zing.ui.main.fragments.settings.ChangePassword"
+        android:label="ChangePassword" />
 
 </navigation>

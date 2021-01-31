@@ -1,6 +1,7 @@
 package com.riyazuddin.zing.repositories
 
 import android.net.Uri
+import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
@@ -193,41 +194,65 @@ class DefaultMainRepository : MainRepository {
         }
     }
 
-    override suspend fun updateProfilePic(uid: String, imageUri: Uri) = withContext(Dispatchers.IO){
-        val storageRef = storage.reference.child("profilePics/$uid")
-        val user = getUserProfile(uid).data!!
-        if (user.profilePicUrl != DEFAULT_PROFILE_PICTURE_URL){
-            storage.getReferenceFromUrl(user.profilePicUrl).delete().await()
-        }
-        storageRef.putFile(imageUri).await().metadata?.reference?.downloadUrl?.await().toString()
-    }
-
-    override suspend fun updateProfile(updateProfile: UpdateProfile, imageUri: Uri?) = withContext(Dispatchers.IO) {
-        safeCall {
-            val imageDownloadUrl = imageUri?.let {
-                updateProfilePic(updateProfile.uidToUpdate, it)
+    override suspend fun updateProfilePic(uid: String, imageUri: Uri) =
+        withContext(Dispatchers.IO) {
+            val storageRef = storage.reference.child("profilePics/$uid")
+            val user = getUserProfile(uid).data!!
+            if (user.profilePicUrl != DEFAULT_PROFILE_PICTURE_URL) {
+                storage.getReferenceFromUrl(user.profilePicUrl).delete().await()
             }
-
-            val map = mutableMapOf(
-                "name" to updateProfile.name,
-                "username" to updateProfile.username,
-                "bio" to updateProfile.bio
-            )
-            imageDownloadUrl?.let {
-                map["profilePicUrl"] = it
-            }
-
-            usersCollection.document(updateProfile.uidToUpdate).update(map.toMap()).await()
-            Resource.Success(Any())
+            storageRef.putFile(imageUri).await().metadata?.reference?.downloadUrl?.await()
+                .toString()
         }
-    }
 
-    override suspend fun searchUsername(query: String) : Resource<QuerySnapshot> {
-        return withContext(Dispatchers.IO){
+    override suspend fun updateProfile(updateProfile: UpdateProfile, imageUri: Uri?) =
+        withContext(Dispatchers.IO) {
+            safeCall {
+                val imageDownloadUrl = imageUri?.let {
+                    updateProfilePic(updateProfile.uidToUpdate, it)
+                }
+
+                val map = mutableMapOf(
+                    "name" to updateProfile.name,
+                    "username" to updateProfile.username,
+                    "bio" to updateProfile.bio
+                )
+                imageDownloadUrl?.let {
+                    map["profilePicUrl"] = it
+                }
+
+                usersCollection.document(updateProfile.uidToUpdate).update(map.toMap()).await()
+                Resource.Success(Any())
+            }
+        }
+
+    override suspend fun searchUsername(query: String): Resource<QuerySnapshot> {
+        return withContext(Dispatchers.IO) {
             safeCall {
                 val result = usersCollection.whereEqualTo("username", query).get().await()
                 Resource.Success(result)
             }
+        }
+    }
+
+    override suspend fun verifyAccount(currentPassword: String): Resource<Any> =
+        withContext(Dispatchers.IO) {
+            safeCall {
+                val currentUser = auth.currentUser!!
+                val email = currentUser.email.toString()
+                val credential = EmailAuthProvider.getCredential(email, currentPassword)
+                currentUser.reauthenticate(credential).await()
+                Resource.Success("Verification Success")
+            }
+        }
+
+    override suspend fun changePassword(
+        newPassword: String
+    ): Resource<Any> = withContext(Dispatchers.IO) {
+        safeCall {
+            val currentUser = auth.currentUser!!
+            currentUser.updatePassword(newPassword).await()
+            Resource.Success("Password Changed Successfully")
         }
     }
 }

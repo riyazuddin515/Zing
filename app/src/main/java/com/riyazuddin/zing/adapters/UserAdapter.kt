@@ -12,11 +12,9 @@ import java.io.Serializable
 import javax.inject.Inject
 
 class UserAdapter @Inject constructor(val glide: RequestManager) :
-    RecyclerView.Adapter<UserAdapter.UserViewHolder>() , Serializable{
+    RecyclerView.Adapter<UserAdapter.UserViewHolder>(), Serializable {
 
-    class UserViewHolder(binding: ItemUserBinding) : RecyclerView.ViewHolder(binding.root) {
-        val binding = ItemUserBinding.bind(itemView)
-    }
+    class UserViewHolder(val binding: ItemUserBinding) : RecyclerView.ViewHolder(binding.root)
 
     private val differCallback = object : DiffUtil.ItemCallback<User>() {
         override fun areItemsTheSame(oldItem: User, newItem: User): Boolean {
@@ -45,11 +43,11 @@ class UserAdapter @Inject constructor(val glide: RequestManager) :
     }
 
     override fun onBindViewHolder(holder: UserViewHolder, position: Int) {
-        val user = users[position]
-        holder.apply {
-            glide.load(user.profilePicUrl).into(binding.CIVProfilePic)
-            binding.tvUsername.text = user.username
-            itemView.setOnClickListener {
+        holder.binding.apply {
+            val user = users[position]
+            glide.load(user.profilePicUrl).into(CIVProfilePic)
+            tvUsername.text = user.username
+            userItemCardView.setOnClickListener {
                 onUserClickListener?.let { click ->
                     click(user)
                 }
