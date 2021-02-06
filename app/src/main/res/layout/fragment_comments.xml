@@ -21,6 +21,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:title="Comments"
+            app:navigationIcon="@drawable/ic_arrow_back"
             app:titleTextColor="@color/blackAndWhite"/>
 
     </com.google.android.material.appbar.AppBarLayout>

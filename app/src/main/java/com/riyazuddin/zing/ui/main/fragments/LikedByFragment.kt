@@ -22,15 +22,22 @@ class LikedByFragment : Fragment(R.layout.fragment_liked_by) {
 
         setUpRecyclerView()
 
+        binding.toolbar.setNavigationOnClickListener {
+            findNavController().navigateUp()
+        }
+
         args.userAdapter.setOnUserClickListener {
-            if (Firebase.auth.uid != it.uid){
-                findNavController().navigate(LikedByFragmentDirections.globalActionToOthersProfileFragment(it.uid))
-            }
-            else findNavController().navigate(R.id.profileFragment)
+            if (Firebase.auth.uid != it.uid) {
+                findNavController().navigate(
+                    LikedByFragmentDirections.globalActionToOthersProfileFragment(
+                        it.uid
+                    )
+                )
+            } else findNavController().navigate(R.id.profileFragment)
         }
     }
 
-    private fun setUpRecyclerView(){
+    private fun setUpRecyclerView() {
         binding.rvUsers.apply {
             adapter = args.userAdapter
             layoutManager = LinearLayoutManager(requireContext())

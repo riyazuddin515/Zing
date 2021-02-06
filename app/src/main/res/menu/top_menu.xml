@@ -8,4 +8,10 @@
         app:showAsAction="always"
         android:title="@string/log_out" />
 
+    <item
+        android:id="@+id/chatList"
+        android:icon="@drawable/ic_chat"
+        app:showAsAction="ifRoom"
+        android:title="@string/log_out" />
+
 </menu>

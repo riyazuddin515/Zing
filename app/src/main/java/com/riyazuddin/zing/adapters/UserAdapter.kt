@@ -46,6 +46,7 @@ class UserAdapter @Inject constructor(val glide: RequestManager) :
         holder.binding.apply {
             val user = users[position]
             glide.load(user.profilePicUrl).into(CIVProfilePic)
+            tvName.text = user.name
             tvUsername.text = user.username
             userItemCardView.setOnClickListener {
                 onUserClickListener?.let { click ->

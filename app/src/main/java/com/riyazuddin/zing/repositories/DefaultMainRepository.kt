@@ -1,18 +1,20 @@
 package com.riyazuddin.zing.repositories
 
 import android.net.Uri
+import android.util.Log
+import com.firebase.ui.firestore.FirestoreRecyclerOptions
 import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.QuerySnapshot
 import com.google.firebase.storage.FirebaseStorage
-import com.riyazuddin.zing.data.entities.Comment
-import com.riyazuddin.zing.data.entities.Post
-import com.riyazuddin.zing.data.entities.UpdateProfile
-import com.riyazuddin.zing.data.entities.User
+import com.riyazuddin.zing.data.entities.*
+import com.riyazuddin.zing.other.Constants.CHATS_COLLECTION
 import com.riyazuddin.zing.other.Constants.COMMENTS_COLLECTION
 import com.riyazuddin.zing.other.Constants.DEFAULT_PROFILE_PICTURE_URL
+import com.riyazuddin.zing.other.Constants.LAST_MESSAGE_COLLECTION
+import com.riyazuddin.zing.other.Constants.MESSAGES
 import com.riyazuddin.zing.other.Constants.POSTS_COLLECTION
 import com.riyazuddin.zing.other.Constants.USERS_COLLECTION
 import com.riyazuddin.zing.other.Resource
@@ -29,6 +31,8 @@ class DefaultMainRepository : MainRepository {
     private val usersCollection = firestore.collection(USERS_COLLECTION)
     private val postsCollection = firestore.collection(POSTS_COLLECTION)
     private val commentsCollection = firestore.collection(COMMENTS_COLLECTION)
+    private val chatsCollection = firestore.collection(CHATS_COLLECTION)
+    private val lastMessagesCollection = firestore.collection(LAST_MESSAGE_COLLECTION)
     private val storage = FirebaseStorage.getInstance()
 
     override suspend fun createPost(imageUri: Uri, caption: String) = withContext(Dispatchers.IO) {
@@ -255,4 +259,137 @@ class DefaultMainRepository : MainRepository {
             Resource.Success("Password Changed Successfully")
         }
     }
+
+    override suspend fun getFollowersList(uid: String): Resource<List<User>> =
+        withContext(Dispatchers.IO) {
+            safeCall {
+                val list = usersCollection.whereArrayContains("follows", uid)
+                    .orderBy("name", Query.Direction.ASCENDING)
+                    .get()
+                    .await()
+                    .toObjects(User::class.java)
+
+                Resource.Success(list)
+            }
+        }
+
+    override suspend fun sendMessage(
+        currentUid: String,
+        receiverUid: String,
+        message: String,
+        type: String,
+        uri: Uri?,
+        senderName: String,
+        senderUsername: String,
+        senderProfilePicUrl: String,
+        receiverName: String,
+        receiverUsername: String,
+        receiveProfileUrl: String
+    ): Resource<Message> = withContext(Dispatchers.IO) {
+        safeCall {
+            val chatThread = getChatThread(currentUid, receiverUid)
+            val messageId = UUID.randomUUID().toString()
+
+            val messageMediaUrl = uri?.let {
+                Log.e("TAG", "sendMessage: Uri not null")
+                storage.reference.child("chatMedia/$chatThread/$messageId").putFile(it)
+                    .await().metadata?.reference?.downloadUrl?.await().toString()
+            }
+
+
+            Log.e("TAG", "sendMessage: stored $messageMediaUrl")
+
+            val messageOb = Message(
+                messageId = messageId,
+                message = message,
+                type = type,
+                date = System.currentTimeMillis(),
+                senderAddReceiverUid = listOf(currentUid, receiverUid),
+                url = messageMediaUrl ?: ""
+            )
+
+            Log.e("TAG", "sendMessage: message created")
+            //upload message and lastMessage
+            chatsCollection.document(chatThread)
+                .collection(MESSAGES).document(messageId)
+                .set(messageOb)
+                .await()
+            Log.e("TAG", "sendMessage: message posted")
+
+            val lastMessage = LastMessage(
+                messageId = messageId,
+                message = message,
+                type = type,
+                date = System.currentTimeMillis(),
+                senderAddReceiverUid = listOf(currentUid, receiverUid),
+                url = messageMediaUrl ?: "",
+
+                senderName = senderName,
+                senderUserName = senderUsername,
+                senderProfilePicUrl = senderProfilePicUrl,
+
+                receiverName = receiverName,
+                receiverUsername = receiverUsername,
+                receiverProfilePicUrl = receiveProfileUrl
+            )
+
+            chatsCollection.document(chatThread).set(lastMessage).await()
+
+            Log.e("TAG", "sendMessage: last message updated")
+
+
+            Resource.Success(messageOb)
+        }
+    }
+
+    override suspend fun deleteChatMessage(
+        currentUid: String,
+        receiverUid: String, message: Message
+    ): Resource<Message> = withContext(Dispatchers.IO) {
+        safeCall {
+            chatsCollection.document(getChatThread(currentUid, receiverUid)).collection(MESSAGES)
+                .document(message.messageId)
+                .delete().await()
+            Resource.Success(message)
+        }
+    }
+
+    override suspend fun getChat(
+        currentUid: String,
+        otherEndUserUid: String
+    ): Resource<FirestoreRecyclerOptions<Message>> = withContext(Dispatchers.IO) {
+        val query = FirebaseFirestore.getInstance()
+            .collection(CHATS_COLLECTION)
+            .document(getChatThread(currentUid, otherEndUserUid))
+            .collection(MESSAGES).orderBy("date", Query.Direction.ASCENDING)
+
+        val options =
+            FirestoreRecyclerOptions.Builder<Message>().setQuery(query, Message::class.java)
+                .build()
+
+        Resource.Success(options)
+    }
+
+    override suspend fun getLastMessageFirestoreRecyclerOptions(uid: String): Resource<FirestoreRecyclerOptions<LastMessage>> =
+        withContext(Dispatchers.IO) {
+
+            val query = FirebaseFirestore.getInstance()
+                .collection(CHATS_COLLECTION)
+                .whereArrayContains("senderAddReceiverUid", uid)
+                .orderBy("date", Query.Direction.DESCENDING)
+
+            val options =
+                FirestoreRecyclerOptions.Builder<LastMessage>()
+                    .setQuery(query, LastMessage::class.java)
+                    .build()
+
+            Resource.Success(options)
+
+        }
+
+    private fun getChatThread(currentUid: String, otherEndUserUid: String) =
+        if (currentUid < otherEndUserUid)
+            currentUid + otherEndUserUid
+        else
+            otherEndUserUid + currentUid
 }

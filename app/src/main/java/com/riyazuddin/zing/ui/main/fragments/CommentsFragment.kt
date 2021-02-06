@@ -9,7 +9,6 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.RequestManager
-import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import com.riyazuddin.zing.R
@@ -26,8 +25,10 @@ import javax.inject.Inject
 class CommentsFragment : Fragment(R.layout.fragment_comments) {
 
     private lateinit var user: User
+
     @Inject
     lateinit var glide: RequestManager
+
     @Inject
     lateinit var commentAdapter: CommentAdapter
     private val args: CommentsFragmentArgs by navArgs()
@@ -44,11 +45,19 @@ class CommentsFragment : Fragment(R.layout.fragment_comments) {
         viewModel.getUserProfile()
         viewModel.getComments(args.postId)
 
+        binding.toolbar.setNavigationOnClickListener {
+            findNavController().navigateUp()
+        }
+
         commentAdapter.setOnUserClickListener {
             if (Firebase.auth.uid == user.uid)
                 findNavController().navigate(R.id.profileFragment)
             else
-                findNavController().navigate(CommentsFragmentDirections.globalActionToOthersProfileFragment(it.authorUid))
+                findNavController().navigate(
+                    CommentsFragmentDirections.globalActionToOthersProfileFragment(
+                        it.authorUid
+                    )
+                )
         }
 
         binding.btnSend.setOnClickListener {
@@ -59,7 +68,7 @@ class CommentsFragment : Fragment(R.layout.fragment_comments) {
     private fun subscribeToObservers() {
         viewModel.userProfileStatus.observe(viewLifecycleOwner, EventObserver(
             onError = { snackBar(it) }
-        ){
+        ) {
             user = it
             glide.load(it.profilePicUrl).into(binding.CIVProfilePic)
         })
@@ -72,7 +81,7 @@ class CommentsFragment : Fragment(R.layout.fragment_comments) {
             onLoading = {
                 binding.progressBar.isVisible = true
             }
-        ){ comments ->
+        ) { comments ->
             binding.progressBar.isVisible = false
             commentAdapter.comments = comments
         })
@@ -83,7 +92,7 @@ class CommentsFragment : Fragment(R.layout.fragment_comments) {
                 snackBar(it)
             },
             onLoading = { binding.btnSend.isEnabled = false }
-        ){ comment ->
+        ) { comment ->
             binding.TIEComment.text?.clear()
             binding.btnSend.isEnabled = true
             snackBar("Comment Posted")

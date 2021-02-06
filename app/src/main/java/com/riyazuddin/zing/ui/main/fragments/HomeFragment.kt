@@ -49,6 +49,9 @@ class HomeFragment : BasePostFragment(R.layout.fragment_home) {
                     }
                 }.show(parentFragmentManager, null)
             }
+            if (it.itemId == R.id.chatList) {
+                findNavController().navigate(R.id.action_homeFragment_to_chatList)
+            }
             true
         }
 
@@ -69,7 +72,11 @@ class HomeFragment : BasePostFragment(R.layout.fragment_home) {
         setUpRecyclerView()
 
         postAdapter.setOnUserClickListener {
-            findNavController().navigate(HomeFragmentDirections.globalActionToOthersProfileFragment(it.authorUid))
+            findNavController().navigate(
+                HomeFragmentDirections.globalActionToOthersProfileFragment(
+                    it.authorUid
+                )
+            )
         }
 
     }

@@ -1,11 +1,9 @@
 package com.riyazuddin.zing.repositories
 
 import android.net.Uri
+import com.firebase.ui.firestore.FirestoreRecyclerOptions
 import com.google.firebase.firestore.QuerySnapshot
-import com.riyazuddin.zing.data.entities.Comment
-import com.riyazuddin.zing.data.entities.Post
-import com.riyazuddin.zing.data.entities.UpdateProfile
-import com.riyazuddin.zing.data.entities.User
+import com.riyazuddin.zing.data.entities.*
 import com.riyazuddin.zing.other.Resource
 
 interface MainRepository {
@@ -34,11 +32,39 @@ interface MainRepository {
 
     suspend fun updateProfile(updateProfile: UpdateProfile, imageUri: Uri? = null): Resource<Any>
 
-    suspend fun updateProfilePic(uid: String, imageUri: Uri) : String
+    suspend fun updateProfilePic(uid: String, imageUri: Uri): String
 
-    suspend fun searchUsername(query: String) : Resource<QuerySnapshot>
+    suspend fun searchUsername(query: String): Resource<QuerySnapshot>
 
     suspend fun verifyAccount(currentPassword: String): Resource<Any>
 
     suspend fun changePassword(newPassword: String): Resource<Any>
+
+    suspend fun getFollowersList(uid: String): Resource<List<User>>
+
+    suspend fun sendMessage(
+        currentUid: String,
+        receiverUid: String,
+        message: String,
+        type: String,
+        uri: Uri?,
+        senderName: String,
+        senderUsername: String,
+        senderProfilePicUrl: String,
+        receiverName: String,
+        receiverUsername: String,
+        receiveProfileUrl: String
+    ): Resource<Message>
+
+    suspend fun deleteChatMessage(
+        currentUid: String,
+        receiverUid: String, message: Message
+    ): Resource<Message>
+
+    suspend fun getChat(
+        currentUid: String,
+        otherEndUserUid: String
+    ): Resource<FirestoreRecyclerOptions<Message>>
+
+    suspend fun getLastMessageFirestoreRecyclerOptions(uid: String): Resource<FirestoreRecyclerOptions<LastMessage>>
 }
