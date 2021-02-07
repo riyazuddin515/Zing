@@ -76,6 +76,134 @@
                 app:layout_constraintStart_toStartOf="@+id/tvName"
                 app:layout_constraintTop_toBottomOf="@+id/tvName" />
 
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/tvCountLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="5dp"
+                android:visibility="gone"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="8dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/CIVProfilePic">
+
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/postCount_layout"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintBottom_toBottomOf="@+id/following_layout"
+                    app:layout_constraintEnd_toStartOf="@+id/following_layout"
+                    app:layout_constraintHorizontal_bias="0.5"
+                    app:layout_constraintHorizontal_chainStyle="spread"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="@+id/following_layout">
+
+
+                    <com.google.android.material.textview.MaterialTextView
+                        android:id="@+id/tvPostCount"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/blackAndWhite"
+                        android:textSize="18sp"
+                        app:layout_constraintBottom_toTopOf="@+id/tvPost"
+                        app:layout_constraintEnd_toEndOf="@+id/tvPost"
+                        app:layout_constraintStart_toStartOf="@+id/tvPost"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintVertical_chainStyle="packed" />
+
+                    <com.google.android.material.textview.MaterialTextView
+                        android:id="@+id/tvPost"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/posts"
+                        android:textColor="@color/blackAndWhite"
+                        android:textSize="18sp"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/tvPostCount" />
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/following_layout"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintBottom_toBottomOf="@+id/followers_Layout"
+                    app:layout_constraintEnd_toStartOf="@+id/followers_Layout"
+                    app:layout_constraintHorizontal_bias="0.5"
+                    app:layout_constraintStart_toEndOf="@+id/postCount_layout"
+                    app:layout_constraintTop_toTopOf="@+id/followers_Layout">
+
+
+                    <com.google.android.material.textview.MaterialTextView
+                        android:id="@+id/tvFollowingCount"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/blackAndWhite"
+                        android:textSize="18sp"
+                        app:layout_constraintBottom_toTopOf="@+id/tvFollowing"
+                        app:layout_constraintEnd_toEndOf="@+id/tvFollowing"
+                        app:layout_constraintStart_toStartOf="@+id/tvFollowing"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintVertical_chainStyle="packed" />
+
+                    <com.google.android.material.textview.MaterialTextView
+                        android:id="@+id/tvFollowing"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/following"
+                        android:textColor="@color/blackAndWhite"
+                        android:textSize="18sp"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/tvFollowingCount" />
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/followers_Layout"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintHorizontal_bias="0.5"
+                    app:layout_constraintStart_toEndOf="@+id/following_layout"
+                    app:layout_constraintTop_toTopOf="parent">
+
+
+                    <com.google.android.material.textview.MaterialTextView
+                        android:id="@+id/tvFollowersCount"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/blackAndWhite"
+                        android:textSize="18sp"
+                        app:layout_constraintBottom_toTopOf="@+id/tvFollowers"
+                        app:layout_constraintEnd_toEndOf="@+id/tvFollowers"
+                        app:layout_constraintStart_toStartOf="@+id/tvFollowers"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintVertical_chainStyle="packed" />
+
+                    <com.google.android.material.textview.MaterialTextView
+                        android:id="@+id/tvFollowers"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/followers"
+                        android:textColor="@color/blackAndWhite"
+                        android:textSize="18sp"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/tvFollowersCount" />
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnToggleFollow"
                 android:layout_width="0dp"
@@ -85,10 +213,10 @@
                 android:layout_marginEnd="16dp"
                 android:text="@string/unfollow"
                 android:textSize="20sp"
-                app:backgroundTint="@android:color/holo_red_light"
+                app:backgroundTint="#008000"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/CIVProfilePic" />
+                app:layout_constraintTop_toBottomOf="@+id/tvCountLayout" />
 
             <LinearLayout
                 android:id="@+id/post_layout"
@@ -103,23 +231,23 @@
 
                 <ImageButton
                     android:id="@+id/btnPostsInGrid"
+                    style="?android:buttonBarButtonStyle"
                     android:layout_width="0dp"
-                    android:contentDescription="@string/button"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:src="@drawable/ic_grid"
-                    style="?android:buttonBarButtonStyle"
-                    android:background="@android:color/transparent"/>
+                    android:background="@android:color/transparent"
+                    android:contentDescription="@string/button"
+                    android:src="@drawable/ic_grid" />
 
                 <ImageButton
                     android:id="@+id/btnPostsInList"
+                    style="?android:buttonBarButtonStyle"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
+                    android:background="@android:color/transparent"
                     android:contentDescription="@string/button"
-                    android:src="@drawable/ic_list"
-                    style="?android:buttonBarButtonStyle"
-                    android:background="@android:color/transparent"/>
+                    android:src="@drawable/ic_list" />
 
             </LinearLayout>
 
@@ -148,12 +276,12 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_marginTop="8dp"
+                android:visibility="gone"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/post_layout"
-                tools:listitem="@layout/item_post"
-                android:visibility="gone"/>
+                tools:listitem="@layout/item_post" />
 
             <ProgressBar
                 android:id="@+id/progressBar"

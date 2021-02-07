@@ -8,7 +8,9 @@ object Constants {
     const val POSTS_COLLECTION = "posts"
     const val COMMENTS_COLLECTION = "comments"
     const val CHATS_COLLECTION = "chats"
-    const val LAST_MESSAGE_COLLECTION = "lastMessages"
+    const val FOLLOWING_COLLECTION = "following"
+    const val FOLLOWERS_COLLECTION = "followers"
+    const val POST_LIKES_COLLECTION = "postLikes"
 
 
     const val MESSAGES = "messages"

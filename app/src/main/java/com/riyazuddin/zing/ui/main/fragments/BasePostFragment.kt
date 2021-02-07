@@ -60,12 +60,16 @@ abstract class BasePostFragment(layoutId: Int) : Fragment(layoutId) {
         }
 
         postAdapter.setOnLikedByClickListener {
-            basePostViewModel.getUsers(it.likedBy)
+            basePostViewModel.getPostLikedUsers(it.postId)
             when (source) {
                 (R.id.homeFragment).toString() -> sourceToDestinationLayoutId = R.id.action_homeFragment_to_likedByFragment
                 (R.id.profileFragment).toString() -> sourceToDestinationLayoutId = R.id.action_profileFragment_to_likedByFragment
                 (R.id.othersProfileFragment).toString() -> sourceToDestinationLayoutId = R.id.action_othersProfileFragment_to_likedByFragment
             }
+            val bundle = Bundle().apply {
+                putString("postId",it.postId)
+            }
+            findNavController().navigate(sourceToDestinationLayoutId, bundle)
         }
 
         postAdapter.setOnCommentClickListener {
@@ -98,14 +102,13 @@ abstract class BasePostFragment(layoutId: Int) : Fragment(layoutId) {
             }
         ) { isLiked ->
             curLikeIndex?.let { index ->
-                val uid = FirebaseAuth.getInstance().uid!!
                 postAdapter.posts[index].apply {
                     this.isLiked = isLiked
                     this.isLiking = false
                     if (isLiked) {
-                        likedBy += uid
+                        this.likeCount++
                     } else {
-                        likedBy -= uid
+                        this.likeCount--
                     }
                 }
                 postAdapter.notifyItemChanged(index)
@@ -130,19 +133,6 @@ abstract class BasePostFragment(layoutId: Int) : Fragment(layoutId) {
             postAdapter.posts = posts
             gridPostAdapter.posts = posts
             postProgressBar.isVisible = false
-        })
-
-
-        basePostViewModel.likedByStatus.observe(viewLifecycleOwner, EventObserver(
-            forIsLikedBy = true,
-            onError = { snackBar(it) }
-        ) { users ->
-            val userAdapter = UserAdapter(glide)
-            userAdapter.users = users
-            val bundle = Bundle().apply {
-                putSerializable("userAdapter", userAdapter)
-            }
-            findNavController().navigate(sourceToDestinationLayoutId, bundle)
         })
     }
 }

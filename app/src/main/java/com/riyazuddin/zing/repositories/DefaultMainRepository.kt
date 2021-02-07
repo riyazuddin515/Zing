@@ -5,6 +5,7 @@ import android.util.Log
 import com.firebase.ui.firestore.FirestoreRecyclerOptions
 import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.QuerySnapshot
@@ -13,9 +14,11 @@ import com.riyazuddin.zing.data.entities.*
 import com.riyazuddin.zing.other.Constants.CHATS_COLLECTION
 import com.riyazuddin.zing.other.Constants.COMMENTS_COLLECTION
 import com.riyazuddin.zing.other.Constants.DEFAULT_PROFILE_PICTURE_URL
-import com.riyazuddin.zing.other.Constants.LAST_MESSAGE_COLLECTION
+import com.riyazuddin.zing.other.Constants.FOLLOWERS_COLLECTION
+import com.riyazuddin.zing.other.Constants.FOLLOWING_COLLECTION
 import com.riyazuddin.zing.other.Constants.MESSAGES
 import com.riyazuddin.zing.other.Constants.POSTS_COLLECTION
+import com.riyazuddin.zing.other.Constants.POST_LIKES_COLLECTION
 import com.riyazuddin.zing.other.Constants.USERS_COLLECTION
 import com.riyazuddin.zing.other.Resource
 import com.riyazuddin.zing.other.safeCall
@@ -32,7 +35,9 @@ class DefaultMainRepository : MainRepository {
     private val postsCollection = firestore.collection(POSTS_COLLECTION)
     private val commentsCollection = firestore.collection(COMMENTS_COLLECTION)
     private val chatsCollection = firestore.collection(CHATS_COLLECTION)
-    private val lastMessagesCollection = firestore.collection(LAST_MESSAGE_COLLECTION)
+    private val followingCollection = firestore.collection(FOLLOWING_COLLECTION)
+    private val followersCollection = firestore.collection(FOLLOWERS_COLLECTION)
+    private val postLikesCollection = firestore.collection(POST_LIKES_COLLECTION)
     private val storage = FirebaseStorage.getInstance()
 
     override suspend fun createPost(imageUri: Uri, caption: String) = withContext(Dispatchers.IO) {
@@ -43,17 +48,17 @@ class DefaultMainRepository : MainRepository {
                 .await().metadata?.reference?.downloadUrl?.await().toString()
             val post = Post(postID, uid, System.currentTimeMillis(), postDownloadUrl, caption)
             postsCollection.document(postID).set(post).await()
+            usersCollection.document(uid).update("postCount", FieldValue.increment(1)).await()
+            postLikesCollection.document(postID).set(PostLikes()).await()
             Resource.Success(Any())
         }
     }
 
     override suspend fun searchUser(query: String) = withContext(Dispatchers.IO) {
         safeCall {
-            val usersList = usersCollection.whereGreaterThanOrEqualTo(
-                "username",
-                query.toUpperCase(Locale.ROOT)
-            )
-                .get().await().toObjects(User::class.java)
+            val usersList = usersCollection
+                .orderBy("username")
+                .startAt(query).endAt(query + "\uf8ff").get().await().toObjects(User::class.java)
             Resource.Success(usersList)
         }
     }
@@ -62,13 +67,50 @@ class DefaultMainRepository : MainRepository {
         safeCall {
             val user = usersCollection.document(uid).get().await().toObject(User::class.java)
                 ?: throw IllegalStateException()
+
             val currentUid = auth.uid!!
-            val currentUser =
-                usersCollection.document(currentUid).get().await().toObject(User::class.java)
+            val currentUserFollowing =
+                followingCollection.document(currentUid).get().await()
+                    .toObject(Following::class.java)
                     ?: throw IllegalStateException()
 
-            user.isFollowing = uid in currentUser.follows
+            user.isFollowing = uid in currentUserFollowing.following
             Resource.Success(user)
+        }
+    }
+
+    override suspend fun getFollowing(uid: String) = withContext(Dispatchers.IO) {
+        safeCall {
+            val following =
+                followingCollection.document(uid).get().await().toObject(Following::class.java)
+                    ?: throw IllegalStateException()
+            Resource.Success(following)
+        }
+    }
+
+    override suspend fun getFollowers(uid: String) = withContext(Dispatchers.IO) {
+        safeCall {
+            val followers =
+                followersCollection.document(uid).get().await().toObject(Followers::class.java)
+                    ?: throw IllegalStateException()
+            Resource.Success(followers)
+        }
+    }
+
+    override suspend fun getPostLikes(postId: String) = withContext(Dispatchers.IO) {
+        safeCall {
+            val postLikes =
+                postLikesCollection.document(postId).get().await().toObject(PostLikes::class.java)
+                    ?: throw IllegalStateException()
+            Resource.Success(postLikes)
+        }
+    }
+
+    override suspend fun getPostLikedUsers(postId: String): Resource<List<User>> = withContext(Dispatchers.IO){
+        safeCall {
+            val postLikes = getPostLikes(postId).data!!
+            val usersList = getUsers(postLikes.likedBy).data!!
+            Resource.Success(usersList)
         }
     }
 
@@ -84,7 +126,7 @@ class DefaultMainRepository : MainRepository {
     override suspend fun getPostForProfile(uid: String) = withContext(Dispatchers.IO) {
         safeCall {
             val posts = postsCollection
-                .whereEqualTo("authorUid", uid)
+                .whereEqualTo("postedBy", uid)
                 .orderBy("date", Query.Direction.DESCENDING)
                 .get()
                 .await()
@@ -93,7 +135,7 @@ class DefaultMainRepository : MainRepository {
                     val user = getUserProfile(uid).data!!
                     post.username = user.username
                     post.userProfilePic = user.profilePicUrl
-                    post.isLiked = uid in post.likedBy
+                    post.isLiked = uid in getPostLikes(post.postId).data!!.likedBy
                 }
             Resource.Success(posts)
         }
@@ -104,17 +146,32 @@ class DefaultMainRepository : MainRepository {
             var isLiked = false
             firestore.runTransaction { transition ->
                 val uid = auth.uid!!
-                val currentLikes = transition.get(postsCollection.document(post.postId))
-                    .toObject(Post::class.java)?.likedBy ?: listOf()
-                transition.update(
-                    postsCollection.document(post.postId),
-                    "likedBy",
-                    if (uid in currentLikes) currentLikes - uid
-                    else {
-                        isLiked = true
+
+                val currentLikes = transition.get(postLikesCollection.document(post.postId))
+                    .toObject(PostLikes::class.java)?.likedBy ?: listOf()
+
+                if (uid in currentLikes) {
+                    transition.update(
+                        postLikesCollection.document(post.postId),
+                        "likedBy",
+                        currentLikes - uid
+                    )
+                    transition.update(
+                        postsCollection.document(post.postId),
+                        "likeCount", FieldValue.increment(-1)
+                    )
+                } else {
+                    isLiked = true
+                    transition.update(
+                        postLikesCollection.document(post.postId),
+                        "likedBy",
                         currentLikes + uid
-                    }
-                )
+                    )
+                    transition.update(
+                        postsCollection.document(post.postId),
+                        "likeCount", FieldValue.increment(1)
+                    )
+                }
             }.await()
             Resource.Success(isLiked)
         }
@@ -124,6 +181,8 @@ class DefaultMainRepository : MainRepository {
         safeCall {
             postsCollection.document(post.postId).delete().await()
             storage.getReferenceFromUrl(post.imageUrl).delete().await()
+            usersCollection.document(post.postedBy).update("postCount", FieldValue.increment(-1))
+                .await()
             Resource.Success(post)
         }
     }
@@ -133,19 +192,63 @@ class DefaultMainRepository : MainRepository {
             var isFollowing = false
             firestore.runTransaction { transition ->
                 val currentUid = auth.uid!!
-                val currentUser =
-                    transition.get(usersCollection.document(currentUid))
-                        .toObject(User::class.java)!!
-                isFollowing = uid in currentUser.follows
-                val newFollows =
-                    if (isFollowing)
-                        currentUser.follows - uid
-                    else {
-                        currentUser.follows + uid
-                    }
-                transition.update(
-                    usersCollection.document(currentUid), "follows", newFollows
-                )
+
+                val currentUserFollowing = transition.get(followingCollection.document(currentUid))
+                    .toObject(Following::class.java)!!
+                val otherUserFollowers = transition.get(followersCollection.document(currentUid))
+                    .toObject(Followers::class.java)!!
+
+                isFollowing = uid in currentUserFollowing.following
+
+
+                if (isFollowing) {
+
+                    transition.update(
+                        followingCollection.document(currentUid),
+                        "following",
+                        currentUserFollowing.following.minus(uid)
+                    )
+                    transition.update(
+                        followersCollection.document(uid),
+                        "followers",
+                        otherUserFollowers.followers.minus(currentUid)
+                    )
+
+                    transition.update(
+                        usersCollection.document(currentUid),
+                        "followingCount",
+                        FieldValue.increment(-1)
+                    )
+                    transition.update(
+                        usersCollection.document(uid),
+                        "followersCount",
+                        FieldValue.increment(-1)
+                    )
+                } else {
+
+                    transition.update(
+                        followingCollection.document(currentUid),
+                        "following",
+                        currentUserFollowing.following.plus(uid)
+                    )
+                    transition.update(
+                        followersCollection.document(uid),
+                        "followers",
+                        otherUserFollowers.followers.plus(currentUid)
+                    )
+
+                    transition.update(
+                        usersCollection.document(currentUid),
+                        "followingCount",
+                        FieldValue.increment(1)
+                    )
+                    transition.update(
+                        usersCollection.document(uid),
+                        "followersCount",
+                        FieldValue.increment(1)
+                    )
+                }
+
             }.await()
             Resource.Success(!isFollowing)
         }
@@ -154,17 +257,17 @@ class DefaultMainRepository : MainRepository {
     override suspend fun getPostForFollows() = withContext(Dispatchers.IO) {
         safeCall {
             val uid = auth.uid!!
-            val followsList = getUserProfile(uid).data!!.follows
-            val allPosts = postsCollection.whereIn("authorUid", followsList)
+            val followsList = getFollowing(uid).data!!.following
+            val allPosts = postsCollection.whereIn("postedBy", followsList)
                 .orderBy("date", Query.Direction.DESCENDING)
                 .get()
                 .await()
                 .toObjects(Post::class.java)
                 .onEach { post ->
-                    val user = getUserProfile(post.authorUid).data!!
+                    val user = getUserProfile(post.postedBy).data!!
                     post.username = user.username
                     post.userProfilePic = user.profilePicUrl
-                    post.isLiked = uid in post.likedBy
+                    post.isLiked = uid in getPostLikes(post.postId).data!!.likedBy
                 }
             Resource.Success(allPosts)
         }
@@ -190,7 +293,7 @@ class DefaultMainRepository : MainRepository {
                 .await()
                 .toObjects(Comment::class.java)
                 .onEach { comment ->
-                    val user = getUserProfile(comment.authorUid).data!!
+                    val user = getUserProfile(comment.commentedBy).data!!
                     comment.username = user.username
                     comment.userProfilePic = user.profilePicUrl
                 }
@@ -263,13 +366,19 @@ class DefaultMainRepository : MainRepository {
     override suspend fun getFollowersList(uid: String): Resource<List<User>> =
         withContext(Dispatchers.IO) {
             safeCall {
-                val list = usersCollection.whereArrayContains("follows", uid)
-                    .orderBy("name", Query.Direction.ASCENDING)
+
+                val followersList = followersCollection.document(uid)
                     .get()
                     .await()
-                    .toObjects(User::class.java)
+                    .toObject(Followers::class.java)!!
 
-                Resource.Success(list)
+                if (followersList.followers.contains(auth.uid)) {
+                    followersList.followers -= auth.uid!!
+                }
+
+                val usersList = getUsers(followersList.followers).data!!
+
+                Resource.Success(usersList)
             }
         }
 

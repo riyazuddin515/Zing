@@ -5,6 +5,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.riyazuddin.zing.data.entities.Post
+import com.riyazuddin.zing.data.entities.PostLikes
 import com.riyazuddin.zing.data.entities.User
 import com.riyazuddin.zing.other.Event
 import com.riyazuddin.zing.other.Resource
@@ -18,25 +19,26 @@ abstract class BasePostViewModel(
     private val dispatcher: CoroutineDispatcher = Dispatchers.Main
 ) : ViewModel() {
 
-    private val _likedByStatus = MutableLiveData<Event<Resource<List<User>>>>()
-    val likedByStatus: LiveData<Event<Resource<List<User>>>> = _likedByStatus
-
     private val _likePostStatus = MutableLiveData<Event<Resource<Boolean>>>()
     val likePostStatus: LiveData<Event<Resource<Boolean>>> = _likePostStatus
 
     private val _deletePostStatus = MutableLiveData<Event<Resource<Post>>>()
     val deletePostStatus: LiveData<Event<Resource<Post>>> = _deletePostStatus
 
+    private val _postLikedUsersStatus = MutableLiveData<Event<Resource<List<User>>>>()
+    val postLikedUsersStatus: LiveData<Event<Resource<List<User>>>> = _postLikedUsersStatus
+
     abstract val posts: LiveData<Event<Resource<List<Post>>>>
 
     abstract fun getPosts(uid: String = "")
 
-    fun getUsers(uids: List<String>) {
-        if (uids.isEmpty()) return
-        _likedByStatus.postValue(Event(Resource.Loading()))
-        viewModelScope.launch(dispatcher) {
-            val result = repository.getUsers(uids)
-            _likedByStatus.postValue(Event(result))
+    fun getPostLikedUsers(postId: String) {
+        if (postId.isEmpty())
+            return
+        _postLikedUsersStatus.postValue(Event(Resource.Loading()))
+        viewModelScope.launch(dispatcher){
+            val result = repository.getPostLikedUsers(postId)
+            _postLikedUsersStatus.postValue(Event(result))
         }
     }
 

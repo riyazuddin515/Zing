@@ -11,8 +11,11 @@ data class User(
     val uid: String = "",
     val username: String = "",
     val profilePicUrl: String = DEFAULT_PROFILE_PICTURE_URL,
-    val follows: List<String> = listOf(),
+//    val follows: List<String> = listOf(),
     val bio: String = "I'm on Zing now",
+    val followingCount: Int = 0,
+    val followersCount: Int = 0,
+    var postCount: Int = 0,
     @get:Exclude
     var isFollowing: Boolean = false,
 ): Serializable

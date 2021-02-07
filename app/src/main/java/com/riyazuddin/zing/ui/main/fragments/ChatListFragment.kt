@@ -1,7 +1,7 @@
 package com.riyazuddin.zing.ui.main.fragments
 
 import android.os.Bundle
-import android.view.View
+import android.view.*
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
@@ -30,16 +30,27 @@ class ChatListFragment : Fragment(R.layout.fragment_chat_list) {
 
     private var firestoreChatListAdapter: ChatListAdapter? = null
 
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        binding = FragmentChatListBinding.inflate(inflater, container, false)
+        binding.toolbar.inflateMenu(R.menu.chat_list_menu)
+        binding.toolbar.setOnMenuItemClickListener {
+            if(it.itemId == R.id.newChat)
+                findNavController().navigate(R.id.action_chatList_to_newChat)
+            true
+        }
+        return binding.root
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        binding = FragmentChatListBinding.bind(view)
 
         viewModel.getLastMessages(Firebase.auth.uid!!)
         subscribeToObservers()
 
-        binding.ivNewChat.setOnClickListener {
-            findNavController().navigate(R.id.action_chatList_to_newChat)
-        }
         binding.toolbar.setNavigationOnClickListener {
             findNavController().navigateUp()
         }
@@ -65,9 +76,7 @@ class ChatListFragment : Fragment(R.layout.fragment_chat_list) {
         })
     }
 
-
     private fun setupRecyclerView() {
-
         binding.rvChatLast.apply {
             adapter = firestoreChatListAdapter
             layoutManager = LinearLayoutManager(requireContext())

@@ -51,7 +51,7 @@ class PostAdapter @Inject constructor(val glide: RequestManager) :
             glide.load(post.userProfilePic).into(CIVProfilePic)
             glide.load(post.imageUrl).into(ivPostImage)
             tvUsername.text = post.username
-            val likeCount = post.likedBy.size
+            val likeCount = post.likeCount
             tvLikedBy.text = when {
                 likeCount <= 0 -> "No Likes"
                 likeCount == 1 -> "Liked by 1 Person"
@@ -60,7 +60,7 @@ class PostAdapter @Inject constructor(val glide: RequestManager) :
             if (post.caption.isEmpty())
                 tvCaption.isVisible = false
             else tvCaption.text = post.caption
-            ibDelete.isVisible = (post.authorUid == Firebase.auth.uid!!)
+            ibDelete.isVisible = (post.postedBy == Firebase.auth.uid!!)
             ibLike.setImageResource(
                 if (post.isLiked) R.drawable.ic_like_red
                 else R.drawable.ic_outline_like

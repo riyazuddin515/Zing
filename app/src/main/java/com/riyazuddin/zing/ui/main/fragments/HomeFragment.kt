@@ -74,7 +74,7 @@ class HomeFragment : BasePostFragment(R.layout.fragment_home) {
         postAdapter.setOnUserClickListener {
             findNavController().navigate(
                 HomeFragmentDirections.globalActionToOthersProfileFragment(
-                    it.authorUid
+                    it.postedBy
                 )
             )
         }

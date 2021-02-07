@@ -55,7 +55,7 @@ class CommentsFragment : Fragment(R.layout.fragment_comments) {
             else
                 findNavController().navigate(
                     CommentsFragmentDirections.globalActionToOthersProfileFragment(
-                        it.authorUid
+                        it.commentedBy
                     )
                 )
         }

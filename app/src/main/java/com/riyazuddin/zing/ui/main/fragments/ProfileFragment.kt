@@ -3,6 +3,7 @@ package com.riyazuddin.zing.ui.main.fragments
 import android.os.Bundle
 import android.view.MotionEvent
 import android.view.View
+import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.ProgressBar
 import androidx.core.view.isVisible
@@ -47,7 +48,7 @@ open class ProfileFragment : BasePostFragment(R.layout.fragment_profile) {
     protected open val uid: String
         get() = FirebaseAuth.getInstance().uid!!
 
-    private lateinit var dialogs: PostPreviewDialog
+    private var dialogs: PostPreviewDialog? = null
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -72,7 +73,8 @@ open class ProfileFragment : BasePostFragment(R.layout.fragment_profile) {
 
         gridPostAdapter.setItemOnLongListener { post ->
 
-            val dialogLayout = layoutInflater.inflate(R.layout.item_grid_post_preview, null)
+            val nullParent: ViewGroup? = null
+            val dialogLayout = layoutInflater.inflate(R.layout.item_grid_post_preview,  nullParent)
 
             val postImage = dialogLayout.findViewById<ImageView>(R.id.ivPostPreview)
             val authorImage = dialogLayout.findViewById<ImageView>(R.id.CIVProfilePic)
@@ -115,6 +117,11 @@ open class ProfileFragment : BasePostFragment(R.layout.fragment_profile) {
             binding.toolbar.title = user.username
             glide.load(user.profilePicUrl).into(binding.CIVProfilePic)
             binding.tvBio.text = if (user.bio.isEmpty()) "No Bio" else user.bio
+
+            binding.tvPostCount.text = user.postCount.toString()
+            binding.tvFollowingCount.text = user.followingCount.toString()
+            binding.tvFollowersCount.text = user.followersCount.toString()
+            binding.tvCountLayout.isVisible = true
         })
 
         basePostViewModel.deletePostStatus.observe(viewLifecycleOwner, EventObserver {
@@ -139,10 +146,11 @@ open class ProfileFragment : BasePostFragment(R.layout.fragment_profile) {
     }
 
     private fun showImagePreview() {
-        dialogs.show(childFragmentManager, null)
+        dialogs?.show(childFragmentManager, null)
     }
 
     private fun hidePreviewImage() {
-        dialogs.dismiss()
+        dialogs?.dismiss()
+
     }
 }

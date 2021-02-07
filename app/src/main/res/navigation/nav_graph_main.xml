@@ -131,8 +131,8 @@
         android:name="com.riyazuddin.zing.ui.main.fragments.LikedByFragment"
         android:label="LikedByFragment" >
         <argument
-            android:name="userAdapter"
-            app:argType="com.riyazuddin.zing.adapters.UserAdapter" />
+            android:name="postId"
+            app:argType="string" />
     </fragment>
     <fragment
         android:id="@+id/profileInfo"

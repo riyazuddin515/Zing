@@ -73,4 +73,8 @@
     <string name="image">Image</string>
     <string name="button">button</string>
     <string name="enter_your_message">Enter your message</string>
+    <string name="new_chat">New Chat</string>
+    <string name="posts">Posts</string>
+    <string name="following">Following</string>
+    <string name="followers">Followers</string>
 </resources>

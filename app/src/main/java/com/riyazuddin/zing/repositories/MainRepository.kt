@@ -5,6 +5,10 @@ import com.firebase.ui.firestore.FirestoreRecyclerOptions
 import com.google.firebase.firestore.QuerySnapshot
 import com.riyazuddin.zing.data.entities.*
 import com.riyazuddin.zing.other.Resource
+import com.riyazuddin.zing.other.safeCall
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withContext
 
 interface MainRepository {
 
@@ -41,6 +45,14 @@ interface MainRepository {
     suspend fun changePassword(newPassword: String): Resource<Any>
 
     suspend fun getFollowersList(uid: String): Resource<List<User>>
+
+    suspend fun getFollowing(uid: String): Resource<Following>
+
+    suspend fun getFollowers(uid: String): Resource<Followers>
+
+    suspend fun getPostLikes(postId: String) : Resource<PostLikes>
+
+    suspend fun getPostLikedUsers(postId: String): Resource<List<User>>
 
     suspend fun sendMessage(
         currentUid: String,
