@@ -5,9 +5,11 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ProgressBar
+import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import androidx.paging.LoadState
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
@@ -18,6 +20,9 @@ import com.riyazuddin.zing.ui.dialogs.CustomDialog
 import com.riyazuddin.zing.ui.main.viewmodels.BasePostViewModel
 import com.riyazuddin.zing.ui.main.viewmodels.HomeViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class HomeFragment : BasePostFragment(R.layout.fragment_home) {
@@ -58,18 +63,31 @@ class HomeFragment : BasePostFragment(R.layout.fragment_home) {
         return view
     }
 
-    override val postProgressBar: ProgressBar
-        get() = binding.progressBar
     override val basePostViewModel: BasePostViewModel
         get() {
             val vm: HomeViewModel by viewModels()
             return vm
         }
 
+    private val viewModel: HomeViewModel by lazy { basePostViewModel as HomeViewModel }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         setUpRecyclerView()
+
+        lifecycleScope.launch {
+            viewModel.pagingFlow.collect {
+                postAdapter.submitData(it)
+            }
+        }
+        lifecycleScope.launch {
+            postAdapter.loadStateFlow.collectLatest {
+                binding.progressBar.isVisible =
+                    it.refresh is LoadState.Loading ||
+                            it.append is LoadState.Loading
+            }
+        }
 
         postAdapter.setOnUserClickListener {
             findNavController().navigate(

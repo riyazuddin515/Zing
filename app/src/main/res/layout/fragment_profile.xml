@@ -218,39 +218,6 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/tvCountLayout" />
 
-            <LinearLayout
-                android:id="@+id/post_layout"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="5dp"
-                android:orientation="horizontal"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.5"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/btnToggleFollow">
-
-                <ImageButton
-                    android:id="@+id/btnPostsInGrid"
-                    style="?android:buttonBarButtonStyle"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:background="@android:color/transparent"
-                    android:contentDescription="@string/button"
-                    android:src="@drawable/ic_grid" />
-
-                <ImageButton
-                    android:id="@+id/btnPostsInList"
-                    style="?android:buttonBarButtonStyle"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:background="@android:color/transparent"
-                    android:contentDescription="@string/button"
-                    android:src="@drawable/ic_list" />
-
-            </LinearLayout>
-
             <ProgressBar
                 android:id="@+id/progressBarProfileMetadata"
                 android:layout_width="wrap_content"
@@ -262,25 +229,14 @@
                 app:layout_constraintTop_toTopOf="parent" />
 
             <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rvPostGrid"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_marginTop="8dp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/post_layout" />
-
-            <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rvPostList"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_marginTop="8dp"
-                android:visibility="gone"
+                app:layout_constraintTop_toBottomOf="@id/btnToggleFollow"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/post_layout"
                 tools:listitem="@layout/item_post" />
 
             <ProgressBar

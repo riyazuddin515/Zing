@@ -3,7 +3,7 @@ package com.riyazuddin.zing.adapters
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.core.view.isVisible
-import androidx.recyclerview.widget.AsyncListDiffer
+import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.RequestManager
@@ -15,11 +15,11 @@ import com.riyazuddin.zing.databinding.ItemPostBinding
 import javax.inject.Inject
 
 class PostAdapter @Inject constructor(val glide: RequestManager) :
-    RecyclerView.Adapter<PostAdapter.PostViewHolder>() {
+    PagingDataAdapter<Post, PostAdapter.PostViewHolder>(Companion) {
 
     class PostViewHolder(val binding: ItemPostBinding) : RecyclerView.ViewHolder(binding.root)
 
-    private val differCallback = object : DiffUtil.ItemCallback<Post>() {
+    companion object : DiffUtil.ItemCallback<Post>() {
         override fun areItemsTheSame(oldItem: Post, newItem: Post): Boolean {
             return oldItem.hashCode() == newItem.hashCode()
         }
@@ -28,11 +28,6 @@ class PostAdapter @Inject constructor(val glide: RequestManager) :
             return oldItem.postId == newItem.postId
         }
     }
-    private val differ = AsyncListDiffer(this, differCallback)
-
-    var posts: List<Post>
-        get() = differ.currentList
-        set(value) = differ.submitList(value)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PostViewHolder {
         return PostViewHolder(
@@ -45,9 +40,8 @@ class PostAdapter @Inject constructor(val glide: RequestManager) :
     }
 
     override fun onBindViewHolder(holder: PostViewHolder, position: Int) {
-
         holder.binding.apply {
-            val post = posts[position]
+            val post = getItem(position) ?: return
             glide.load(post.userProfilePic).into(CIVProfilePic)
             glide.load(post.imageUrl).into(ivPostImage)
             tvUsername.text = post.username
@@ -65,7 +59,7 @@ class PostAdapter @Inject constructor(val glide: RequestManager) :
                 if (post.isLiked) R.drawable.ic_like_red
                 else R.drawable.ic_outline_like
             )
-
+            rootLayout.isVisible = true
             ibLike.setOnClickListener {
                 onLikeClickListener?.let { click ->
                     click(post, position)
@@ -97,10 +91,6 @@ class PostAdapter @Inject constructor(val glide: RequestManager) :
                 }
             }
         }
-    }
-
-    override fun getItemCount(): Int {
-        return posts.size
     }
 
 

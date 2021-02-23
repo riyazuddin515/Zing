@@ -4,13 +4,21 @@ import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.PagingData
+import androidx.paging.cachedIn
+import com.google.firebase.firestore.FirebaseFirestore
 import com.riyazuddin.zing.data.entities.Post
 import com.riyazuddin.zing.data.entities.User
+import com.riyazuddin.zing.data.pagingsource.ProfilePostPagingSource
+import com.riyazuddin.zing.other.Constants.POST_PAGE_SIZE
 import com.riyazuddin.zing.other.Event
 import com.riyazuddin.zing.other.Resource
 import com.riyazuddin.zing.repositories.MainRepository
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 
 class ProfileViewModel @ViewModelInject constructor(
@@ -24,17 +32,17 @@ class ProfileViewModel @ViewModelInject constructor(
     private val _loadProfileMetadata = MutableLiveData<Event<Resource<User>>>()
     val loadProfileMetadata: LiveData<Event<Resource<User>>> = _loadProfileMetadata
 
-    private val _posts = MutableLiveData<Event<Resource<List<Post>>>>()
-    override val posts: LiveData<Event<Resource<List<Post>>>>
-        get() = _posts
 
-    override fun getPosts(uid: String) {
-        _posts.postValue(Event(Resource.Loading()))
-        viewModelScope.launch(dispatcher) {
-            val result = repository.getPostForProfile(uid)
-            _posts.postValue(Event(result))
-        }
+    fun getPagingFlowOfPost(uid: String): Flow<PagingData<Post>> {
+        val pagingSource = ProfilePostPagingSource(
+            FirebaseFirestore.getInstance(),
+            uid
+        )
+        return Pager(PagingConfig(POST_PAGE_SIZE)) {
+            pagingSource
+        }.flow.cachedIn(viewModelScope)
     }
+
 
     fun toggleFollowForUser(uid: String) {
         _followStatus.postValue(Event(Resource.Loading()))
@@ -44,12 +52,11 @@ class ProfileViewModel @ViewModelInject constructor(
         }
     }
 
-    fun loadProfile(uid: String){
+    fun loadProfile(uid: String) {
         _loadProfileMetadata.postValue(Event(Resource.Loading()))
-        viewModelScope.launch(dispatcher){
+        viewModelScope.launch(dispatcher) {
             val result = repository.getUserProfile(uid)
             _loadProfileMetadata.postValue(Event(result))
         }
-        getPosts(uid)
     }
 }

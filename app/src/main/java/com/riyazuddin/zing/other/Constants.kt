@@ -12,6 +12,7 @@ object Constants {
     const val FOLLOWERS_COLLECTION = "followers"
     const val POST_LIKES_COLLECTION = "postLikes"
 
+    const val POST_PAGE_SIZE = 10
 
     const val MESSAGES = "messages"
 

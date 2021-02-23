@@ -44,15 +44,15 @@ class AuthViewModel @ViewModelInject constructor(
             if (name.isEmpty() || username.isEmpty() || email.isEmpty() || password.isEmpty())
                 applicationContext.getString(R.string.error_fields_can_not_be_empty)
             else if (username.length < MIN_USERNAME)
-                applicationContext.getString(R.string.error_username_too_short)
+                applicationContext.getString(R.string.error_username_too_short, MIN_PASSWORD)
             else if (username.length > MAX_USERNAME)
-                applicationContext.getString(R.string.error_username_too_long)
+                applicationContext.getString(R.string.error_username_too_long, MAX_USERNAME)
             else if (!Patterns.EMAIL_ADDRESS.matcher(email).matches())
                 applicationContext.getString(R.string.error_not_a_valid_email)
             else if (password.length < MIN_PASSWORD)
-                applicationContext.getString(R.string.error_password_too_short)
+                applicationContext.getString(R.string.error_password_too_short, MIN_PASSWORD)
             else if (password.length > MAX_PASSWORD)
-                applicationContext.getString(R.string.error_password_too_long)
+                applicationContext.getString(R.string.error_password_too_long, MAX_PASSWORD)
             else if (repeatPassword != password)
                 applicationContext.getString(R.string.error_password_not_match)
             else null
@@ -76,9 +76,9 @@ class AuthViewModel @ViewModelInject constructor(
             else if (!Patterns.EMAIL_ADDRESS.matcher(email).matches())
                 applicationContext.getString(R.string.error_not_a_valid_email)
             else if (password.length < MIN_PASSWORD)
-                applicationContext.getString(R.string.error_password_too_short)
+                applicationContext.getString(R.string.error_password_too_short, MIN_PASSWORD)
             else if (password.length > MAX_PASSWORD)
-                applicationContext.getString(R.string.error_password_too_long)
+                applicationContext.getString(R.string.error_password_too_long, MAX_PASSWORD)
             else null
 
         error?.let {

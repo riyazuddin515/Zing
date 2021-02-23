@@ -2,16 +2,11 @@ package com.riyazuddin.zing.ui.main.fragments
 
 import android.os.Bundle
 import android.view.View
-import android.widget.ProgressBar
-import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.RequestManager
-import com.google.firebase.auth.FirebaseAuth
 import com.riyazuddin.zing.R
-import com.riyazuddin.zing.adapters.GridPostAdapter
 import com.riyazuddin.zing.adapters.PostAdapter
-import com.riyazuddin.zing.adapters.UserAdapter
 import com.riyazuddin.zing.other.EventObserver
 import com.riyazuddin.zing.other.snackBar
 import com.riyazuddin.zing.ui.dialogs.CustomDialog
@@ -21,7 +16,6 @@ import kotlin.properties.Delegates
 
 abstract class BasePostFragment(layoutId: Int) : Fragment(layoutId) {
 
-    protected abstract val postProgressBar: ProgressBar
     protected abstract val basePostViewModel: BasePostViewModel
 
     protected abstract val source: String
@@ -29,8 +23,6 @@ abstract class BasePostFragment(layoutId: Int) : Fragment(layoutId) {
 
     @Inject
     lateinit var postAdapter: PostAdapter
-    @Inject
-    lateinit var gridPostAdapter: GridPostAdapter
 
     @Inject
     lateinit var glide: RequestManager
@@ -62,26 +54,32 @@ abstract class BasePostFragment(layoutId: Int) : Fragment(layoutId) {
         postAdapter.setOnLikedByClickListener {
             basePostViewModel.getPostLikedUsers(it.postId)
             when (source) {
-                (R.id.homeFragment).toString() -> sourceToDestinationLayoutId = R.id.action_homeFragment_to_likedByFragment
-                (R.id.profileFragment).toString() -> sourceToDestinationLayoutId = R.id.action_profileFragment_to_likedByFragment
-                (R.id.othersProfileFragment).toString() -> sourceToDestinationLayoutId = R.id.action_othersProfileFragment_to_likedByFragment
+                (R.id.homeFragment).toString() -> sourceToDestinationLayoutId =
+                    R.id.action_homeFragment_to_likedByFragment
+                (R.id.profileFragment).toString() -> sourceToDestinationLayoutId =
+                    R.id.action_profileFragment_to_likedByFragment
+                (R.id.othersProfileFragment).toString() -> sourceToDestinationLayoutId =
+                    R.id.action_othersProfileFragment_to_likedByFragment
             }
             val bundle = Bundle().apply {
-                putString("postId",it.postId)
+                putString("postId", it.postId)
             }
             findNavController().navigate(sourceToDestinationLayoutId, bundle)
         }
 
         postAdapter.setOnCommentClickListener {
             when (source) {
-                (R.id.homeFragment).toString() -> sourceToDestinationLayoutId = R.id.action_homeFragment_to_commentsFragment
-                (R.id.profileFragment).toString() -> sourceToDestinationLayoutId = R.id.action_profileFragment_to_commentsFragment
-                (R.id.othersProfileFragment).toString() -> sourceToDestinationLayoutId = R.id.action_othersProfileFragment_to_commentsFragment
+                (R.id.homeFragment).toString() -> sourceToDestinationLayoutId =
+                    R.id.action_homeFragment_to_commentsFragment
+                (R.id.profileFragment).toString() -> sourceToDestinationLayoutId =
+                    R.id.action_profileFragment_to_commentsFragment
+                (R.id.othersProfileFragment).toString() -> sourceToDestinationLayoutId =
+                    R.id.action_othersProfileFragment_to_commentsFragment
             }
             val bundle = Bundle().apply {
-                putString("postId",it.postId)
+                putString("postId", it.postId)
             }
-            findNavController().navigate(sourceToDestinationLayoutId,bundle)
+            findNavController().navigate(sourceToDestinationLayoutId, bundle)
         }
     }
 
@@ -89,20 +87,20 @@ abstract class BasePostFragment(layoutId: Int) : Fragment(layoutId) {
         basePostViewModel.likePostStatus.observe(viewLifecycleOwner, EventObserver(
             onError = {
                 curLikeIndex?.let { index ->
-                    postAdapter.posts[index].isLiking = false
+                    postAdapter.peek(index)?.isLiking = false
                     postAdapter.notifyItemChanged(index)
                 }
                 snackBar(it)
             },
             onLoading = {
                 curLikeIndex?.let { index ->
-                    postAdapter.posts[index].isLiking = true
+                    postAdapter.peek(index)?.isLiking = true
                     postAdapter.notifyItemChanged(index)
                 }
             }
         ) { isLiked ->
             curLikeIndex?.let { index ->
-                postAdapter.posts[index].apply {
+                postAdapter.peek(index)?.apply {
                     this.isLiked = isLiked
                     this.isLiking = false
                     if (isLiked) {
@@ -113,26 +111,6 @@ abstract class BasePostFragment(layoutId: Int) : Fragment(layoutId) {
                 }
                 postAdapter.notifyItemChanged(index)
             }
-        })
-
-        basePostViewModel.deletePostStatus.observe(viewLifecycleOwner, EventObserver(
-            onError = { snackBar(it) }
-        ) { post ->
-            postAdapter.posts -= post
-        })
-
-        basePostViewModel.posts.observe(viewLifecycleOwner, EventObserver(
-            onError = {
-                postProgressBar.isVisible = false
-                snackBar(it)
-            },
-            onLoading = {
-                postProgressBar.isVisible = true
-            }
-        ) { posts ->
-            postAdapter.posts = posts
-            gridPostAdapter.posts = posts
-            postProgressBar.isVisible = false
         })
     }
 }

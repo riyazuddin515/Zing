@@ -106,20 +106,27 @@ class DefaultMainRepository : MainRepository {
         }
     }
 
-    override suspend fun getPostLikedUsers(postId: String): Resource<List<User>> = withContext(Dispatchers.IO){
-        safeCall {
-            val postLikes = getPostLikes(postId).data!!
-            val usersList = getUsers(postLikes.likedBy).data!!
-            Resource.Success(usersList)
+    override suspend fun getPostLikedUsers(postId: String): Resource<List<User>> =
+        withContext(Dispatchers.IO) {
+            safeCall {
+                val postLikes = getPostLikes(postId).data!!
+                val usersList = getUsers(postLikes.likedBy).data!!
+                Resource.Success(usersList)
+            }
         }
-    }
 
     override suspend fun getUsers(uids: List<String>) = withContext(Dispatchers.IO) {
         safeCall {
-            val usersList =
-                usersCollection.whereIn("uid", uids).orderBy("username").get().await()
-                    .toObjects(User::class.java)
-            Resource.Success(usersList)
+            val chunks = uids.chunked(10)
+            val resultList = mutableListOf<User>()
+            chunks.forEach { chunks ->
+                val usersList =
+                    usersCollection.whereIn("uid", chunks).orderBy("username").get().await()
+                        .toObjects(User::class.java)
+                resultList.addAll(usersList)
+            }
+
+            Resource.Success(resultList.toList())
         }
     }
 

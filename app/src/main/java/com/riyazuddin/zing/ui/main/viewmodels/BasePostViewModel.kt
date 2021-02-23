@@ -28,10 +28,6 @@ abstract class BasePostViewModel(
     private val _postLikedUsersStatus = MutableLiveData<Event<Resource<List<User>>>>()
     val postLikedUsersStatus: LiveData<Event<Resource<List<User>>>> = _postLikedUsersStatus
 
-    abstract val posts: LiveData<Event<Resource<List<Post>>>>
-
-    abstract fun getPosts(uid: String = "")
-
     fun getPostLikedUsers(postId: String) {
         if (postId.isEmpty())
             return

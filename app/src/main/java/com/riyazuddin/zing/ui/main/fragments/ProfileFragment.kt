@@ -8,6 +8,8 @@ import android.widget.ImageView
 import android.widget.ProgressBar
 import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
+import androidx.paging.LoadState
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -22,6 +24,9 @@ import com.riyazuddin.zing.ui.dialogs.PostPreviewDialog
 import com.riyazuddin.zing.ui.main.viewmodels.BasePostViewModel
 import com.riyazuddin.zing.ui.main.viewmodels.ProfileViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 
 
 @AndroidEntryPoint
@@ -31,9 +36,6 @@ open class ProfileFragment : BasePostFragment(R.layout.fragment_profile) {
         get() = (R.id.profileFragment).toString()
 
     private lateinit var binding: FragmentProfileBinding
-
-    override val postProgressBar: ProgressBar
-        get() = binding.progressBar
 
     override val basePostViewModel: BasePostViewModel
         get() {
@@ -48,58 +50,29 @@ open class ProfileFragment : BasePostFragment(R.layout.fragment_profile) {
     protected open val uid: String
         get() = FirebaseAuth.getInstance().uid!!
 
-    private var dialogs: PostPreviewDialog? = null
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding = FragmentProfileBinding.bind(view)
 
-        setUpGridPostRecyclerView()
         setUpRecyclerView()
         subscribeToObservers()
 
         binding.btnToggleFollow.isVisible = false
         viewModel.loadProfile(uid)
 
-        binding.btnPostsInGrid.setOnClickListener {
-            binding.rvPostGrid.isVisible = true
-            binding.rvPostList.isVisible = false
-        }
-
-        binding.btnPostsInList.setOnClickListener {
-            binding.rvPostList.isVisible = true
-            binding.rvPostGrid.isVisible = false
-        }
-
-        gridPostAdapter.setItemOnLongListener { post ->
-
-            val nullParent: ViewGroup? = null
-            val dialogLayout = layoutInflater.inflate(R.layout.item_grid_post_preview,  nullParent)
-
-            val postImage = dialogLayout.findViewById<ImageView>(R.id.ivPostPreview)
-            val authorImage = dialogLayout.findViewById<ImageView>(R.id.CIVProfilePic)
-            val userName = dialogLayout.findViewById<MaterialTextView>(R.id.tvUsername)
-            userName.text = post.username
-
-            glide.load(post.userProfilePic).into(authorImage)
-            glide.load(post.imageUrl).into(postImage)
-
-            dialogs = PostPreviewDialog(dialogLayout)
-
-            showImagePreview()
-        }
-
-        binding.rvPostGrid.addOnItemTouchListener(object : RecyclerView.OnItemTouchListener {
-            override fun onInterceptTouchEvent(rv: RecyclerView, e: MotionEvent): Boolean {
-                if (e.action == MotionEvent.ACTION_UP)
-                    hidePreviewImage()
-                return false
+        lifecycleScope.launch {
+            viewModel.getPagingFlowOfPost(uid).collect {
+                postAdapter.submitData(it)
             }
-
-            override fun onTouchEvent(rv: RecyclerView, e: MotionEvent) {}
-
-            override fun onRequestDisallowInterceptTouchEvent(disallowIntercept: Boolean) {}
-        })
+        }
+        lifecycleScope.launch {
+            postAdapter.loadStateFlow.collectLatest {
+                binding.progressBar.isVisible =
+                    it.refresh is LoadState.Loading ||
+                            it.append is LoadState.Loading
+            }
+        }
     }
 
     private fun subscribeToObservers() {
@@ -124,8 +97,11 @@ open class ProfileFragment : BasePostFragment(R.layout.fragment_profile) {
             binding.tvCountLayout.isVisible = true
         })
 
-        basePostViewModel.deletePostStatus.observe(viewLifecycleOwner, EventObserver {
-            gridPostAdapter.posts -= it
+        basePostViewModel.deletePostStatus.observe(viewLifecycleOwner, EventObserver(
+            onError = { snackBar(it) }
+        ) { deletedPost ->
+            postAdapter.refresh()
+            snackBar("Post Deleted.")
         })
     }
 
@@ -135,22 +111,5 @@ open class ProfileFragment : BasePostFragment(R.layout.fragment_profile) {
             layoutManager = LinearLayoutManager(requireContext())
             itemAnimator = null
         }
-    }
-
-    private fun setUpGridPostRecyclerView() {
-        binding.rvPostGrid.apply {
-            adapter = gridPostAdapter
-            layoutManager = GridLayoutManager(context, 3)
-            itemAnimator = null
-        }
-    }
-
-    private fun showImagePreview() {
-        dialogs?.show(childFragmentManager, null)
-    }
-
-    private fun hidePreviewImage() {
-        dialogs?.dismiss()
-
     }
 }

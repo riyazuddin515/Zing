@@ -34,7 +34,6 @@ object AppModule {
         @ApplicationContext context: Context
     ) = Glide.with(context).setDefaultRequestOptions(
         RequestOptions()
-            .placeholder(R.drawable.default_profile_pic)
             .error(R.drawable.ic_outline_error)
             .diskCacheStrategy(DiskCacheStrategy.DATA)
     )

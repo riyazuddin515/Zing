@@ -23,11 +23,12 @@
 
         <ImageView
             android:id="@+id/messageImage"
-            android:layout_width="match_parent"
-            android:layout_height="200dp"
+            android:layout_width="wrap_content"
+            android:layout_height="150dp"
             android:layout_margin="8dp"
             android:contentDescription="@string/image"
             android:visibility="gone"
+            android:scaleType="centerInside"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.5"
