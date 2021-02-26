@@ -1,26 +1,17 @@
 package com.riyazuddin.zing.ui.main.fragments
 
 import android.os.Bundle
-import android.view.MotionEvent
 import android.view.View
-import android.view.ViewGroup
-import android.widget.ImageView
-import android.widget.ProgressBar
 import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.paging.LoadState
-import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.textview.MaterialTextView
 import com.google.firebase.auth.FirebaseAuth
 import com.riyazuddin.zing.R
-import com.riyazuddin.zing.data.entities.Post
 import com.riyazuddin.zing.databinding.FragmentProfileBinding
 import com.riyazuddin.zing.other.EventObserver
 import com.riyazuddin.zing.other.snackBar
-import com.riyazuddin.zing.ui.dialogs.PostPreviewDialog
 import com.riyazuddin.zing.ui.main.viewmodels.BasePostViewModel
 import com.riyazuddin.zing.ui.main.viewmodels.ProfileViewModel
 import dagger.hilt.android.AndroidEntryPoint

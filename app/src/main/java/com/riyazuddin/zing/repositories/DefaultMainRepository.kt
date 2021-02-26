@@ -1,8 +1,6 @@
 package com.riyazuddin.zing.repositories
 
 import android.net.Uri
-import android.util.Log
-import com.firebase.ui.firestore.FirestoreRecyclerOptions
 import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldValue
@@ -16,7 +14,6 @@ import com.riyazuddin.zing.other.Constants.COMMENTS_COLLECTION
 import com.riyazuddin.zing.other.Constants.DEFAULT_PROFILE_PICTURE_URL
 import com.riyazuddin.zing.other.Constants.FOLLOWERS_COLLECTION
 import com.riyazuddin.zing.other.Constants.FOLLOWING_COLLECTION
-import com.riyazuddin.zing.other.Constants.MESSAGES
 import com.riyazuddin.zing.other.Constants.POSTS_COLLECTION
 import com.riyazuddin.zing.other.Constants.POST_LIKES_COLLECTION
 import com.riyazuddin.zing.other.Constants.USERS_COLLECTION
@@ -58,7 +55,11 @@ class DefaultMainRepository : MainRepository {
         safeCall {
             val usersList = usersCollection
                 .orderBy("username")
-                .startAt(query).endAt(query + "\uf8ff").get().await().toObjects(User::class.java)
+                .startAt(query)
+                .endAt(query + "\uf8ff")
+                .get()
+                .await()
+                .toObjects(User::class.java)
             Resource.Success(usersList)
         }
     }
@@ -119,9 +120,9 @@ class DefaultMainRepository : MainRepository {
         safeCall {
             val chunks = uids.chunked(10)
             val resultList = mutableListOf<User>()
-            chunks.forEach { chunks ->
+            chunks.forEach { chunk ->
                 val usersList =
-                    usersCollection.whereIn("uid", chunks).orderBy("username").get().await()
+                    usersCollection.whereIn("uid", chunk).orderBy("username").get().await()
                         .toObjects(User::class.java)
                 resultList.addAll(usersList)
             }
@@ -388,124 +389,4 @@ class DefaultMainRepository : MainRepository {
                 Resource.Success(usersList)
             }
         }
-
-    override suspend fun sendMessage(
-        currentUid: String,
-        receiverUid: String,
-        message: String,
-        type: String,
-        uri: Uri?,
-        senderName: String,
-        senderUsername: String,
-        senderProfilePicUrl: String,
-        receiverName: String,
-        receiverUsername: String,
-        receiveProfileUrl: String
-    ): Resource<Message> = withContext(Dispatchers.IO) {
-        safeCall {
-            val chatThread = getChatThread(currentUid, receiverUid)
-            val messageId = UUID.randomUUID().toString()
-
-            val messageMediaUrl = uri?.let {
-                Log.e("TAG", "sendMessage: Uri not null")
-                storage.reference.child("chatMedia/$chatThread/$messageId").putFile(it)
-                    .await().metadata?.reference?.downloadUrl?.await().toString()
-            }
-
-
-            Log.e("TAG", "sendMessage: stored $messageMediaUrl")
-
-            val messageOb = Message(
-                messageId = messageId,
-                message = message,
-                type = type,
-                date = System.currentTimeMillis(),
-                senderAddReceiverUid = listOf(currentUid, receiverUid),
-                url = messageMediaUrl ?: ""
-            )
-
-            Log.e("TAG", "sendMessage: message created")
-            //upload message and lastMessage
-            chatsCollection.document(chatThread)
-                .collection(MESSAGES).document(messageId)
-                .set(messageOb)
-                .await()
-            Log.e("TAG", "sendMessage: message posted")
-
-            val lastMessage = LastMessage(
-                messageId = messageId,
-                message = message,
-                type = type,
-                date = System.currentTimeMillis(),
-                senderAddReceiverUid = listOf(currentUid, receiverUid),
-                url = messageMediaUrl ?: "",
-
-                senderName = senderName,
-                senderUserName = senderUsername,
-                senderProfilePicUrl = senderProfilePicUrl,
-
-                receiverName = receiverName,
-                receiverUsername = receiverUsername,
-                receiverProfilePicUrl = receiveProfileUrl
-            )
-
-            chatsCollection.document(chatThread).set(lastMessage).await()
-
-            Log.e("TAG", "sendMessage: last message updated")
-
-
-            Resource.Success(messageOb)
-        }
-    }
-
-    override suspend fun deleteChatMessage(
-        currentUid: String,
-        receiverUid: String, message: Message
-    ): Resource<Message> = withContext(Dispatchers.IO) {
-        safeCall {
-            chatsCollection.document(getChatThread(currentUid, receiverUid)).collection(MESSAGES)
-                .document(message.messageId)
-                .delete().await()
-            Resource.Success(message)
-        }
-    }
-
-    override suspend fun getChat(
-        currentUid: String,
-        otherEndUserUid: String
-    ): Resource<FirestoreRecyclerOptions<Message>> = withContext(Dispatchers.IO) {
-        val query = FirebaseFirestore.getInstance()
-            .collection(CHATS_COLLECTION)
-            .document(getChatThread(currentUid, otherEndUserUid))
-            .collection(MESSAGES).orderBy("date", Query.Direction.ASCENDING)
-
-        val options =
-            FirestoreRecyclerOptions.Builder<Message>().setQuery(query, Message::class.java)
-                .build()
-
-        Resource.Success(options)
-    }
-
-    override suspend fun getLastMessageFirestoreRecyclerOptions(uid: String): Resource<FirestoreRecyclerOptions<LastMessage>> =
-        withContext(Dispatchers.IO) {
-
-            val query = FirebaseFirestore.getInstance()
-                .collection(CHATS_COLLECTION)
-                .whereArrayContains("senderAddReceiverUid", uid)
-                .orderBy("date", Query.Direction.DESCENDING)
-
-            val options =
-                FirestoreRecyclerOptions.Builder<LastMessage>()
-                    .setQuery(query, LastMessage::class.java)
-                    .build()
-
-            Resource.Success(options)
-
-        }
-
-    private fun getChatThread(currentUid: String, otherEndUserUid: String) =
-        if (currentUid < otherEndUserUid)
-            currentUid + otherEndUserUid
-        else
-            otherEndUserUid + currentUid
 }

@@ -36,8 +36,6 @@ class CameraFragment : Fragment(R.layout.fragment_camera) {
     private lateinit var outputDirectory: File
     private lateinit var cameraExecutor: ExecutorService
 
-    private val args: CameraFragmentArgs by navArgs()
-
     companion object {
         const val TAG = "CameraFragmentLog"
         const val PERMISSION_CODE = 50
@@ -119,16 +117,17 @@ class CameraFragment : Fragment(R.layout.fragment_camera) {
                 override fun onImageSaved(
                     outputFileResults: ImageCapture.OutputFileResults
                 ) {
-//                    val savedUri = Uri.fromFile(photoFile)
-                    args.chatToCamera.uri = Uri.fromFile(photoFile)
-                    val bundle = Bundle().apply {
-                        putSerializable("chatToCamera", args.chatToCamera)
-                    }
-
-                    findNavController().navigate(
-                        R.id.action_cameraFragment_to_capturePreviewFragment,
-                        bundle
-                    )
+                    val savedUri = Uri.fromFile(photoFile)
+                    Toast.makeText(requireContext(), savedUri.toString(), Toast.LENGTH_SHORT).show()
+//                    args.chatToCamera.uri = Uri.fromFile(photoFile)
+//                    val bundle = Bundle().apply {
+//                        putSerializable("chatToCamera", args.chatToCamera)
+//                    }
+//
+//                    findNavController().navigate(
+//                        R.id.action_cameraFragment_to_capturePreviewFragment,
+//                        bundle
+//                    )
                 }
             })
 
