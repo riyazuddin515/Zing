@@ -3,12 +3,12 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@color/background"
-    android:elevation="13dp">
+    android:layout_margin="5dp"
+    app:cardCornerRadius="8dp"
+    android:elevation="20dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/rootLayout"
-        android:visibility="gone"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@color/background">
@@ -43,20 +43,29 @@
             android:background="@android:color/transparent"
             android:contentDescription="@string/trashimage"
             android:src="@drawable/ic_outline_delete"
-            app:layout_constraintBottom_toTopOf="@+id/ivPostImage"
+            app:layout_constraintBottom_toTopOf="@+id/postCard"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <ImageView
-            android:id="@+id/ivPostImage"
+        <androidx.cardview.widget.CardView
+            android:id="@+id/postCard"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:contentDescription="@string/postimage"
+            android:layout_margin="8dp"
+            app:cardCornerRadius="8dp"
+            android:elevation="10dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/CIVProfilePic" />
+            app:layout_constraintTop_toBottomOf="@+id/CIVProfilePic">
+
+            <ImageView
+                android:id="@+id/ivPostImage"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:contentDescription="@string/postimage" />
+
+        </androidx.cardview.widget.CardView>
 
         <ImageButton
             android:id="@+id/ibLike"
@@ -68,7 +77,7 @@
             android:contentDescription="@string/like"
             android:src="@drawable/ic_outline_like"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/ivPostImage" />
+            app:layout_constraintTop_toBottomOf="@+id/postCard" />
 
         <ImageButton
             android:id="@+id/ibComment"
@@ -87,11 +96,21 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="5dp"
-            android:layout_marginEnd="16dp"
+            android:textColor="@color/mainTextColor"
+            android:layout_marginBottom="5dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="@+id/ibLike"
+            app:layout_constraintTop_toBottomOf="@+id/ibLike"
+            app:layout_constraintVertical_bias="0.0" />
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/tvPostedOn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
             android:textColor="@color/mainTextColor"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="@+id/ibLike"
-            app:layout_constraintTop_toBottomOf="@+id/ibLike" />
+            app:layout_constraintTop_toTopOf="@+id/ibComment" />
 
         <com.google.android.material.textview.MaterialTextView
             android:id="@+id/tvCaption"

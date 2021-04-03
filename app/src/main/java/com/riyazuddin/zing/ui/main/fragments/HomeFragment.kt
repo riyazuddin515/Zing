@@ -3,6 +3,7 @@ package com.riyazuddin.zing.ui.main.fragments
 import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.isVisible
@@ -11,6 +12,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.paging.LoadState
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import com.riyazuddin.zing.R
@@ -23,6 +25,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+
 
 @AndroidEntryPoint
 class HomeFragment : BasePostFragment(R.layout.fragment_home) {
@@ -37,27 +40,7 @@ class HomeFragment : BasePostFragment(R.layout.fragment_home) {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-
-        binding = FragmentHomeBinding.inflate(inflater, container, false)
-        val view = binding.root
-
-        binding.toolbar.inflateMenu(R.menu.top_menu)
-        binding.toolbar.setOnMenuItemClickListener {
-            if (it.itemId == R.id.logOut) {
-                CustomDialog("Log Out", " Are you sure to logout of the app?").apply {
-                    setPositiveListener {
-                        Firebase.auth.signOut()
-                        Intent(requireActivity(), AuthActivity::class.java).apply {
-                            startActivity(this)
-                            requireActivity().finish()
-                        }
-                    }
-                }.show(parentFragmentManager, null)
-            }
-            true
-        }
-
-        return view
+        return binding.root
     }
 
     override val basePostViewModel: BasePostViewModel
@@ -68,9 +51,11 @@ class HomeFragment : BasePostFragment(R.layout.fragment_home) {
 
     private val viewModel: HomeViewModel by lazy { basePostViewModel as HomeViewModel }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
 
+        binding = FragmentHomeBinding.inflate(layoutInflater)
+        setupToolbar()
         setUpRecyclerView()
 
         lifecycleScope.launch {
@@ -78,6 +63,7 @@ class HomeFragment : BasePostFragment(R.layout.fragment_home) {
                 postAdapter.submitData(it)
             }
         }
+
         lifecycleScope.launch {
             postAdapter.loadStateFlow.collectLatest {
                 binding.progressBar.isVisible =
@@ -93,14 +79,33 @@ class HomeFragment : BasePostFragment(R.layout.fragment_home) {
                 )
             )
         }
-
     }
 
     private fun setUpRecyclerView() {
         binding.rvPost.apply {
             adapter = postAdapter
+            adapter?.stateRestorationPolicy =
+                RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
             layoutManager = LinearLayoutManager(requireContext())
             itemAnimator = null
+        }
+    }
+
+    private fun setupToolbar() {
+        binding.toolbar.inflateMenu(R.menu.top_menu)
+        binding.toolbar.setOnMenuItemClickListener {
+            if (it.itemId == R.id.logOut) {
+                CustomDialog("Log Out", " Are you sure to logout of the app?").apply {
+                    setPositiveListener {
+                        Firebase.auth.signOut()
+                        Intent(requireActivity(), AuthActivity::class.java).apply {
+                            startActivity(this)
+                            requireActivity().finish()
+                        }
+                    }
+                }.show(parentFragmentManager, null)
+            }
+            true
         }
     }
 

@@ -7,7 +7,6 @@ import com.google.firebase.firestore.QuerySnapshot
 import com.riyazuddin.zing.data.entities.Followers
 import com.riyazuddin.zing.data.entities.Following
 import com.riyazuddin.zing.data.entities.User
-import com.riyazuddin.zing.other.Constants.CHATS_COLLECTION
 import com.riyazuddin.zing.other.Constants.FOLLOWERS_COLLECTION
 import com.riyazuddin.zing.other.Constants.FOLLOWING_COLLECTION
 import com.riyazuddin.zing.other.Constants.USERS_COLLECTION
@@ -65,7 +64,7 @@ class DefaultAuthRepository : AuthRepository {
         return withContext(Dispatchers.IO) {
             safeCall {
                 val result =
-                    firestore.collection(CHATS_COLLECTION).whereEqualTo("username", query).get()
+                    firestore.collection(USERS_COLLECTION).whereEqualTo("username", query).get()
                         .await()
                 Resource.Success(result)
             }

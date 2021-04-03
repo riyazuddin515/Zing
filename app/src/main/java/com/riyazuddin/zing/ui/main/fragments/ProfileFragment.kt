@@ -1,12 +1,15 @@
 package com.riyazuddin.zing.ui.main.fragments
 
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.paging.LoadState
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.auth.FirebaseAuth
 import com.riyazuddin.zing.R
 import com.riyazuddin.zing.databinding.FragmentProfileBinding
@@ -41,13 +44,20 @@ open class ProfileFragment : BasePostFragment(R.layout.fragment_profile) {
     protected open val uid: String
         get() = FirebaseAuth.getInstance().uid!!
 
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        return binding.root
+    }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        binding = FragmentProfileBinding.bind(view)
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        binding = FragmentProfileBinding.inflate(layoutInflater)
 
         setUpRecyclerView()
-        subscribeToObservers()
 
         binding.btnToggleFollow.isVisible = false
         viewModel.loadProfile(uid)
@@ -64,6 +74,12 @@ open class ProfileFragment : BasePostFragment(R.layout.fragment_profile) {
                             it.append is LoadState.Loading
             }
         }
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        subscribeToObservers()
     }
 
     private fun subscribeToObservers() {
@@ -99,6 +115,7 @@ open class ProfileFragment : BasePostFragment(R.layout.fragment_profile) {
     private fun setUpRecyclerView() {
         binding.rvPostList.apply {
             adapter = postAdapter
+            adapter?.stateRestorationPolicy = RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
             layoutManager = LinearLayoutManager(requireContext())
             itemAnimator = null
         }

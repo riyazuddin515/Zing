@@ -9,7 +9,6 @@ import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.QuerySnapshot
 import com.google.firebase.storage.FirebaseStorage
 import com.riyazuddin.zing.data.entities.*
-import com.riyazuddin.zing.other.Constants.CHATS_COLLECTION
 import com.riyazuddin.zing.other.Constants.COMMENTS_COLLECTION
 import com.riyazuddin.zing.other.Constants.DEFAULT_PROFILE_PICTURE_URL
 import com.riyazuddin.zing.other.Constants.FOLLOWERS_COLLECTION
@@ -31,7 +30,6 @@ class DefaultMainRepository : MainRepository {
     private val usersCollection = firestore.collection(USERS_COLLECTION)
     private val postsCollection = firestore.collection(POSTS_COLLECTION)
     private val commentsCollection = firestore.collection(COMMENTS_COLLECTION)
-    private val chatsCollection = firestore.collection(CHATS_COLLECTION)
     private val followingCollection = firestore.collection(FOLLOWING_COLLECTION)
     private val followersCollection = firestore.collection(FOLLOWERS_COLLECTION)
     private val postLikesCollection = firestore.collection(POST_LIKES_COLLECTION)

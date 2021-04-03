@@ -7,18 +7,11 @@ object Constants {
     const val USERS_COLLECTION = "users"
     const val POSTS_COLLECTION = "posts"
     const val COMMENTS_COLLECTION = "comments"
-    const val CHATS_COLLECTION = "chats"
     const val FOLLOWING_COLLECTION = "following"
     const val FOLLOWERS_COLLECTION = "followers"
     const val POST_LIKES_COLLECTION = "postLikes"
 
     const val POST_PAGE_SIZE = 10
-
-    const val MESSAGES = "messages"
-
-    const val TEXT = "text"
-    const val IMAGE = "image"
-    const val VIDEO = "video"
 
     const val MIN_PASSWORD = 8
     const val MAX_PASSWORD = 15

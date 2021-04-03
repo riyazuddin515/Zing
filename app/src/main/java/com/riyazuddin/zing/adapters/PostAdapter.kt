@@ -1,7 +1,9 @@
 package com.riyazuddin.zing.adapters
 
-import android.view.LayoutInflater
-import android.view.ViewGroup
+import android.content.Context
+import android.view.*
+import android.view.GestureDetector.OnDoubleTapListener
+import android.widget.Toast
 import androidx.core.view.isVisible
 import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
@@ -12,9 +14,11 @@ import com.google.firebase.ktx.Firebase
 import com.riyazuddin.zing.R
 import com.riyazuddin.zing.data.entities.Post
 import com.riyazuddin.zing.databinding.ItemPostBinding
+import com.riyazuddin.zing.other.Utils.Companion.getTimeAgo
 import javax.inject.Inject
 
-class PostAdapter @Inject constructor(val glide: RequestManager) :
+
+class PostAdapter @Inject constructor(val glide: RequestManager, val applicationContext: Context) :
     PagingDataAdapter<Post, PostAdapter.PostViewHolder>(Companion) {
 
     class PostViewHolder(val binding: ItemPostBinding) : RecyclerView.ViewHolder(binding.root)
@@ -46,11 +50,13 @@ class PostAdapter @Inject constructor(val glide: RequestManager) :
             glide.load(post.imageUrl).into(ivPostImage)
             tvUsername.text = post.username
             val likeCount = post.likeCount
+            tvLikedBy.isVisible = likeCount != 0
             tvLikedBy.text = when {
                 likeCount <= 0 -> "No Likes"
                 likeCount == 1 -> "Liked by 1 Person"
                 else -> "Liked by $likeCount persons"
             }
+            tvPostedOn.text = getTimeAgo(post.date)
             if (post.caption.isEmpty())
                 tvCaption.isVisible = false
             else tvCaption.text = post.caption
@@ -90,6 +96,15 @@ class PostAdapter @Inject constructor(val glide: RequestManager) :
                     click(post)
                 }
             }
+
+            ivPostImage.setOnClickListener(object : DoubleClickListener() {
+                override fun onDoubleClick(v: View?) {
+                    onLikeClickListener?.let { click ->
+                        click(post, position)
+                    }
+                }
+            })
+
         }
     }
 
@@ -121,4 +136,20 @@ class PostAdapter @Inject constructor(val glide: RequestManager) :
     }
 
 
+    abstract class DoubleClickListener : View.OnClickListener {
+        var lastClickTime: Long = 0
+        override fun onClick(v: View?) {
+            val clickTime = System.currentTimeMillis()
+            if (clickTime - lastClickTime < DOUBLE_CLICK_TIME_DELTA) {
+                onDoubleClick(v)
+            }
+            lastClickTime = clickTime
+        }
+
+        abstract fun onDoubleClick(v: View?)
+
+        companion object {
+            private const val DOUBLE_CLICK_TIME_DELTA: Long = 300 //milliseconds
+        }
+    }
 }

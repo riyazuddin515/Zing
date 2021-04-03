@@ -5,7 +5,9 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:id="@+id/userItemCardView"
-    android:background="@color/background">
+    android:layout_margin="5dp"
+    app:cardCornerRadius="8dp"
+    android:elevation="20dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"

@@ -1,5 +1,10 @@
 package com.riyazuddin.zing.other
 
+import java.text.DateFormat
+import java.text.SimpleDateFormat
+import java.time.format.DateTimeFormatter
+import java.util.*
+
 class Utils {
     companion object {
         private const val SECOND_MILLIS = 1000
@@ -26,8 +31,11 @@ class Utils {
                 (diff / HOUR_MILLIS).toString() + " hours ago"
             } else if (diff < 48 * HOUR_MILLIS) {
                 "yesterday"
-            } else {
+            } else if (diff < 168 * HOUR_MILLIS) {
                 (diff / DAY_MILLIS).toString() + " days ago"
+            } else {
+                val s = SimpleDateFormat("dd MMM yyyy", Locale.US)
+                s.format(time)
             }
         }
 
