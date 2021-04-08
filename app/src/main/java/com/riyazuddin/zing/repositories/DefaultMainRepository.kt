@@ -1,6 +1,11 @@
 package com.riyazuddin.zing.repositories
 
 import android.net.Uri
+import com.algolia.search.client.ClientSearch
+import com.algolia.search.model.APIKey
+import com.algolia.search.model.ApplicationID
+import com.algolia.search.model.IndexName
+import com.algolia.search.model.response.ResponseSearch
 import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldValue
@@ -8,6 +13,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.QuerySnapshot
 import com.google.firebase.storage.FirebaseStorage
+import com.riyazuddin.zing.BuildConfig
 import com.riyazuddin.zing.data.entities.*
 import com.riyazuddin.zing.other.Constants.COMMENTS_COLLECTION
 import com.riyazuddin.zing.other.Constants.DEFAULT_PROFILE_PICTURE_URL
@@ -18,6 +24,7 @@ import com.riyazuddin.zing.other.Constants.POST_LIKES_COLLECTION
 import com.riyazuddin.zing.other.Constants.USERS_COLLECTION
 import com.riyazuddin.zing.other.Resource
 import com.riyazuddin.zing.other.safeCall
+import io.ktor.client.features.logging.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
@@ -46,19 +53,6 @@ class DefaultMainRepository : MainRepository {
             usersCollection.document(uid).update("postCount", FieldValue.increment(1)).await()
             postLikesCollection.document(postID).set(PostLikes()).await()
             Resource.Success(Any())
-        }
-    }
-
-    override suspend fun searchUser(query: String) = withContext(Dispatchers.IO) {
-        safeCall {
-            val usersList = usersCollection
-                .orderBy("username")
-                .startAt(query)
-                .endAt(query + "\uf8ff")
-                .get()
-                .await()
-                .toObjects(User::class.java)
-            Resource.Success(usersList)
         }
     }
 
@@ -385,6 +379,22 @@ class DefaultMainRepository : MainRepository {
                 val usersList = getUsers(followersList.followers).data!!
 
                 Resource.Success(usersList)
+            }
+        }
+
+    override suspend fun algoliaSearch(searchQuery: String): Resource<ResponseSearch> =
+        withContext(Dispatchers.IO) {
+            safeCall {
+                val client = ClientSearch(
+                    ApplicationID(BuildConfig.ALGOLIA_APP_ID),
+                    APIKey(BuildConfig.ALGOLIA_SEARCH_KEY),
+                    LogLevel.ALL
+                )
+                val index = client.initIndex(IndexName("user_search"))
+
+                val queryObj = com.algolia.search.model.search.Query(searchQuery)
+                val result = index.search(queryObj)
+                Resource.Success(result)
             }
         }
 }

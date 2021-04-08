@@ -1,6 +1,7 @@
 package com.riyazuddin.zing.repositories
 
 import android.net.Uri
+import com.algolia.search.model.response.ResponseSearch
 import com.google.firebase.firestore.QuerySnapshot
 import com.riyazuddin.zing.data.entities.*
 import com.riyazuddin.zing.other.Resource
@@ -8,8 +9,6 @@ import com.riyazuddin.zing.other.Resource
 interface MainRepository {
 
     suspend fun createPost(imageUri: Uri, caption: String): Resource<Any>
-
-    suspend fun searchUser(query: String): Resource<List<User>>
 
     suspend fun getUsers(uids: List<String>): Resource<List<User>>
 
@@ -48,4 +47,6 @@ interface MainRepository {
     suspend fun getPostLikes(postId: String): Resource<PostLikes>
 
     suspend fun getPostLikedUsers(postId: String): Resource<List<User>>
+
+    suspend fun algoliaSearch(searchQuery: String): Resource<ResponseSearch>
 }

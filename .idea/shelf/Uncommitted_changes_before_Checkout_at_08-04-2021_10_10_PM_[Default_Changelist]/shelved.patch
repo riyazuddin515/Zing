@@ -1,0 +1,295 @@
+Index: app/src/main/java/com/riyazuddin/zing/ui/main/viewmodels/SearchViewModel.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.riyazuddin.zing.ui.main.viewmodels\r\n\r\nimport androidx.hilt.lifecycle.ViewModelInject\r\nimport androidx.lifecycle.LiveData\r\nimport androidx.lifecycle.MutableLiveData\r\nimport androidx.lifecycle.ViewModel\r\nimport androidx.lifecycle.viewModelScope\r\nimport com.riyazuddin.zing.data.entities.User\r\nimport com.riyazuddin.zing.other.Event\r\nimport com.riyazuddin.zing.other.Resource\r\nimport com.riyazuddin.zing.repositories.MainRepository\r\nimport kotlinx.coroutines.CoroutineDispatcher\r\nimport kotlinx.coroutines.Dispatchers\r\nimport kotlinx.coroutines.launch\r\n\r\nclass SearchViewModel @ViewModelInject constructor(\r\n    private val repository: MainRepository,\r\n    private val dispatcher: CoroutineDispatcher = Dispatchers.Main\r\n) : ViewModel() {\r\n\r\n    private val _searchUserStatus = MutableLiveData<Event<Resource<List<User>>>>()\r\n    val searchUserStatus: LiveData<Event<Resource<List<User>>>> = _searchUserStatus\r\n\r\n    fun searchUser(query: String) {\r\n        if (query.isEmpty())\r\n            return\r\n\r\n        _searchUserStatus.postValue(Event(Resource.Loading()))\r\n        viewModelScope.launch {\r\n            val result = repository.searchUser(query)\r\n            _searchUserStatus.postValue(Event(result))\r\n        }\r\n    }\r\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/java/com/riyazuddin/zing/ui/main/viewmodels/SearchViewModel.kt	(revision ad4a4b207177699c613519b6b6d97f3a51fa76b3)
++++ app/src/main/java/com/riyazuddin/zing/ui/main/viewmodels/SearchViewModel.kt	(date 1617898867387)
+@@ -5,7 +5,7 @@
+ import androidx.lifecycle.MutableLiveData
+ import androidx.lifecycle.ViewModel
+ import androidx.lifecycle.viewModelScope
+-import com.riyazuddin.zing.data.entities.User
++import com.algolia.search.model.response.ResponseSearch
+ import com.riyazuddin.zing.other.Event
+ import com.riyazuddin.zing.other.Resource
+ import com.riyazuddin.zing.repositories.MainRepository
+@@ -18,17 +18,16 @@
+     private val dispatcher: CoroutineDispatcher = Dispatchers.Main
+ ) : ViewModel() {
+ 
+-    private val _searchUserStatus = MutableLiveData<Event<Resource<List<User>>>>()
+-    val searchUserStatus: LiveData<Event<Resource<List<User>>>> = _searchUserStatus
++    private val _algoliaSearchResult = MutableLiveData<Event<Resource<ResponseSearch>>>()
++    val algoliaSearchResult: LiveData<Event<Resource<ResponseSearch>>> = _algoliaSearchResult
+ 
+-    fun searchUser(query: String) {
++    fun search(query: String) {
+         if (query.isEmpty())
+             return
+-
+-        _searchUserStatus.postValue(Event(Resource.Loading()))
++        _algoliaSearchResult.postValue(Event(Resource.Loading()))
+         viewModelScope.launch {
+-            val result = repository.searchUser(query)
+-            _searchUserStatus.postValue(Event(result))
++            val result = repository.algoliaSearch(query)
++            _algoliaSearchResult.postValue(Event(result))
+         }
+     }
+ }
+\ No newline at end of file
+Index: app/src/main/java/com/riyazuddin/zing/ui/main/fragments/SearchFragment.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.riyazuddin.zing.ui.main.fragments\r\n\r\nimport android.os.Bundle\r\nimport android.view.View\r\nimport androidx.core.view.isVisible\r\nimport androidx.core.widget.addTextChangedListener\r\nimport androidx.fragment.app.Fragment\r\nimport androidx.fragment.app.viewModels\r\nimport androidx.lifecycle.lifecycleScope\r\nimport androidx.navigation.fragment.findNavController\r\nimport androidx.recyclerview.widget.LinearLayoutManager\r\nimport com.google.firebase.auth.ktx.auth\r\nimport com.google.firebase.ktx.Firebase\r\nimport com.riyazuddin.zing.R\r\nimport com.riyazuddin.zing.adapters.UserAdapter\r\nimport com.riyazuddin.zing.databinding.FragmentSearchBinding\r\nimport com.riyazuddin.zing.other.Constants.SEARCH_TIME_DELAY\r\nimport com.riyazuddin.zing.other.EventObserver\r\nimport com.riyazuddin.zing.ui.main.viewmodels.SearchViewModel\r\nimport dagger.hilt.android.AndroidEntryPoint\r\nimport kotlinx.coroutines.Job\r\nimport kotlinx.coroutines.delay\r\nimport kotlinx.coroutines.launch\r\nimport javax.inject.Inject\r\n\r\n@AndroidEntryPoint\r\nclass SearchFragment : Fragment(R.layout.fragment_search) {\r\n\r\n    private lateinit var binding: FragmentSearchBinding\r\n\r\n    @Inject\r\n    lateinit var userAdapter: UserAdapter\r\n    private val viewModel: SearchViewModel by viewModels()\r\n\r\n    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {\r\n        super.onViewCreated(view, savedInstanceState)\r\n        binding = FragmentSearchBinding.bind(view)\r\n\r\n        setUpRecyclerView()\r\n        subscribeToObservers()\r\n\r\n        var job: Job? = null\r\n        binding.TIESearch.addTextChangedListener { eiditable ->\r\n            job?.cancel()\r\n            job = lifecycleScope.launch {\r\n                delay(SEARCH_TIME_DELAY)\r\n                eiditable?.let {\r\n                    viewModel.searchUser(it.toString())\r\n                }\r\n            }\r\n        }\r\n\r\n        userAdapter.setOnUserClickListener { user ->\r\n            if (Firebase.auth.uid != user.uid) {\r\n                findNavController().navigate(\r\n                    SearchFragmentDirections.globalActionToOthersProfileFragment(\r\n                        user.uid\r\n                    )\r\n                )\r\n            } else {\r\n                findNavController().navigate(R.id.profileFragment)\r\n            }\r\n\r\n        }\r\n    }\r\n\r\n    private fun subscribeToObservers() {\r\n        viewModel.searchUserStatus.observe(viewLifecycleOwner, EventObserver(\r\n            onError = { binding.progressBar.isVisible = false },\r\n            onLoading = { binding.progressBar.isVisible = true }\r\n        ) { users ->\r\n            binding.progressBar.isVisible = false\r\n            userAdapter.users = users\r\n        })\r\n    }\r\n\r\n    private fun setUpRecyclerView() {\r\n        binding.rvUsers.apply {\r\n            adapter = userAdapter\r\n            layoutManager = LinearLayoutManager(requireContext())\r\n            itemAnimator = null\r\n        }\r\n    }\r\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/java/com/riyazuddin/zing/ui/main/fragments/SearchFragment.kt	(revision ad4a4b207177699c613519b6b6d97f3a51fa76b3)
++++ app/src/main/java/com/riyazuddin/zing/ui/main/fragments/SearchFragment.kt	(date 1617898867387)
+@@ -1,6 +1,7 @@
+ package com.riyazuddin.zing.ui.main.fragments
+ 
+ import android.os.Bundle
++import android.util.Log
+ import android.view.View
+ import androidx.core.view.isVisible
+ import androidx.core.widget.addTextChangedListener
+@@ -9,10 +10,12 @@
+ import androidx.lifecycle.lifecycleScope
+ import androidx.navigation.fragment.findNavController
+ import androidx.recyclerview.widget.LinearLayoutManager
++import com.algolia.instantsearch.helper.android.list.autoScrollToStart
+ import com.google.firebase.auth.ktx.auth
+ import com.google.firebase.ktx.Firebase
+ import com.riyazuddin.zing.R
+ import com.riyazuddin.zing.adapters.UserAdapter
++import com.riyazuddin.zing.data.entities.User
+ import com.riyazuddin.zing.databinding.FragmentSearchBinding
+ import com.riyazuddin.zing.other.Constants.SEARCH_TIME_DELAY
+ import com.riyazuddin.zing.other.EventObserver
+@@ -21,6 +24,7 @@
+ import kotlinx.coroutines.Job
+ import kotlinx.coroutines.delay
+ import kotlinx.coroutines.launch
++import kotlinx.serialization.json.jsonPrimitive
+ import javax.inject.Inject
+ 
+ @AndroidEntryPoint
+@@ -45,7 +49,8 @@
+             job = lifecycleScope.launch {
+                 delay(SEARCH_TIME_DELAY)
+                 eiditable?.let {
+-                    viewModel.searchUser(it.toString())
++//                    viewModel.searchUser(it.toString())
++                    viewModel.search(it.toString())
+                 }
+             }
+         }
+@@ -65,10 +70,26 @@
+     }
+ 
+     private fun subscribeToObservers() {
+-        viewModel.searchUserStatus.observe(viewLifecycleOwner, EventObserver(
++        viewModel.algoliaSearchResult.observe(viewLifecycleOwner, EventObserver(
+             onError = { binding.progressBar.isVisible = false },
+             onLoading = { binding.progressBar.isVisible = true }
+-        ) { users ->
++        ) {
++            val hits = it.hits
++            val users = mutableListOf<User>()
++            hits.forEach { hit ->
++                val user = User(
++                    name = hit.json.getValue("name").toString().replace("\"",""),
++                    uid = hit.json.getValue("uid").toString().replace("\"",""),
++                    username = hit.json.getValue("username").toString().replace("\"",""),
++                    profilePicUrl = hit.json.getValue("profilePicUrl").toString().replace("\"",""),
++                    bio = hit.json.getValue("bio").toString().replace("\"",""),
++                    followingCount = hit.json.getValue("followingCount").toString().toInt(),
++                    followersCount = hit.json.getValue("followersCount").toString().toInt(),
++                    postCount = hit.json.getValue("postCount").toString().toInt()
++                )
++                users.add(user)
++                Log.i(TAG, "subscribeToObservers: ${hit.json}")
++            }
+             binding.progressBar.isVisible = false
+             userAdapter.users = users
+         })
+@@ -81,4 +102,8 @@
+             itemAnimator = null
+         }
+     }
++
++    companion object{
++        const val TAG = "SearchFragment"
++    }
+ }
+\ No newline at end of file
+Index: .gitignore
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>*.iml\r\n.gradle\r\n/local.properties\r\n/.idea/caches\r\n/.idea/libraries\r\n/.idea/modules.xml\r\n/.idea/workspace.xml\r\n/.idea/navEditor.xml\r\n/.idea/assetWizardSettings.xml\r\n.DS_Store\r\n/build\r\n/captures\r\n.externalNativeBuild\r\n.cxx\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- .gitignore	(revision ad4a4b207177699c613519b6b6d97f3a51fa76b3)
++++ .gitignore	(date 1617898867382)
+@@ -12,3 +12,4 @@
+ /captures
+ .externalNativeBuild
+ .cxx
++local.properties
+Index: app/src/main/java/com/riyazuddin/zing/repositories/DefaultMainRepository.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.riyazuddin.zing.repositories\r\n\r\nimport android.net.Uri\r\nimport com.google.firebase.auth.EmailAuthProvider\r\nimport com.google.firebase.auth.FirebaseAuth\r\nimport com.google.firebase.firestore.FieldValue\r\nimport com.google.firebase.firestore.FirebaseFirestore\r\nimport com.google.firebase.firestore.Query\r\nimport com.google.firebase.firestore.QuerySnapshot\r\nimport com.google.firebase.storage.FirebaseStorage\r\nimport com.riyazuddin.zing.data.entities.*\r\nimport com.riyazuddin.zing.other.Constants.COMMENTS_COLLECTION\r\nimport com.riyazuddin.zing.other.Constants.DEFAULT_PROFILE_PICTURE_URL\r\nimport com.riyazuddin.zing.other.Constants.FOLLOWERS_COLLECTION\r\nimport com.riyazuddin.zing.other.Constants.FOLLOWING_COLLECTION\r\nimport com.riyazuddin.zing.other.Constants.POSTS_COLLECTION\r\nimport com.riyazuddin.zing.other.Constants.POST_LIKES_COLLECTION\r\nimport com.riyazuddin.zing.other.Constants.USERS_COLLECTION\r\nimport com.riyazuddin.zing.other.Resource\r\nimport com.riyazuddin.zing.other.safeCall\r\nimport kotlinx.coroutines.Dispatchers\r\nimport kotlinx.coroutines.tasks.await\r\nimport kotlinx.coroutines.withContext\r\nimport java.util.*\r\n\r\nclass DefaultMainRepository : MainRepository {\r\n\r\n    private val auth = FirebaseAuth.getInstance()\r\n    private val firestore = FirebaseFirestore.getInstance()\r\n    private val usersCollection = firestore.collection(USERS_COLLECTION)\r\n    private val postsCollection = firestore.collection(POSTS_COLLECTION)\r\n    private val commentsCollection = firestore.collection(COMMENTS_COLLECTION)\r\n    private val followingCollection = firestore.collection(FOLLOWING_COLLECTION)\r\n    private val followersCollection = firestore.collection(FOLLOWERS_COLLECTION)\r\n    private val postLikesCollection = firestore.collection(POST_LIKES_COLLECTION)\r\n    private val storage = FirebaseStorage.getInstance()\r\n\r\n    override suspend fun createPost(imageUri: Uri, caption: String) = withContext(Dispatchers.IO) {\r\n        safeCall {\r\n            val uid = auth.uid!!\r\n            val postID = UUID.randomUUID().toString()\r\n            val postDownloadUrl = storage.reference.child(\"posts/$uid/$postID\").putFile(imageUri)\r\n                .await().metadata?.reference?.downloadUrl?.await().toString()\r\n            val post = Post(postID, uid, System.currentTimeMillis(), postDownloadUrl, caption)\r\n            postsCollection.document(postID).set(post).await()\r\n            usersCollection.document(uid).update(\"postCount\", FieldValue.increment(1)).await()\r\n            postLikesCollection.document(postID).set(PostLikes()).await()\r\n            Resource.Success(Any())\r\n        }\r\n    }\r\n\r\n    override suspend fun searchUser(query: String) = withContext(Dispatchers.IO) {\r\n        safeCall {\r\n            val usersList = usersCollection\r\n                .orderBy(\"username\")\r\n                .startAt(query)\r\n                .endAt(query + \"\\uf8ff\")\r\n                .get()\r\n                .await()\r\n                .toObjects(User::class.java)\r\n            Resource.Success(usersList)\r\n        }\r\n    }\r\n\r\n    override suspend fun getUserProfile(uid: String) = withContext(Dispatchers.IO) {\r\n        safeCall {\r\n            val user = usersCollection.document(uid).get().await().toObject(User::class.java)\r\n                ?: throw IllegalStateException()\r\n\r\n            val currentUid = auth.uid!!\r\n            val currentUserFollowing =\r\n                followingCollection.document(currentUid).get().await()\r\n                    .toObject(Following::class.java)\r\n                    ?: throw IllegalStateException()\r\n\r\n            user.isFollowing = uid in currentUserFollowing.following\r\n            Resource.Success(user)\r\n        }\r\n    }\r\n\r\n    override suspend fun getFollowing(uid: String) = withContext(Dispatchers.IO) {\r\n        safeCall {\r\n            val following =\r\n                followingCollection.document(uid).get().await().toObject(Following::class.java)\r\n                    ?: throw IllegalStateException()\r\n            Resource.Success(following)\r\n        }\r\n    }\r\n\r\n    override suspend fun getFollowers(uid: String) = withContext(Dispatchers.IO) {\r\n        safeCall {\r\n            val followers =\r\n                followersCollection.document(uid).get().await().toObject(Followers::class.java)\r\n                    ?: throw IllegalStateException()\r\n            Resource.Success(followers)\r\n        }\r\n    }\r\n\r\n    override suspend fun getPostLikes(postId: String) = withContext(Dispatchers.IO) {\r\n        safeCall {\r\n            val postLikes =\r\n                postLikesCollection.document(postId).get().await().toObject(PostLikes::class.java)\r\n                    ?: throw IllegalStateException()\r\n            Resource.Success(postLikes)\r\n        }\r\n    }\r\n\r\n    override suspend fun getPostLikedUsers(postId: String): Resource<List<User>> =\r\n        withContext(Dispatchers.IO) {\r\n            safeCall {\r\n                val postLikes = getPostLikes(postId).data!!\r\n                val usersList = getUsers(postLikes.likedBy).data!!\r\n                Resource.Success(usersList)\r\n            }\r\n        }\r\n\r\n    override suspend fun getUsers(uids: List<String>) = withContext(Dispatchers.IO) {\r\n        safeCall {\r\n            val chunks = uids.chunked(10)\r\n            val resultList = mutableListOf<User>()\r\n            chunks.forEach { chunk ->\r\n                val usersList =\r\n                    usersCollection.whereIn(\"uid\", chunk).orderBy(\"username\").get().await()\r\n                        .toObjects(User::class.java)\r\n                resultList.addAll(usersList)\r\n            }\r\n\r\n            Resource.Success(resultList.toList())\r\n        }\r\n    }\r\n\r\n    override suspend fun getPostForProfile(uid: String) = withContext(Dispatchers.IO) {\r\n        safeCall {\r\n            val posts = postsCollection\r\n                .whereEqualTo(\"postedBy\", uid)\r\n                .orderBy(\"date\", Query.Direction.DESCENDING)\r\n                .get()\r\n                .await()\r\n                .toObjects(Post::class.java)\r\n                .onEach { post ->\r\n                    val user = getUserProfile(uid).data!!\r\n                    post.username = user.username\r\n                    post.userProfilePic = user.profilePicUrl\r\n                    post.isLiked = uid in getPostLikes(post.postId).data!!.likedBy\r\n                }\r\n            Resource.Success(posts)\r\n        }\r\n    }\r\n\r\n    override suspend fun toggleLikeForPost(post: Post) = withContext(Dispatchers.IO) {\r\n        safeCall {\r\n            var isLiked = false\r\n            firestore.runTransaction { transition ->\r\n                val uid = auth.uid!!\r\n\r\n                val currentLikes = transition.get(postLikesCollection.document(post.postId))\r\n                    .toObject(PostLikes::class.java)?.likedBy ?: listOf()\r\n\r\n                if (uid in currentLikes) {\r\n                    transition.update(\r\n                        postLikesCollection.document(post.postId),\r\n                        \"likedBy\",\r\n                        currentLikes - uid\r\n                    )\r\n                    transition.update(\r\n                        postsCollection.document(post.postId),\r\n                        \"likeCount\", FieldValue.increment(-1)\r\n                    )\r\n                } else {\r\n                    isLiked = true\r\n                    transition.update(\r\n                        postLikesCollection.document(post.postId),\r\n                        \"likedBy\",\r\n                        currentLikes + uid\r\n                    )\r\n                    transition.update(\r\n                        postsCollection.document(post.postId),\r\n                        \"likeCount\", FieldValue.increment(1)\r\n                    )\r\n                }\r\n            }.await()\r\n            Resource.Success(isLiked)\r\n        }\r\n    }\r\n\r\n    override suspend fun deletePost(post: Post) = withContext(Dispatchers.IO) {\r\n        safeCall {\r\n            postsCollection.document(post.postId).delete().await()\r\n            storage.getReferenceFromUrl(post.imageUrl).delete().await()\r\n            usersCollection.document(post.postedBy).update(\"postCount\", FieldValue.increment(-1))\r\n                .await()\r\n            Resource.Success(post)\r\n        }\r\n    }\r\n\r\n    override suspend fun toggleFollowForUser(uid: String) = withContext(Dispatchers.IO) {\r\n        safeCall {\r\n            var isFollowing = false\r\n            firestore.runTransaction { transition ->\r\n                val currentUid = auth.uid!!\r\n\r\n                val currentUserFollowing = transition.get(followingCollection.document(currentUid))\r\n                    .toObject(Following::class.java)!!\r\n                val otherUserFollowers = transition.get(followersCollection.document(currentUid))\r\n                    .toObject(Followers::class.java)!!\r\n\r\n                isFollowing = uid in currentUserFollowing.following\r\n\r\n\r\n                if (isFollowing) {\r\n\r\n                    transition.update(\r\n                        followingCollection.document(currentUid),\r\n                        \"following\",\r\n                        currentUserFollowing.following.minus(uid)\r\n                    )\r\n                    transition.update(\r\n                        followersCollection.document(uid),\r\n                        \"followers\",\r\n                        otherUserFollowers.followers.minus(currentUid)\r\n                    )\r\n\r\n                    transition.update(\r\n                        usersCollection.document(currentUid),\r\n                        \"followingCount\",\r\n                        FieldValue.increment(-1)\r\n                    )\r\n                    transition.update(\r\n                        usersCollection.document(uid),\r\n                        \"followersCount\",\r\n                        FieldValue.increment(-1)\r\n                    )\r\n                } else {\r\n\r\n                    transition.update(\r\n                        followingCollection.document(currentUid),\r\n                        \"following\",\r\n                        currentUserFollowing.following.plus(uid)\r\n                    )\r\n                    transition.update(\r\n                        followersCollection.document(uid),\r\n                        \"followers\",\r\n                        otherUserFollowers.followers.plus(currentUid)\r\n                    )\r\n\r\n                    transition.update(\r\n                        usersCollection.document(currentUid),\r\n                        \"followingCount\",\r\n                        FieldValue.increment(1)\r\n                    )\r\n                    transition.update(\r\n                        usersCollection.document(uid),\r\n                        \"followersCount\",\r\n                        FieldValue.increment(1)\r\n                    )\r\n                }\r\n\r\n            }.await()\r\n            Resource.Success(!isFollowing)\r\n        }\r\n    }\r\n\r\n    override suspend fun getPostForFollows() = withContext(Dispatchers.IO) {\r\n        safeCall {\r\n            val uid = auth.uid!!\r\n            val followsList = getFollowing(uid).data!!.following\r\n            val allPosts = postsCollection.whereIn(\"postedBy\", followsList)\r\n                .orderBy(\"date\", Query.Direction.DESCENDING)\r\n                .get()\r\n                .await()\r\n                .toObjects(Post::class.java)\r\n                .onEach { post ->\r\n                    val user = getUserProfile(post.postedBy).data!!\r\n                    post.username = user.username\r\n                    post.userProfilePic = user.profilePicUrl\r\n                    post.isLiked = uid in getPostLikes(post.postId).data!!.likedBy\r\n                }\r\n            Resource.Success(allPosts)\r\n        }\r\n    }\r\n\r\n    override suspend fun createComment(commentText: String, postId: String) =\r\n        withContext(Dispatchers.IO) {\r\n            safeCall {\r\n                val uid = auth.uid!!\r\n                val commentId = UUID.randomUUID().toString()\r\n                val date = System.currentTimeMillis()\r\n                val comment = Comment(commentId, commentText, postId, date, uid)\r\n                commentsCollection.document(commentId).set(comment).await()\r\n                Resource.Success(comment)\r\n            }\r\n        }\r\n\r\n    override suspend fun getPostComments(postId: String) = withContext(Dispatchers.IO) {\r\n        safeCall {\r\n            val comments = commentsCollection.whereEqualTo(\"postId\", postId)\r\n                .orderBy(\"date\", Query.Direction.DESCENDING)\r\n                .get()\r\n                .await()\r\n                .toObjects(Comment::class.java)\r\n                .onEach { comment ->\r\n                    val user = getUserProfile(comment.commentedBy).data!!\r\n                    comment.username = user.username\r\n                    comment.userProfilePic = user.profilePicUrl\r\n                }\r\n            Resource.Success(comments)\r\n        }\r\n    }\r\n\r\n    override suspend fun updateProfilePic(uid: String, imageUri: Uri) =\r\n        withContext(Dispatchers.IO) {\r\n            val storageRef = storage.reference.child(\"profilePics/$uid\")\r\n            val user = getUserProfile(uid).data!!\r\n            if (user.profilePicUrl != DEFAULT_PROFILE_PICTURE_URL) {\r\n                storage.getReferenceFromUrl(user.profilePicUrl).delete().await()\r\n            }\r\n            storageRef.putFile(imageUri).await().metadata?.reference?.downloadUrl?.await()\r\n                .toString()\r\n        }\r\n\r\n    override suspend fun updateProfile(updateProfile: UpdateProfile, imageUri: Uri?) =\r\n        withContext(Dispatchers.IO) {\r\n            safeCall {\r\n                val imageDownloadUrl = imageUri?.let {\r\n                    updateProfilePic(updateProfile.uidToUpdate, it)\r\n                }\r\n\r\n                val map = mutableMapOf(\r\n                    \"name\" to updateProfile.name,\r\n                    \"username\" to updateProfile.username,\r\n                    \"bio\" to updateProfile.bio\r\n                )\r\n                imageDownloadUrl?.let {\r\n                    map[\"profilePicUrl\"] = it\r\n                }\r\n\r\n                usersCollection.document(updateProfile.uidToUpdate).update(map.toMap()).await()\r\n                Resource.Success(Any())\r\n            }\r\n        }\r\n\r\n    override suspend fun searchUsername(query: String): Resource<QuerySnapshot> {\r\n        return withContext(Dispatchers.IO) {\r\n            safeCall {\r\n                val result = usersCollection.whereEqualTo(\"username\", query).get().await()\r\n                Resource.Success(result)\r\n            }\r\n        }\r\n    }\r\n\r\n    override suspend fun verifyAccount(currentPassword: String): Resource<Any> =\r\n        withContext(Dispatchers.IO) {\r\n            safeCall {\r\n                val currentUser = auth.currentUser!!\r\n                val email = currentUser.email.toString()\r\n                val credential = EmailAuthProvider.getCredential(email, currentPassword)\r\n                currentUser.reauthenticate(credential).await()\r\n                Resource.Success(\"Verification Success\")\r\n            }\r\n        }\r\n\r\n    override suspend fun changePassword(\r\n        newPassword: String\r\n    ): Resource<Any> = withContext(Dispatchers.IO) {\r\n        safeCall {\r\n            val currentUser = auth.currentUser!!\r\n            currentUser.updatePassword(newPassword).await()\r\n            Resource.Success(\"Password Changed Successfully\")\r\n        }\r\n    }\r\n\r\n    override suspend fun getFollowersList(uid: String): Resource<List<User>> =\r\n        withContext(Dispatchers.IO) {\r\n            safeCall {\r\n\r\n                val followersList = followersCollection.document(uid)\r\n                    .get()\r\n                    .await()\r\n                    .toObject(Followers::class.java)!!\r\n\r\n                if (followersList.followers.contains(auth.uid)) {\r\n                    followersList.followers -= auth.uid!!\r\n                }\r\n\r\n                val usersList = getUsers(followersList.followers).data!!\r\n\r\n                Resource.Success(usersList)\r\n            }\r\n        }\r\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/java/com/riyazuddin/zing/repositories/DefaultMainRepository.kt	(revision ad4a4b207177699c613519b6b6d97f3a51fa76b3)
++++ app/src/main/java/com/riyazuddin/zing/repositories/DefaultMainRepository.kt	(date 1617898867384)
+@@ -1,6 +1,11 @@
+ package com.riyazuddin.zing.repositories
+ 
+ import android.net.Uri
++import com.algolia.search.client.ClientSearch
++import com.algolia.search.model.APIKey
++import com.algolia.search.model.ApplicationID
++import com.algolia.search.model.IndexName
++import com.algolia.search.model.response.ResponseSearch
+ import com.google.firebase.auth.EmailAuthProvider
+ import com.google.firebase.auth.FirebaseAuth
+ import com.google.firebase.firestore.FieldValue
+@@ -8,6 +13,7 @@
+ import com.google.firebase.firestore.Query
+ import com.google.firebase.firestore.QuerySnapshot
+ import com.google.firebase.storage.FirebaseStorage
++import com.riyazuddin.zing.BuildConfig
+ import com.riyazuddin.zing.data.entities.*
+ import com.riyazuddin.zing.other.Constants.COMMENTS_COLLECTION
+ import com.riyazuddin.zing.other.Constants.DEFAULT_PROFILE_PICTURE_URL
+@@ -18,6 +24,7 @@
+ import com.riyazuddin.zing.other.Constants.USERS_COLLECTION
+ import com.riyazuddin.zing.other.Resource
+ import com.riyazuddin.zing.other.safeCall
++import io.ktor.client.features.logging.*
+ import kotlinx.coroutines.Dispatchers
+ import kotlinx.coroutines.tasks.await
+ import kotlinx.coroutines.withContext
+@@ -49,19 +56,6 @@
+         }
+     }
+ 
+-    override suspend fun searchUser(query: String) = withContext(Dispatchers.IO) {
+-        safeCall {
+-            val usersList = usersCollection
+-                .orderBy("username")
+-                .startAt(query)
+-                .endAt(query + "\uf8ff")
+-                .get()
+-                .await()
+-                .toObjects(User::class.java)
+-            Resource.Success(usersList)
+-        }
+-    }
+-
+     override suspend fun getUserProfile(uid: String) = withContext(Dispatchers.IO) {
+         safeCall {
+             val user = usersCollection.document(uid).get().await().toObject(User::class.java)
+@@ -387,4 +381,20 @@
+                 Resource.Success(usersList)
+             }
+         }
++
++    override suspend fun algoliaSearch(searchQuery: String): Resource<ResponseSearch> =
++        withContext(Dispatchers.IO) {
++            safeCall {
++                val client = ClientSearch(
++                    ApplicationID(BuildConfig.ALGOLIA_APP_ID),
++                    APIKey(BuildConfig.ALGOLIA_SEARCH_KEY),
++                    LogLevel.ALL
++                )
++                val index = client.initIndex(IndexName("user_search"))
++
++                val queryObj = com.algolia.search.model.search.Query(searchQuery)
++                val result = index.search(queryObj)
++                Resource.Success(result)
++            }
++        }
+ }
+\ No newline at end of file
+Index: app/src/main/java/com/riyazuddin/zing/repositories/MainRepository.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.riyazuddin.zing.repositories\r\n\r\nimport android.net.Uri\r\nimport com.google.firebase.firestore.QuerySnapshot\r\nimport com.riyazuddin.zing.data.entities.*\r\nimport com.riyazuddin.zing.other.Resource\r\n\r\ninterface MainRepository {\r\n\r\n    suspend fun createPost(imageUri: Uri, caption: String): Resource<Any>\r\n\r\n    suspend fun searchUser(query: String): Resource<List<User>>\r\n\r\n    suspend fun getUsers(uids: List<String>): Resource<List<User>>\r\n\r\n    suspend fun getUserProfile(uid: String): Resource<User>\r\n\r\n    suspend fun getPostForProfile(uid: String): Resource<List<Post>>\r\n\r\n    suspend fun toggleLikeForPost(post: Post): Resource<Boolean>\r\n\r\n    suspend fun deletePost(post: Post): Resource<Post>\r\n\r\n    suspend fun toggleFollowForUser(uid: String): Resource<Boolean>\r\n\r\n    suspend fun getPostForFollows(): Resource<List<Post>>\r\n\r\n    suspend fun createComment(commentText: String, postId: String): Resource<Comment>\r\n\r\n    suspend fun getPostComments(postId: String): Resource<List<Comment>>\r\n\r\n    suspend fun updateProfile(updateProfile: UpdateProfile, imageUri: Uri? = null): Resource<Any>\r\n\r\n    suspend fun updateProfilePic(uid: String, imageUri: Uri): String\r\n\r\n    suspend fun searchUsername(query: String): Resource<QuerySnapshot>\r\n\r\n    suspend fun verifyAccount(currentPassword: String): Resource<Any>\r\n\r\n    suspend fun changePassword(newPassword: String): Resource<Any>\r\n\r\n    suspend fun getFollowersList(uid: String): Resource<List<User>>\r\n\r\n    suspend fun getFollowing(uid: String): Resource<Following>\r\n\r\n    suspend fun getFollowers(uid: String): Resource<Followers>\r\n\r\n    suspend fun getPostLikes(postId: String): Resource<PostLikes>\r\n\r\n    suspend fun getPostLikedUsers(postId: String): Resource<List<User>>\r\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/java/com/riyazuddin/zing/repositories/MainRepository.kt	(revision ad4a4b207177699c613519b6b6d97f3a51fa76b3)
++++ app/src/main/java/com/riyazuddin/zing/repositories/MainRepository.kt	(date 1617898867385)
+@@ -1,6 +1,7 @@
+ package com.riyazuddin.zing.repositories
+ 
+ import android.net.Uri
++import com.algolia.search.model.response.ResponseSearch
+ import com.google.firebase.firestore.QuerySnapshot
+ import com.riyazuddin.zing.data.entities.*
+ import com.riyazuddin.zing.other.Resource
+@@ -9,8 +10,6 @@
+ 
+     suspend fun createPost(imageUri: Uri, caption: String): Resource<Any>
+ 
+-    suspend fun searchUser(query: String): Resource<List<User>>
+-
+     suspend fun getUsers(uids: List<String>): Resource<List<User>>
+ 
+     suspend fun getUserProfile(uid: String): Resource<User>
+@@ -48,4 +47,6 @@
+     suspend fun getPostLikes(postId: String): Resource<PostLikes>
+ 
+     suspend fun getPostLikedUsers(postId: String): Resource<List<User>>
++
++    suspend fun algoliaSearch(searchQuery: String): Resource<ResponseSearch>
+ }
+\ No newline at end of file
+Index: app/build.gradle
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>apply plugin: 'com.android.application'\r\napply plugin: 'kotlin-android'\r\napply plugin: 'kotlin-kapt'\r\napply plugin: \"androidx.navigation.safeargs.kotlin\"\r\napply plugin: 'dagger.hilt.android.plugin'\r\napply plugin: 'com.google.gms.google-services'\r\n\r\nandroid {\r\n    compileSdkVersion 30\r\n    buildToolsVersion '30.0.3'\r\n\r\n    defaultConfig {\r\n        applicationId \"com.riyazuddin.zing\"\r\n        minSdkVersion 21\r\n        targetSdkVersion 30\r\n        versionCode 1\r\n        versionName \"1.0\"\r\n\r\n        testInstrumentationRunner \"androidx.test.runner.AndroidJUnitRunner\"\r\n    }\r\n    buildTypes {\r\n        release {\r\n            minifyEnabled false\r\n            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'\r\n        }\r\n    }\r\n    buildFeatures {\r\n        viewBinding true\r\n    }\r\n    buildTypes {\r\n        release {\r\n            minifyEnabled false\r\n            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'\r\n        }\r\n    }\r\n    compileOptions {\r\n        sourceCompatibility JavaVersion.VERSION_1_8\r\n        targetCompatibility JavaVersion.VERSION_1_8\r\n    }\r\n    kotlinOptions {\r\n        jvmTarget = JavaVersion.VERSION_1_8.toString()\r\n    }\r\n}\r\n\r\ndependencies {\r\n    implementation fileTree(dir: \"libs\", include: [\"*.jar\"])\r\n//    implementation \"org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version\"\r\n    implementation 'androidx.core:core-ktx:1.3.2'\r\n    implementation 'androidx.appcompat:appcompat:1.2.0'\r\n    implementation 'androidx.constraintlayout:constraintlayout:2.0.4'\r\n    testImplementation 'junit:junit:4.13.1'\r\n    androidTestImplementation 'androidx.test.ext:junit:1.1.2'\r\n    androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'\r\n\r\n    // Material Design\r\n    implementation 'com.google.android.material:material:1.3.0-beta01'\r\n\r\n    // Architectural Components\r\n    implementation \"androidx.lifecycle:lifecycle-viewmodel-ktx:2.2.0\"\r\n\r\n    def paging_version = \"3.0.0-alpha08\"\r\n    implementation \"androidx.paging:paging-runtime-ktx:$paging_version\"\r\n\r\n    // Lifecycle\r\n    implementation \"androidx.lifecycle:lifecycle-extensions:2.2.0\"\r\n    implementation \"androidx.lifecycle:lifecycle-livedata-ktx:2.2.0\"\r\n    implementation \"androidx.lifecycle:lifecycle-runtime:2.2.0\"\r\n    implementation \"androidx.lifecycle:lifecycle-runtime-ktx:2.2.0\"\r\n\r\n    // Coroutines\r\n    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.1'\r\n    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.4.1'\r\n\r\n    // Coroutine Lifecycle Scopes\r\n    implementation \"androidx.lifecycle:lifecycle-viewmodel-ktx:2.2.0\"\r\n    implementation \"androidx.lifecycle:lifecycle-runtime-ktx:2.2.0\"\r\n\r\n    // Navigation Component\r\n    implementation \"androidx.navigation:navigation-fragment-ktx:2.3.2\"\r\n    implementation \"androidx.navigation:navigation-ui-ktx:2.3.2\"\r\n\r\n    // Glide\r\n    implementation 'com.github.bumptech.glide:glide:4.11.0'\r\n    kapt 'com.github.bumptech.glide:compiler:4.11.0'\r\n\r\n    // Activity KTX for viewModels()\r\n    implementation \"androidx.activity:activity-ktx:1.2.0-rc01\"\r\n    implementation \"androidx.fragment:fragment-ktx:1.3.0-rc01\"\r\n\r\n    //Dagger - Hilt\r\n    implementation \"com.google.dagger:hilt-android:2.28-alpha\"\r\n    kapt \"com.google.dagger:hilt-android-compiler:2.28-alpha\"\r\n    implementation \"androidx.hilt:hilt-lifecycle-viewmodel:1.0.0-alpha02\"\r\n    kapt \"androidx.hilt:hilt-compiler:1.0.0-alpha02\"\r\n\r\n    //Firebase BoM\r\n    implementation platform('com.google.firebase:firebase-bom:26.1.0')\r\n    implementation 'com.google.firebase:firebase-analytics-ktx'\r\n    implementation 'com.google.firebase:firebase-auth-ktx'\r\n    implementation 'com.google.firebase:firebase-firestore'\r\n    implementation 'com.google.firebase:firebase-storage-ktx'\r\n    // FirebaseUI for Cloud Firestore\r\n    implementation 'com.firebaseui:firebase-ui-firestore:7.1.1'\r\n\r\n    def camerax_version = \"1.0.0-beta07\"\r\n    // CameraX core library using camera2 implementation\r\n    implementation \"androidx.camera:camera-camera2:$camerax_version\"\r\n    // CameraX Lifecycle Library\r\n    implementation \"androidx.camera:camera-lifecycle:$camerax_version\"\r\n    // CameraX View class\r\n    implementation \"androidx.camera:camera-view:1.0.0-alpha14\"\r\n\r\n    // Firebase Coroutines\r\n    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.1.1'\r\n\r\n    // Circular Image View\r\n    implementation 'de.hdodenhof:circleimageview:3.1.0'\r\n\r\n    // Android Image Cropper\r\n    api 'com.theartofdev.edmodo:android-image-cropper:2.8.0'\r\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/build.gradle	(revision ad4a4b207177699c613519b6b6d97f3a51fa76b3)
++++ app/build.gradle	(date 1617898867383)
+@@ -1,9 +1,12 @@
+-apply plugin: 'com.android.application'
+-apply plugin: 'kotlin-android'
+-apply plugin: 'kotlin-kapt'
+-apply plugin: "androidx.navigation.safeargs.kotlin"
+-apply plugin: 'dagger.hilt.android.plugin'
+-apply plugin: 'com.google.gms.google-services'
++plugins {
++    id 'com.android.application'
++    id 'kotlin-android'
++    id 'kotlin-kapt'
++    id "androidx.navigation.safeargs.kotlin"
++    id 'dagger.hilt.android.plugin'
++    id 'com.google.gms.google-services'
++    id 'com.google.secrets_gradle_plugin' version '0.5'
++}
+ 
+ android {
+     compileSdkVersion 30
+@@ -118,4 +121,8 @@
+ 
+     // Android Image Cropper
+     api 'com.theartofdev.edmodo:android-image-cropper:2.8.0'
++
++    //Algolia Search
++    implementation 'com.algolia:instantsearch-android:2.10.0'
++    implementation "androidx.lifecycle:lifecycle-common:2.3.1"
+ }
+\ No newline at end of file

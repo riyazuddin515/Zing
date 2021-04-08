@@ -1,9 +1,12 @@
-apply plugin: 'com.android.application'
-apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-kapt'
-apply plugin: "androidx.navigation.safeargs.kotlin"
-apply plugin: 'dagger.hilt.android.plugin'
-apply plugin: 'com.google.gms.google-services'
+plugins {
+    id 'com.android.application'
+    id 'kotlin-android'
+    id 'kotlin-kapt'
+    id "androidx.navigation.safeargs.kotlin"
+    id 'dagger.hilt.android.plugin'
+    id 'com.google.gms.google-services'
+    id 'com.google.secrets_gradle_plugin' version '0.5'
+}
 
 android {
     compileSdkVersion 30
@@ -118,4 +121,8 @@ dependencies {
 
     // Android Image Cropper
     api 'com.theartofdev.edmodo:android-image-cropper:2.8.0'
+
+    //Algolia Search
+    implementation 'com.algolia:instantsearch-android:2.10.0'
+    implementation "androidx.lifecycle:lifecycle-common:2.3.1"
 }
