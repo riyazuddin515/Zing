@@ -42,7 +42,7 @@ class LikedByFragment : Fragment(R.layout.fragment_liked_by) {
 
     private fun subscribeToObservers() {
         viewModel.postLikedUsersStatus.observe(viewLifecycleOwner, EventObserver(
-            forIsLikedBy = true,
+            oneTimeConsume = true,
             onError = { snackBar(it) },
         ) {
             userAdapter.users = it

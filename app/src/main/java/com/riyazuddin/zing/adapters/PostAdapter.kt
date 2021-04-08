@@ -2,8 +2,6 @@ package com.riyazuddin.zing.adapters
 
 import android.content.Context
 import android.view.*
-import android.view.GestureDetector.OnDoubleTapListener
-import android.widget.Toast
 import androidx.core.view.isVisible
 import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
@@ -15,7 +13,11 @@ import com.riyazuddin.zing.R
 import com.riyazuddin.zing.data.entities.Post
 import com.riyazuddin.zing.databinding.ItemPostBinding
 import com.riyazuddin.zing.other.Utils.Companion.getTimeAgo
+import java.text.DecimalFormat
 import javax.inject.Inject
+import kotlin.math.floor
+import kotlin.math.log10
+import kotlin.math.pow
 
 
 class PostAdapter @Inject constructor(val glide: RequestManager, val applicationContext: Context) :
@@ -51,11 +53,8 @@ class PostAdapter @Inject constructor(val glide: RequestManager, val application
             tvUsername.text = post.username
             val likeCount = post.likeCount
             tvLikedBy.isVisible = likeCount != 0
-            tvLikedBy.text = when {
-                likeCount <= 0 -> "No Likes"
-                likeCount == 1 -> "Liked by 1 Person"
-                else -> "Liked by $likeCount persons"
-            }
+            val likesText = if(likeCount == 1) "1 like" else "${String.format("%,d",likeCount)} likes"
+            tvLikedBy.text = likesText
             tvPostedOn.text = getTimeAgo(post.date)
             if (post.caption.isEmpty())
                 tvCaption.isVisible = false
@@ -104,7 +103,6 @@ class PostAdapter @Inject constructor(val glide: RequestManager, val application
                     }
                 }
             })
-
         }
     }
 

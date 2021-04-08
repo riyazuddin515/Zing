@@ -1,7 +1,6 @@
 package com.riyazuddin.zing.ui.auth
 
 import android.content.Intent
-import android.content.SharedPreferences
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
@@ -21,18 +20,18 @@ class AuthActivity : AppCompatActivity() {
         binding = ActivityAuthBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        val appSharedPreferences = getSharedPreferences("AppSharedPreferences",0)
-        val isNightModeNo: Boolean = appSharedPreferences.getBoolean("NightMode",false)
+        val appSharedPreferences = getSharedPreferences("AppSharedPreferences", 0)
+        val isNightModeNo: Boolean = appSharedPreferences.getBoolean("NightMode", false)
 
-        if (isNightModeNo){
+        if (isNightModeNo) {
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
-        }else{
+        } else {
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
         }
 
         Firebase.auth.currentUser?.let {
             it.reload()
-            if (it.isEmailVerified){
+            if (it.isEmailVerified) {
                 Intent(this, MainActivity::class.java).apply {
                     startActivity(this)
                     finish()

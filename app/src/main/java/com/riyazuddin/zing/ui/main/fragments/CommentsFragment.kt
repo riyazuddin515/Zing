@@ -1,6 +1,7 @@
 package com.riyazuddin.zing.ui.main.fragments
 
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
@@ -24,7 +25,7 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class CommentsFragment : Fragment(R.layout.fragment_comments) {
 
-    private lateinit var user: User
+    private lateinit var currentUser: User
 
     @Inject
     lateinit var glide: RequestManager
@@ -50,7 +51,7 @@ class CommentsFragment : Fragment(R.layout.fragment_comments) {
         }
 
         commentAdapter.setOnUserClickListener {
-            if (Firebase.auth.uid == user.uid)
+            if (Firebase.auth.uid == it.commentedBy)
                 findNavController().navigate(R.id.profileFragment)
             else
                 findNavController().navigate(
@@ -69,7 +70,7 @@ class CommentsFragment : Fragment(R.layout.fragment_comments) {
         viewModel.userProfileStatus.observe(viewLifecycleOwner, EventObserver(
             onError = { snackBar(it) }
         ) {
-            user = it
+            currentUser = it
             glide.load(it.profilePicUrl).into(binding.CIVProfilePic)
         })
 
@@ -87,6 +88,7 @@ class CommentsFragment : Fragment(R.layout.fragment_comments) {
         })
 
         viewModel.createCommentStatus.observe(viewLifecycleOwner, EventObserver(
+            oneTimeConsume = true,
             onError = {
                 binding.btnSend.isEnabled = true
                 snackBar(it)
@@ -96,8 +98,8 @@ class CommentsFragment : Fragment(R.layout.fragment_comments) {
             binding.TIEComment.text?.clear()
             binding.btnSend.isEnabled = true
             snackBar("Comment Posted")
-            comment.username = user.username
-            comment.userProfilePic = user.profilePicUrl
+            comment.username = currentUser.username
+            comment.userProfilePic = currentUser.profilePicUrl
             commentAdapter.comments += comment
             binding.rvComments.smoothScrollToPosition(commentAdapter.itemCount)
         })
@@ -111,4 +113,7 @@ class CommentsFragment : Fragment(R.layout.fragment_comments) {
         }
     }
 
+    companion object{
+        const val TAG = "CommentsFrag"
+    }
 }

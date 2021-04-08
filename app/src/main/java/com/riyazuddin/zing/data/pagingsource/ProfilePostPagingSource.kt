@@ -1,10 +1,11 @@
 package com.riyazuddin.zing.data.pagingsource
 
 import androidx.paging.PagingSource
-import androidx.paging.PagingState
+import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.QuerySnapshot
+import com.google.firebase.ktx.Firebase
 import com.riyazuddin.zing.data.entities.Post
 import com.riyazuddin.zing.data.entities.PostLikes
 import com.riyazuddin.zing.data.entities.User
@@ -41,9 +42,10 @@ class ProfilePostPagingSource(
                         .document(uid).get().await().toObject(User::class.java)!!
                     post.username = user.username
                     post.userProfilePic = user.profilePicUrl
-                    post.isLiked = uid in db.collection(POST_LIKES_COLLECTION)
+                    val likesList = db.collection(POST_LIKES_COLLECTION)
                         .document(post.postId).get().await()
                         .toObject(PostLikes::class.java)!!.likedBy
+                    post.isLiked = Firebase.auth.uid in likesList
                 },
                 null,
                 nextPage
