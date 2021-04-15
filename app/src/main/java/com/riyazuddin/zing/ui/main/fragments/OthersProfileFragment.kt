@@ -7,6 +7,7 @@ import android.view.animation.OvershootInterpolator
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
+import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.transition.ChangeBounds
 import androidx.transition.TransitionManager
@@ -36,6 +37,20 @@ class OthersProfileFragment : ProfileFragment() {
 
         binding.btnToggleFollow.setOnClickListener {
             viewModel.toggleFollowForUser(uid)
+        }
+
+        binding.followersLayout.setOnClickListener {
+            val bundle = Bundle().apply {
+                putString("uid", uid)
+            }
+            findNavController().navigate(R.id.action_othersProfileFragment_to_followersFragment, bundle)
+        }
+
+        binding.followingLayout.setOnClickListener {
+            val bundle = Bundle().apply {
+                putString("uid", uid)
+            }
+            findNavController().navigate(R.id.action_othersProfileFragment_to_followingFragment, bundle)
         }
     }
 

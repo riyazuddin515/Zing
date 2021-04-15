@@ -77,7 +77,8 @@ class DefaultMainRepository : MainRepository {
             val following =
                 followingCollection.document(uid).get().await().toObject(Following::class.java)
                     ?: throw IllegalStateException()
-            Resource.Success(following)
+            val result = getUsers(following.following)
+            result
         }
     }
 
@@ -86,7 +87,8 @@ class DefaultMainRepository : MainRepository {
             val followers =
                 followersCollection.document(uid).get().await().toObject(Followers::class.java)
                     ?: throw IllegalStateException()
-            Resource.Success(followers)
+            val result = getUsers(followers.followers)
+            result
         }
     }
 
@@ -256,7 +258,7 @@ class DefaultMainRepository : MainRepository {
     override suspend fun getPostForFollows() = withContext(Dispatchers.IO) {
         safeCall {
             val uid = auth.uid!!
-            val followsList = getFollowing(uid).data!!.following
+            val followsList = getFollowingList(uid).data!!.following
             val allPosts = postsCollection.whereIn("postedBy", followsList)
                 .orderBy("date", Query.Direction.DESCENDING)
                 .get()
@@ -368,24 +370,27 @@ class DefaultMainRepository : MainRepository {
         }
     }
 
-    override suspend fun getFollowersList(uid: String): Resource<List<User>> =
-        withContext(Dispatchers.IO) {
+    override suspend fun getFollowersList(uid: String): Resource<Followers> = withContext(Dispatchers.IO) {
             safeCall {
-
                 val followersList = followersCollection.document(uid)
                     .get()
                     .await()
                     .toObject(Followers::class.java)!!
 
-                if (followersList.followers.contains(auth.uid)) {
-                    followersList.followers -= auth.uid!!
-                }
-
-                val usersList = getUsers(followersList.followers).data!!
-
-                Resource.Success(usersList)
+                Resource.Success(followersList)
             }
         }
+
+    override suspend fun getFollowingList(uid: String): Resource<Following> = withContext(Dispatchers.IO){
+        safeCall {
+            val followingList = followingCollection.document(uid)
+                .get()
+                .await()
+                .toObject(Following::class.java)!!
+
+            Resource.Success(followingList)
+        }
+    }
 
     override suspend fun algoliaSearch(searchQuery: String): Resource<ResponseSearch> =
         withContext(Dispatchers.IO) {

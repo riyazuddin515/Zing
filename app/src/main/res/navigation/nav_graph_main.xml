@@ -58,6 +58,12 @@
             app:exitAnim="@anim/fade_out"
             app:popEnterAnim="@anim/fade_in"
             app:popExitAnim="@anim/slide_out_to_left"/>
+        <action
+            android:id="@+id/action_profileFragment_to_followersFragment"
+            app:destination="@id/followersFragment" />
+        <action
+            android:id="@+id/action_profileFragment_to_followingFragment"
+            app:destination="@id/followingFragment" />
     </fragment>
 
     <fragment
@@ -68,13 +74,6 @@
         <action
             android:id="@+id/action_settingsFragment_to_profileInfo"
             app:destination="@id/profileInfo"
-            app:enterAnim="@anim/slide_in_from_bottom"
-            app:exitAnim="@anim/fade_out"
-            app:popEnterAnim="@anim/fade_in"
-            app:popExitAnim="@anim/slide_out_to_bottom" />
-        <action
-            android:id="@+id/action_settingsFragment_to_email"
-            app:destination="@id/email"
             app:enterAnim="@anim/slide_in_from_bottom"
             app:exitAnim="@anim/fade_out"
             app:popEnterAnim="@anim/fade_in"
@@ -106,11 +105,18 @@
             app:exitAnim="@anim/fade_out"
             app:popEnterAnim="@anim/fade_in"
             app:popExitAnim="@anim/slide_out_to_left"/>
+        <action
+            android:id="@+id/action_othersProfileFragment_to_followersFragment"
+            app:destination="@id/followersFragment" />
+        <action
+            android:id="@+id/action_othersProfileFragment_to_followingFragment"
+            app:destination="@id/followingFragment" />
     </fragment>
 
     <action
         android:id="@+id/globalActionToOthersProfileFragment"
         app:destination="@id/othersProfileFragment"/>
+
 
     <fragment
         android:id="@+id/commentsFragment"
@@ -133,10 +139,6 @@
         android:id="@+id/profileInfo"
         android:name="com.riyazuddin.zing.ui.main.fragments.settings.ProfileInfo"
         android:label="ProfileInfo" />
-    <fragment
-        android:id="@+id/email"
-        android:name="com.riyazuddin.zing.ui.main.fragments.settings.Email"
-        android:label="Email" />
     <fragment
         android:id="@+id/currentPasswordVerification"
         android:name="com.riyazuddin.zing.ui.main.fragments.settings.CurrentPasswordVerification"
@@ -167,6 +169,22 @@
         android:id="@+id/capturePreviewFragment"
         android:name="com.riyazuddin.zing.ui.main.fragments.CapturePreviewFragment"
         android:label="CapturePreviewFragment" >
+    </fragment>
+    <fragment
+        android:id="@+id/followersFragment"
+        android:name="com.riyazuddin.zing.ui.main.fragments.FollowersFragment"
+        android:label="FollowersFragment">
+        <argument
+            android:name="uid"
+            app:argType="string"/>
+    </fragment>
+    <fragment
+        android:id="@+id/followingFragment"
+        android:name="com.riyazuddin.zing.ui.main.fragments.FollowingFragment"
+        android:label="FollowingFragment">
+        <argument
+            android:name="uid"
+            app:argType="string"/>
     </fragment>
 
 </navigation>

@@ -54,11 +54,13 @@ interface MainRepository {
 
     suspend fun changePassword(newPassword: String): Resource<Any>
 
-    suspend fun getFollowersList(uid: String): Resource<List<User>>
+    suspend fun getFollowersList(uid: String): Resource<Followers>
 
-    suspend fun getFollowing(uid: String): Resource<Following>
+    suspend fun getFollowingList(uid: String): Resource<Following>
 
-    suspend fun getFollowers(uid: String): Resource<Followers>
+    suspend fun getFollowing(uid: String): Resource<List<User>>
+
+    suspend fun getFollowers(uid: String): Resource<List<User>>
 
     suspend fun getPostLikes(postId: String): Resource<PostLikes>
 

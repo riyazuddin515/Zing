@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import androidx.paging.LoadState
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -81,6 +82,20 @@ open class ProfileFragment : BasePostFragment(R.layout.fragment_profile) {
         super.onViewCreated(view, savedInstanceState)
 
         subscribeToObservers()
+
+        binding.followersLayout.setOnClickListener {
+            val bundle = Bundle().apply {
+                putString("uid", uid)
+            }
+            findNavController().navigate(R.id.action_profileFragment_to_followersFragment, bundle)
+        }
+
+        binding.followingLayout.setOnClickListener {
+            val bundle = Bundle().apply {
+                putString("uid", uid)
+            }
+            findNavController().navigate(R.id.action_profileFragment_to_followingFragment, bundle)
+        }
     }
 
     private fun subscribeToObservers() {

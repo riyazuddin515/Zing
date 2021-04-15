@@ -55,7 +55,6 @@ class HomeFragment : BasePostFragment(R.layout.fragment_home) {
         super.onCreate(savedInstanceState)
 
         binding = FragmentHomeBinding.inflate(layoutInflater)
-//        setupToolbar()
         setUpRecyclerView()
 
         binding.btnLogout.setOnClickListener {
@@ -99,26 +98,8 @@ class HomeFragment : BasePostFragment(R.layout.fragment_home) {
             adapter?.stateRestorationPolicy =
                 RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
             layoutManager = LinearLayoutManager(requireContext())
-            itemAnimator = null
+//            itemAnimator = null
         }
-    }
-
-    private fun setupToolbar() {
-//        binding.toolbar.inflateMenu(R.menu.top_menu)
-//        binding.toolbar.setOnMenuItemClickListener {
-//            if (it.itemId == R.id.logOut) {
-//                CustomDialog("Log Out", " Are you sure to logout of the app?").apply {
-//                    setPositiveListener {
-//                        Firebase.auth.signOut()
-//                        Intent(requireActivity(), AuthActivity::class.java).apply {
-//                            startActivity(this)
-//                            requireActivity().finish()
-//                        }
-//                    }
-//                }.show(parentFragmentManager, null)
-//            }
-//            true
-//        }
     }
 
 }
