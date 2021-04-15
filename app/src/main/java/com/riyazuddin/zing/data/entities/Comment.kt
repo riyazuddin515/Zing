@@ -8,8 +8,6 @@ data class Comment(
     val postId: String = "",
     val date: Long = 0L,
     val commentedBy: String = "",
-    var isLike: Boolean = false,
-    @get:Exclude var isLiking: Boolean = false,
     @get:Exclude var username: String? = null,
     @get:Exclude var userProfilePic: String? = null,
 )

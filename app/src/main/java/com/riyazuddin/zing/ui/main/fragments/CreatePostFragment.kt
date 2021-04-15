@@ -61,6 +61,9 @@ class CreatePostFragment : Fragment(R.layout.fragment_create_post) {
 
         subscribeToObservers()
 
+        binding.btnClose.setOnClickListener {
+            findNavController().popBackStack()
+        }
         binding.btnSelectImage.setOnClickListener {
             cropContent.launch("image/*")
         }

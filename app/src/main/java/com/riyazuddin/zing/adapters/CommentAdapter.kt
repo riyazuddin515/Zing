@@ -55,10 +55,6 @@ class CommentAdapter @Inject constructor(private val glide: RequestManager) :
             val date =
                 SimpleDateFormat("d MMM yyyy HH:mm", Locale.ENGLISH).format(Date(comment.date))
             tvTime.text = date
-            ibLike.setImageResource(
-                if (comment.isLike) R.drawable.ic_like_red
-                else R.drawable.ic_outline_like
-            )
 
             CIVProfilePic.setOnClickListener {
                 onUserClickListener?.let { click ->

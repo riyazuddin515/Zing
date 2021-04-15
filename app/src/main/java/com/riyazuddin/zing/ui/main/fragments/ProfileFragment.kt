@@ -1,6 +1,7 @@
 package com.riyazuddin.zing.ui.main.fragments
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -87,6 +88,7 @@ open class ProfileFragment : BasePostFragment(R.layout.fragment_profile) {
             onError = {
                 binding.progressBarProfileMetadata.isVisible = false
                 snackBar(it)
+                Log.e(TAG, "subscribeToObservers: $it")
             },
             onLoading = {
                 binding.progressBarProfileMetadata.isVisible = true
@@ -105,7 +107,10 @@ open class ProfileFragment : BasePostFragment(R.layout.fragment_profile) {
         })
 
         basePostViewModel.deletePostStatus.observe(viewLifecycleOwner, EventObserver(
-            onError = { snackBar(it) }
+            onError = {
+                snackBar(it)
+                Log.e(TAG, "subscribeToObservers: $it", )
+            }
         ) { deletedPost ->
             postAdapter.refresh()
             snackBar("Post Deleted.")
@@ -119,5 +124,9 @@ open class ProfileFragment : BasePostFragment(R.layout.fragment_profile) {
             layoutManager = LinearLayoutManager(requireContext())
             itemAnimator = null
         }
+    }
+    
+    companion object{
+        const val TAG = "ProfileFagLog"
     }
 }

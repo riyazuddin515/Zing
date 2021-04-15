@@ -3,13 +3,14 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/background">
+    xmlns:tools="http://schemas.android.com/tools"
+    android:background="@color/whiteAndBlack">
 
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/appBarLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/background"
+        android:background="@color/whiteAndBlack"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
@@ -29,6 +30,7 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginTop="20dp"
+        tools:src="@drawable/default_profile_pic"
         app:layout_constraintDimensionRatio="1:1"
         app:layout_constraintEnd_toStartOf="@+id/guideline2"
         app:layout_constraintStart_toEndOf="@+id/guideline1"
@@ -41,7 +43,7 @@
         android:layout_marginTop="5dp"
         android:padding="3dp"
         android:text="@string/change_profile_image"
-        android:textColor="@color/colorPrimaryDark"
+        android:textColor="@color/colorPrimary"
         android:textSize="20sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
@@ -57,10 +59,6 @@
         android:layout_marginTop="8dp"
         android:layout_marginEnd="16dp"
         android:hint="@string/name"
-        android:textColorHint="@color/blackAndWhite"
-        app:boxBackgroundColor="@color/background"
-        app:boxStrokeColor="@color/blackAndWhite"
-        app:hintTextColor="@color/blackAndWhite"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/tvChangeProfileImage">
@@ -81,10 +79,6 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         android:hint="@string/username"
-        android:textColorHint="@color/blackAndWhite"
-        app:boxBackgroundColor="@color/background"
-        app:boxStrokeColor="@color/blackAndWhite"
-        app:hintTextColor="@color/blackAndWhite"
         app:layout_constraintEnd_toEndOf="@id/TILName"
         app:layout_constraintStart_toStartOf="@+id/TILName"
         app:layout_constraintTop_toBottomOf="@+id/TILName">
@@ -93,7 +87,6 @@
             android:id="@+id/TIEUsername"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="@string/riyazuddin515"
             android:inputType="text|textNoSuggestions"
             android:textColor="@color/blackAndWhite"/>
 
@@ -106,10 +99,6 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         android:hint="@string/bio"
-        android:textColorHint="@color/blackAndWhite"
-        app:boxBackgroundColor="@color/background"
-        app:boxStrokeColor="@color/blackAndWhite"
-        app:hintTextColor="@color/blackAndWhite"
         app:layout_constraintEnd_toEndOf="@id/TILUsername"
         app:layout_constraintStart_toStartOf="@+id/TILUsername"
         app:layout_constraintTop_toBottomOf="@+id/TILUsername">
@@ -125,14 +114,15 @@
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnUpdate"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="10dp"
         android:text="@string/update"
         android:textAllCaps="false"
         android:textSize="20sp"
-        app:backgroundTint="@color/colorPrimaryDark"
+        app:backgroundTint="@color/colorPrimary"
         app:layout_constraintEnd_toEndOf="@+id/TILBio"
+        app:layout_constraintStart_toStartOf="@+id/TILBio"
         app:layout_constraintTop_toBottomOf="@+id/TILBio" />
 
     <androidx.constraintlayout.widget.Guideline

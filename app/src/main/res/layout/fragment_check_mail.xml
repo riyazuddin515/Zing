@@ -3,50 +3,89 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/background">
+    android:background="@drawable/auth_background">
 
-    <ImageView
-        android:id="@+id/imageView2"
-        android:layout_width="60dp"
-        android:layout_height="60dp"
-        android:layout_marginTop="150dp"
-        android:contentDescription="@string/mail_icon"
-        android:src="@drawable/ic_mail"
+    <ImageButton
+        android:id="@+id/btnClose"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:background="@android:color/transparent"
+        android:src="@drawable/ic_close"
+        android:tint="@color/white"
+        android:layout_marginEnd="15dp"
+        android:layout_marginTop="16dp"
+        android:contentDescription="@string/close"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <com.google.android.material.textview.MaterialTextView
-        android:id="@+id/materialTextView3"
+    <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
         android:layout_marginEnd="16dp"
-        android:gravity="center_horizontal"
-        android:text="@string/email_verification"
-        android:textColor="@color/blackAndWhite"
-        android:textSize="15sp"
+        app:cardElevation="25dp"
+        app:cardBackgroundColor="@color/whiteAndBlack"
+        app:cardCornerRadius="20dp"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/imageView2" />
+        app:layout_constraintTop_toTopOf="parent">
 
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/btnOpenMail"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:backgroundTint="@color/colorAccent"
-        android:text="@string/open_mail"
-        android:textAllCaps="false"
-        android:textColor="@color/white"
-        android:textSize="18sp"
-        app:backgroundTint="@color/colorPrimaryDark"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/materialTextView3" />
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <ImageView
+                android:id="@+id/imageView2"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:layout_marginTop="20dp"
+                android:contentDescription="@string/mail_icon"
+                android:src="@drawable/ic_mail"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/materialTextView3"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="16dp"
+                android:gravity="center_horizontal"
+                android:text="@string/email_verification"
+                android:textColor="@color/blackAndWhite"
+                android:textSize="18sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/imageView2" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnOpenMail"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:backgroundTint="@color/colorAccent"
+                android:text="@string/open_mail"
+                android:textAllCaps="false"
+                android:textColor="@color/white"
+                android:textSize="18sp"
+                android:layout_marginBottom="20dp"
+                app:backgroundTint="@color/colorPrimaryDark"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/materialTextView3" />
+
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.cardview.widget.CardView>
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -12,7 +12,6 @@ import androidx.core.view.isVisible
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.RequestManager
@@ -23,6 +22,7 @@ import com.riyazuddin.zing.R
 import com.riyazuddin.zing.data.entities.UpdateProfile
 import com.riyazuddin.zing.data.entities.User
 import com.riyazuddin.zing.databinding.FragmentProfileInfoBinding
+import com.riyazuddin.zing.other.Constants.MIN_USERNAME
 import com.riyazuddin.zing.other.Constants.SEARCH_TIME_DELAY
 import com.riyazuddin.zing.other.EventObserver
 import com.riyazuddin.zing.other.snackBar
@@ -87,6 +87,7 @@ class ProfileInfo : Fragment(R.layout.fragment_profile_info) {
         }
 
         binding.btnUpdate.setOnClickListener {
+            it.isEnabled = false
             val updateProfile = UpdateProfile(
                 uidToUpdate = Firebase.auth.uid!!,
                 name = binding.TIEName.text.toString(),
@@ -98,16 +99,18 @@ class ProfileInfo : Fragment(R.layout.fragment_profile_info) {
 
         var job: Job? = null
 
-        binding.TIEUsername.addTextChangedListener {
+        binding.TIEUsername.addTextChangedListener { editable ->
             job?.cancel()
             job = lifecycleScope.launch {
                 delay(SEARCH_TIME_DELAY)
-                if (it.toString() != user.username) {
-                    viewModel.searchUsername(it.toString())
-                } else {
-                    binding.TILUsername.error = null
-                    binding.btnUpdate.isEnabled = true
-                    binding.TILUsername.endIconMode = TextInputLayout.END_ICON_NONE
+                editable?.let {
+                    if (it.toString() != user.username && it.length >= MIN_USERNAME) {
+                        viewModel.searchUsername(it.toString())
+                    } else {
+                        binding.TILUsername.error = null
+                        binding.btnUpdate.isEnabled = true
+                        binding.TILUsername.endIconMode = TextInputLayout.END_ICON_NONE
+                    }
                 }
             }
         }
@@ -115,7 +118,7 @@ class ProfileInfo : Fragment(R.layout.fragment_profile_info) {
     }
 
     private fun subscribeToObservers() {
-        viewModel.imageUri.observe(viewLifecycleOwner){
+        viewModel.imageUri.observe(viewLifecycleOwner) {
             imageUri = it
             glide.load(it).into(binding.CIVProfilePic)
         }
@@ -139,10 +142,12 @@ class ProfileInfo : Fragment(R.layout.fragment_profile_info) {
             onError = {
                 snackBar(it)
                 binding.progressBar.isVisible = false
+                binding.btnUpdate.isEnabled = true
             },
             onLoading = { binding.progressBar.isVisible = true }
         ) {
             binding.progressBar.isVisible = false
+            binding.btnUpdate.isEnabled = true
             snackBar("Profile successfully updated")
         })
 

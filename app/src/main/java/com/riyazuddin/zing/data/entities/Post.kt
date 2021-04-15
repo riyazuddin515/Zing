@@ -8,7 +8,6 @@ data class Post(
     val date: Long = 0L,
     val imageUrl: String = "",
     val caption: String = "",
-//    var likedBy: List<String> = listOf(),
     var likeCount: Int = 0,
     @get:Exclude var username: String? = null,
     @get:Exclude var userProfilePic: String? = null,

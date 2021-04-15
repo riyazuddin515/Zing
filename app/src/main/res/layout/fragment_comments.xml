@@ -4,13 +4,13 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/background">
+    android:background="@color/whiteAndBlack">
 
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/appBar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/background"
+        android:background="@color/whiteAndBlack"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
@@ -42,20 +42,18 @@
         android:layout_width="40dp"
         android:layout_height="40dp"
         android:layout_marginStart="5dp"
+        tools:src="@drawable/default_profile_pic"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/TILComment" />
 
     <com.google.android.material.textfield.TextInputLayout
+        style="@style/Outline_TextInputLayoutStyle"
         android:id="@+id/TILComment"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="2"
         android:hint="@string/add_a_comment"
-        android:textColorHint="@color/blackAndWhite"
-        app:hintTextColor="@color/blackAndWhite"
-        app:boxBackgroundColor="@color/background"
-        app:boxStrokeColor="@color/mainTextColor"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/btnSend"
         app:layout_constraintStart_toEndOf="@id/CIVProfilePic">

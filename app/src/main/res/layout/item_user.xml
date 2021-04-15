@@ -6,13 +6,13 @@
     android:layout_height="wrap_content"
     android:id="@+id/userItemCardView"
     android:layout_margin="5dp"
-    app:cardCornerRadius="8dp"
-    android:elevation="20dp">
+    app:cardCornerRadius="15dp"
+    app:cardElevation="20dp"
+    app:cardBackgroundColor="@color/whiteAndBlack">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/background">
+        android:layout_height="wrap_content">
 
         <de.hdodenhof.circleimageview.CircleImageView
             android:id="@+id/CIVProfilePic"

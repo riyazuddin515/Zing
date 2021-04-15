@@ -24,14 +24,13 @@ class MainActivity : AppCompatActivity() {
             supportFragmentManager.findFragmentById(R.id.mainNavHost) as NavHostFragment
 
         binding.bottomNavigation.apply {
-            background = null
             setupWithNavController(navHostFragment.findNavController())
             setOnNavigationItemReselectedListener { }
         }
 
         navHostFragment.findNavController().addOnDestinationChangedListener { _, destination, _ ->
             when (destination.id) {
-                R.id.homeFragment, R.id.searchFragment, R.id.createPostFragment,
+                R.id.homeFragment, R.id.searchFragment,
                 R.id.profileFragment, R.id.settingsFragment, R.id.othersProfileFragment->
                     binding.bottomNavigation.visibility = View.VISIBLE
 

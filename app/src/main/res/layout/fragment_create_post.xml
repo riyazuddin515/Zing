@@ -3,23 +3,48 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/background">
+    android:background="@color/whiteAndBlack">
 
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/appBarLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/background"
+        android:background="@color/whiteAndBlack"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <com.google.android.material.appbar.MaterialToolbar
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:title="Select an Image"
-            app:titleTextColor="@color/blackAndWhite" />
+            android:layout_height="wrap_content">
+
+            <com.google.android.material.appbar.MaterialToolbar
+                android:id="@+id/materialToolbar"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/btnClose"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:title="Select an Image"
+                app:titleTextColor="@color/blackAndWhite" />
+
+            <ImageButton
+                android:id="@+id/btnClose"
+                android:layout_width="50dp"
+                android:layout_height="0dp"
+                android:src="@drawable/ic_close"
+                android:contentDescription="@string/post"
+                android:tint="@color/blackAndWhite"
+                android:background="@android:color/transparent"
+                app:layout_constraintBottom_toBottomOf="@+id/materialToolbar"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/materialToolbar" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+
 
     </com.google.android.material.appbar.AppBarLayout>
 
@@ -42,7 +67,6 @@
         android:text="@string/select_image"
         android:textAllCaps="false"
         android:textSize="20sp"
-        app:backgroundTint="@color/colorPrimaryDark"
         app:layout_constraintBottom_toBottomOf="@+id/IMVCreatePost"
         app:layout_constraintEnd_toEndOf="@+id/IMVCreatePost"
         app:layout_constraintStart_toStartOf="@+id/IMVCreatePost"
@@ -57,10 +81,6 @@
         android:layout_marginTop="8dp"
         android:layout_marginEnd="16dp"
         android:hint="@string/enter_caption"
-        android:textColorHint="@color/blackAndWhite"
-        app:boxBackgroundColor="@color/background"
-        app:boxStrokeColor="@color/blackAndWhite"
-        app:hintTextColor="@color/blackAndWhite"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
@@ -82,7 +102,6 @@
         android:text="@string/post"
         android:textAllCaps="false"
         android:textSize="20sp"
-        app:backgroundTint="@color/colorPrimaryDark"
         app:layout_constraintEnd_toEndOf="@+id/TILCaption"
         app:layout_constraintTop_toBottomOf="@+id/TILCaption" />
 
@@ -109,6 +128,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.5" />
+        app:layout_constraintGuide_percent="0.6"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,9 +1,7 @@
 package com.riyazuddin.zing.repositories
 
-import com.google.firebase.auth.AuthResult
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.QuerySnapshot
 import com.riyazuddin.zing.data.entities.Followers
 import com.riyazuddin.zing.data.entities.Following
 import com.riyazuddin.zing.data.entities.User
@@ -26,7 +24,7 @@ class DefaultAuthRepository : AuthRepository {
         username: String,
         email: String,
         password: String
-    ): Resource<AuthResult> {
+    ): Resource<Boolean> {
         return withContext(Dispatchers.IO) {
             safeCall {
                 val result = auth.createUserWithEmailAndPassword(email, password).await()
@@ -34,19 +32,19 @@ class DefaultAuthRepository : AuthRepository {
                 val uid = result.user!!.uid
                 val user = User(name, uid, username)
                 firestore.collection(USERS_COLLECTION).document(uid).set(user).await()
-                firestore.collection(FOLLOWING_COLLECTION).document(uid).set(Following()).await()
-                firestore.collection(FOLLOWERS_COLLECTION).document(uid).set(Followers()).await()
+                firestore.collection(FOLLOWING_COLLECTION).document(uid).set(Following(uid = uid)).await()
+                firestore.collection(FOLLOWERS_COLLECTION).document(uid).set(Followers(uid = uid)).await()
 
-                Resource.Success(result)
+                Resource.Success(true)
             }
         }
     }
 
-    override suspend fun login(email: String, password: String): Resource<AuthResult> {
+    override suspend fun login(email: String, password: String): Resource<Boolean> {
         return withContext(Dispatchers.IO) {
             safeCall {
-                val result = auth.signInWithEmailAndPassword(email, password).await()
-                Resource.Success(result)
+                auth.signInWithEmailAndPassword(email, password).await()
+                Resource.Success(true)
             }
         }
     }
@@ -60,13 +58,16 @@ class DefaultAuthRepository : AuthRepository {
         }
     }
 
-    override suspend fun searchUsername(query: String): Resource<QuerySnapshot> {
+    override suspend fun searchUsername(query: String): Resource<Boolean> {
         return withContext(Dispatchers.IO) {
             safeCall {
                 val result =
                     firestore.collection(USERS_COLLECTION).whereEqualTo("username", query).get()
                         .await()
-                Resource.Success(result)
+                if (result.isEmpty)
+                    Resource.Success(true)
+                else
+                    Resource.Success(false)
             }
         }
     }

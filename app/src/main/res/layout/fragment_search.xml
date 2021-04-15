@@ -4,26 +4,25 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#CFD7DE">
+    android:background="@color/PrimaryToBlack">
 
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/appBarLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/background"
+        android:background="@android:color/transparent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
         <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="@string/search_user"
-            android:textColorHint="@color/blackAndWhite"
-            app:hintTextColor="@color/blackAndWhite"
-            app:boxBackgroundColor="@color/background"
-            app:boxStrokeColor="@color/mainTextColor">
+            app:startIconDrawable="@drawable/ic_outline_search"
+            app:startIconTint="@color/blackAndWhite">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/TIESearch"

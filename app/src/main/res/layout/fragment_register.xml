@@ -3,161 +3,191 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/background">
-
-    <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/guideline"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.4" />
+    android:background="@drawable/auth_background">
 
     <com.google.android.material.textview.MaterialTextView
-        android:id="@+id/materialTextView2"
+        android:id="@+id/materialTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
-        android:text="@string/create_new_account"
-        android:textColor="@color/colorPrimaryDark"
-        android:textSize="30sp"
-        android:textStyle="bold"
-        app:layout_constraintBottom_toTopOf="@+id/TILName"
-        app:layout_constraintStart_toStartOf="@+id/TILName" />
+        android:text="@string/app_name"
+        android:textColor="@color/white"
+        android:textSize="70sp"
+        android:textStyle="bold|italic"
+        android:fontFamily="serif"
+        android:layout_marginBottom="10dp"
+        app:layout_constraintBottom_toTopOf="@+id/cardView"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.498"
+        app:layout_constraintStart_toStartOf="parent" />
 
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/TILName"
-        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
-        android:textColorHint="@color/blackAndWhite"
-        app:boxBackgroundColor="@color/background"
-        app:boxStrokeColor="@color/blackAndWhite"
-        app:hintTextColor="@color/blackAndWhite"
-        app:layout_constraintBottom_toTopOf="@+id/TILUsername"
-        app:layout_constraintEnd_toEndOf="@id/TILUsername"
-        app:layout_constraintStart_toStartOf="@id/TILUsername">
-
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/TIEName"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="@string/name"
-            android:inputType="textPersonName" />
-
-    </com.google.android.material.textfield.TextInputLayout>
-
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/TILUsername"
-        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cardView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:layout_marginEnd="16dp"
-        android:layout_marginBottom="8dp"
-        android:textColorHint="@color/blackAndWhite"
-        app:boxBackgroundColor="@color/background"
-        app:boxStrokeColor="@color/blackAndWhite"
-        app:hintTextColor="@color/blackAndWhite"
-        app:layout_constraintBottom_toTopOf="@+id/guideline">
-
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/TIEUsername"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="@string/username"
-            android:inputType="text|textNoSuggestions" />
-
-    </com.google.android.material.textfield.TextInputLayout>
-
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/TILEmail"
-        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginBottom="8dp"
-        android:textColorHint="@color/blackAndWhite"
-        app:boxBackgroundColor="@color/background"
-        app:boxStrokeColor="@color/blackAndWhite"
-        app:hintTextColor="@color/blackAndWhite"
+        app:cardElevation="25dp"
+        app:cardBackgroundColor="@color/whiteAndBlack"
+        app:cardCornerRadius="20dp"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/guideline">
+        app:layout_constraintTop_toTopOf="parent">
 
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/TIEEmail"
+
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="@string/email"
-            android:inputType="textEmailAddress"
-            android:textColor="@android:color/black" />
+            android:layout_height="wrap_content">
 
-    </com.google.android.material.textfield.TextInputLayout>
+            <androidx.constraintlayout.widget.Guideline
+                android:id="@+id/guideline"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                app:layout_constraintGuide_percent="0.4" />
 
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/TILPassword"
-        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:textColorHint="@color/blackAndWhite"
-        app:boxBackgroundColor="@color/background"
-        app:boxStrokeColor="@color/blackAndWhite"
-        app:endIconMode="password_toggle"
-        app:hintTextColor="@color/blackAndWhite"
-        app:layout_constraintEnd_toEndOf="@id/TILEmail"
-        app:layout_constraintStart_toStartOf="@id/TILEmail"
-        app:layout_constraintTop_toBottomOf="@+id/TILEmail">
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/materialTextView2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="16dp"
+                android:text="@string/create_new_account"
+                android:textColor="@color/colorPrimary"
+                android:textSize="30sp"
+                android:textStyle="bold"
+                app:layout_constraintBottom_toTopOf="@+id/TILName"
+                app:layout_constraintStart_toStartOf="@+id/TILName"
+                app:layout_constraintTop_toTopOf="parent" />
 
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/TIEPassword"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="@string/password"
-            android:inputType="textPassword"
-            android:textColor="@android:color/black" />
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/TILName"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:hint="@string/name"
+                app:layout_constraintBottom_toTopOf="@+id/TILUsername"
+                app:layout_constraintEnd_toEndOf="@id/TILUsername"
+                app:layout_constraintStart_toStartOf="@id/TILUsername">
 
-    </com.google.android.material.textfield.TextInputLayout>
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/TIEName"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="textPersonName" />
 
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/TILRepeatPassword"
-        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:textColorHint="@color/blackAndWhite"
-        app:boxBackgroundColor="@color/background"
-        app:boxStrokeColor="@color/blackAndWhite"
-        app:endIconMode="password_toggle"
-        app:hintTextColor="@color/blackAndWhite"
-        app:layout_constraintEnd_toEndOf="@+id/TILPassword"
-        app:layout_constraintStart_toStartOf="@+id/TILPassword"
-        app:layout_constraintTop_toBottomOf="@+id/TILPassword">
+            </com.google.android.material.textfield.TextInputLayout>
 
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/TIERepeatPassword"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="@string/repeat_password"
-            android:inputType="textPassword"
-            android:textColor="@android:color/black" />
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/TILUsername"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginBottom="8dp"
+                android:hint="@string/username"
+                app:layout_constraintBottom_toTopOf="@+id/guideline">
 
-    </com.google.android.material.textfield.TextInputLayout>
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/TIEUsername"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:maxLength="20"
+                    android:inputType="text|textNoSuggestions" />
 
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/btnRegister"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
-        android:text="@string/register"
-        android:textAllCaps="false"
-        android:textSize="24sp"
-        android:textColor="@color/white"
-        app:backgroundTint="@color/colorPrimaryDark"
-        app:layout_constraintEnd_toEndOf="@+id/TILRepeatPassword"
-        app:layout_constraintTop_toBottomOf="@+id/TILRepeatPassword" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/TILEmail"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginBottom="8dp"
+                android:hint="@string/email"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/guideline">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/TIEEmail"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="textEmailAddress"
+                    android:textColor="@android:color/black" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/TILPassword"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:hint="@string/password"
+                app:endIconMode="password_toggle"
+                app:layout_constraintEnd_toEndOf="@id/TILEmail"
+                app:layout_constraintStart_toStartOf="@id/TILEmail"
+                app:layout_constraintTop_toBottomOf="@+id/TILEmail">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/TIEPassword"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="textPassword"
+                    android:maxLength="15"
+                    android:maxLines="1"
+                    android:textColor="@android:color/black" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/TILRepeatPassword"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:hint="@string/repeat_password"
+                app:endIconMode="password_toggle"
+                app:layout_constraintEnd_toEndOf="@+id/TILPassword"
+                app:layout_constraintStart_toStartOf="@+id/TILPassword"
+                app:layout_constraintTop_toBottomOf="@+id/TILPassword">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/TIERepeatPassword"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="textPassword"
+                    android:maxLength="15"
+                    android:maxLines="1"
+                    android:textColor="@android:color/black" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnRegister"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="@string/register"
+                android:textAllCaps="false"
+                android:textColor="@color/white"
+                android:textSize="24sp"
+                app:backgroundTint="@color/colorPrimary"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="@+id/TILRepeatPassword"
+                app:layout_constraintStart_toStartOf="@+id/TILRepeatPassword"
+                app:layout_constraintTop_toBottomOf="@+id/TILRepeatPassword" />
+
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+    </androidx.cardview.widget.CardView>
+
 
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/materialTextView4"
@@ -165,9 +195,9 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="32dp"
         android:text="@string/already_have_an_account"
-        android:textColor="@color/blackAndWhite"
+        android:textColor="@color/white"
         android:textSize="16sp"
-        android:textStyle="bold"
+        android:textStyle="normal"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/tvLogin"
         app:layout_constraintHorizontal_bias="0.5"
@@ -181,9 +211,9 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="5dp"
         android:text="@string/login_here"
-        android:textColor="@color/colorPrimaryDark"
+        android:textColor="@color/white"
         android:textSize="20sp"
-        android:textStyle="bold"
+        android:textStyle="bold|italic"
         app:layout_constraintBaseline_toBaselineOf="@+id/materialTextView4"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"

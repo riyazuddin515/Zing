@@ -42,9 +42,6 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
         binding.btnProfileInfo.setOnClickListener {
             findNavController().navigate(R.id.action_settingsFragment_to_profileInfo)
         }
-        binding.btnChangeEmail.setOnClickListener {
-            findNavController().navigate(R.id.action_settingsFragment_to_email)
-        }
         binding.btnChangePassword.setOnClickListener {
             findNavController().navigate(R.id.action_settingsFragment_to_currentPasswordVerification)
         }

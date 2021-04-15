@@ -13,7 +13,7 @@
 
     <item
         android:id="@+id/createPostFragment"
-        android:icon="@drawable/ic_outline_add_box"
+        android:icon="@drawable/ic_outline_plus"
         android:title="@string/post" />
 
     <item

@@ -1,7 +1,9 @@
 package com.riyazuddin.zing.ui.auth.fragments
 
 import android.os.Bundle
+import android.util.Patterns
 import android.view.View
+import android.widget.Toast
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.view.isVisible
 import androidx.core.widget.addTextChangedListener
@@ -12,6 +14,8 @@ import androidx.navigation.fragment.findNavController
 import com.google.android.material.textfield.TextInputLayout
 import com.riyazuddin.zing.R
 import com.riyazuddin.zing.databinding.FragmentRegisterBinding
+import com.riyazuddin.zing.other.Constants
+import com.riyazuddin.zing.other.Constants.MIN_USERNAME
 import com.riyazuddin.zing.other.Constants.SEARCH_TIME_DELAY
 import com.riyazuddin.zing.other.EventObserver
 import com.riyazuddin.zing.other.snackBar
@@ -46,26 +50,53 @@ class RegisterFragment : Fragment(R.layout.fragment_register) {
             job = lifecycleScope.launch {
                 delay(SEARCH_TIME_DELAY)
                 editable?.let {
-                    viewModel.searchUsername(it.toString())
+                    if (it.length >= MIN_USERNAME)
+                        viewModel.searchUsername(it.toString())
                 }
             }
         }
 
         binding.btnRegister.setOnClickListener {
-            viewModel.register(
-                binding.TIEName.text.toString(),
-                binding.TIEUsername.text.toString(),
-                binding.TIEEmail.text.toString(),
-                binding.TIEPassword.text.toString(),
-                binding.TIERepeatPassword.text.toString()
-            )
+
+            val name = binding.TIEName.text.toString()
+            val username = binding.TIEUsername.text.toString()
+            val email = binding.TIEEmail.text.toString()
+            val password = binding.TIEPassword.text.toString()
+            val repeatPassword = binding.TIERepeatPassword.text.toString()
+
+            if (name.isEmpty() || username.isEmpty() || email.isEmpty() || password.isEmpty())
+                Toast.makeText(requireContext(), getString(R.string.error_fields_can_not_be_empty), Toast.LENGTH_SHORT).show()
+            else if (username.length < MIN_USERNAME)
+                binding.TILUsername.error = this.getString(
+                    R.string.error_username_too_long,
+                    MIN_USERNAME
+                )
+            else if (!Patterns.EMAIL_ADDRESS.matcher(email).matches())
+                binding.TILEmail.error = this.getString(R.string.error_not_a_valid_email)
+            else if (password.length < Constants.MIN_PASSWORD)
+                binding.TILPassword.error = this.getString(
+                    R.string.error_password_too_short,
+                    Constants.MIN_PASSWORD
+                )
+            else if (repeatPassword != password)
+                binding.TILRepeatPassword.error = this.getString(R.string.error_password_not_match)
+            else{
+                it.isEnabled = false
+                viewModel.register(
+                    binding.TIEName.text.toString(),
+                    binding.TIEUsername.text.toString(),
+                    binding.TIEEmail.text.toString(),
+                    binding.TIEPassword.text.toString()
+                )
+            }
         }
     }
 
-    private fun subscribeToObservers(){
+    private fun subscribeToObservers() {
         viewModel.registerStatus.observe(viewLifecycleOwner, EventObserver(
             onError = {
                 binding.progressBar.isVisible = false
+                binding.btnRegister.isEnabled = true
                 snackBar(it)
             },
             onLoading = {
@@ -73,6 +104,7 @@ class RegisterFragment : Fragment(R.layout.fragment_register) {
             }
         ) {
             binding.progressBar.isVisible = false
+            binding.btnRegister.isEnabled = true
             snackBar(getString(R.string.registration_success))
             findNavController().navigate(R.id.action_registerFragment_to_checkMailFragment)
         })
@@ -87,10 +119,11 @@ class RegisterFragment : Fragment(R.layout.fragment_register) {
                 binding.TILUsername.endIconMode = TextInputLayout.END_ICON_NONE
                 binding.btnRegister.isEnabled = false
             }
-        ){
+        ) {
             binding.btnRegister.isEnabled = true
             binding.TILUsername.endIconMode = TextInputLayout.END_ICON_CUSTOM
-            binding.TILUsername.endIconDrawable = ResourcesCompat.getDrawable(resources, R.drawable.ic_outline_check_circle, null)
+            binding.TILUsername.endIconDrawable =
+                ResourcesCompat.getDrawable(resources, R.drawable.ic_outline_check_circle, null)
         })
     }
 }

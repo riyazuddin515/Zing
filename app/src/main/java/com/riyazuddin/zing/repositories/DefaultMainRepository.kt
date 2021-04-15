@@ -11,7 +11,6 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
-import com.google.firebase.firestore.QuerySnapshot
 import com.google.firebase.storage.FirebaseStorage
 import com.riyazuddin.zing.BuildConfig
 import com.riyazuddin.zing.data.entities.*
@@ -62,6 +61,7 @@ class DefaultMainRepository : MainRepository {
                 ?: throw IllegalStateException()
 
             val currentUid = auth.uid!!
+
             val currentUserFollowing =
                 followingCollection.document(currentUid).get().await()
                     .toObject(Following::class.java)
@@ -190,65 +190,64 @@ class DefaultMainRepository : MainRepository {
     override suspend fun toggleFollowForUser(uid: String) = withContext(Dispatchers.IO) {
         safeCall {
             var isFollowing = false
-            firestore.runTransaction { transition ->
-                val currentUid = auth.uid!!
+            val currentUserUid = auth.uid!!
 
-                val currentUserFollowing = transition.get(followingCollection.document(currentUid))
-                    .toObject(Following::class.java)!!
-                val otherUserFollowers = transition.get(followersCollection.document(currentUid))
+            firestore.runTransaction { transition ->
+
+                val otherUserFollowersList = transition
+                    .get(followersCollection.document(uid))
                     .toObject(Followers::class.java)!!
 
-                isFollowing = uid in currentUserFollowing.following
+
+                isFollowing = currentUserUid in otherUserFollowersList.followers
 
 
                 if (isFollowing) {
-
+                    //unfollow
                     transition.update(
-                        followingCollection.document(currentUid),
+                        followingCollection.document(currentUserUid),
                         "following",
-                        currentUserFollowing.following.minus(uid)
+                        FieldValue.arrayRemove(uid)
                     )
                     transition.update(
                         followersCollection.document(uid),
                         "followers",
-                        otherUserFollowers.followers.minus(currentUid)
+                        FieldValue.arrayRemove(currentUserUid)
                     )
-
                     transition.update(
-                        usersCollection.document(currentUid),
-                        "followingCount",
+                        usersCollection.document(currentUserUid),
+                        "following",
                         FieldValue.increment(-1)
                     )
                     transition.update(
                         usersCollection.document(uid),
-                        "followersCount",
+                        "followers",
                         FieldValue.increment(-1)
                     )
-                } else {
 
+                } else {
+                    //follow
                     transition.update(
-                        followingCollection.document(currentUid),
+                        followingCollection.document(currentUserUid),
                         "following",
-                        currentUserFollowing.following.plus(uid)
+                        FieldValue.arrayUnion(uid)
                     )
                     transition.update(
                         followersCollection.document(uid),
                         "followers",
-                        otherUserFollowers.followers.plus(currentUid)
+                        FieldValue.arrayUnion(currentUserUid)
                     )
-
                     transition.update(
-                        usersCollection.document(currentUid),
-                        "followingCount",
+                        usersCollection.document(currentUserUid),
+                        "following",
                         FieldValue.increment(1)
                     )
                     transition.update(
                         usersCollection.document(uid),
-                        "followersCount",
+                        "followers",
                         FieldValue.increment(1)
                     )
                 }
-
             }.await()
             Resource.Success(!isFollowing)
         }
@@ -333,11 +332,17 @@ class DefaultMainRepository : MainRepository {
             }
         }
 
-    override suspend fun searchUsername(query: String): Resource<QuerySnapshot> {
+    /**
+     * method used to check username availability
+     */
+    override suspend fun searchUsername(query: String): Resource<Boolean> {
         return withContext(Dispatchers.IO) {
             safeCall {
                 val result = usersCollection.whereEqualTo("username", query).get().await()
-                Resource.Success(result)
+                if (result.isEmpty)
+                    Resource.Success(true)
+                else
+                    Resource.Success(false)
             }
         }
     }

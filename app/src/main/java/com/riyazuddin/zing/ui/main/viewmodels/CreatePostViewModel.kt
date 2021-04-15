@@ -1,6 +1,5 @@
 package com.riyazuddin.zing.ui.main.viewmodels
 
-import android.content.Context
 import android.net.Uri
 import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.LiveData
@@ -16,7 +15,6 @@ import kotlinx.coroutines.launch
 
 class CreatePostViewModel @ViewModelInject constructor(
     private val repository: MainRepository,
-    private val applicationContext: Context,
     private val dispatcher: CoroutineDispatcher = Dispatchers.Main
 ) : ViewModel() {
 
@@ -24,15 +22,15 @@ class CreatePostViewModel @ViewModelInject constructor(
     val createPostStatus: LiveData<Event<Resource<Any>>> = _createPostStatus
 
     private val _currentImageUri = MutableLiveData<Uri>()
-    val currentImageUri : LiveData<Uri> = _currentImageUri
+    val currentImageUri: LiveData<Uri> = _currentImageUri
 
-    fun setImageUri(imageUri: Uri){
+    fun setImageUri(imageUri: Uri) {
         _currentImageUri.postValue(imageUri)
     }
 
-    fun createPost(imageUri: Uri, caption: String){
+    fun createPost(imageUri: Uri, caption: String) {
         _createPostStatus.postValue(Event(Resource.Loading()))
-        viewModelScope.launch {
+        viewModelScope.launch(dispatcher) {
             val result = repository.createPost(imageUri, caption)
             _createPostStatus.postValue(Event(result))
         }

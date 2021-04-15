@@ -55,8 +55,20 @@ class HomeFragment : BasePostFragment(R.layout.fragment_home) {
         super.onCreate(savedInstanceState)
 
         binding = FragmentHomeBinding.inflate(layoutInflater)
-        setupToolbar()
+//        setupToolbar()
         setUpRecyclerView()
+
+        binding.btnLogout.setOnClickListener {
+            CustomDialog("Log Out", " Are you sure to logout of the app?").apply {
+                    setPositiveListener {
+                        Firebase.auth.signOut()
+                        Intent(requireActivity(), AuthActivity::class.java).apply {
+                            startActivity(this)
+                            requireActivity().finish()
+                        }
+                    }
+                }.show(parentFragmentManager, null)
+        }
 
         lifecycleScope.launch {
             viewModel.pagingFlow.collect {
@@ -92,21 +104,21 @@ class HomeFragment : BasePostFragment(R.layout.fragment_home) {
     }
 
     private fun setupToolbar() {
-        binding.toolbar.inflateMenu(R.menu.top_menu)
-        binding.toolbar.setOnMenuItemClickListener {
-            if (it.itemId == R.id.logOut) {
-                CustomDialog("Log Out", " Are you sure to logout of the app?").apply {
-                    setPositiveListener {
-                        Firebase.auth.signOut()
-                        Intent(requireActivity(), AuthActivity::class.java).apply {
-                            startActivity(this)
-                            requireActivity().finish()
-                        }
-                    }
-                }.show(parentFragmentManager, null)
-            }
-            true
-        }
+//        binding.toolbar.inflateMenu(R.menu.top_menu)
+//        binding.toolbar.setOnMenuItemClickListener {
+//            if (it.itemId == R.id.logOut) {
+//                CustomDialog("Log Out", " Are you sure to logout of the app?").apply {
+//                    setPositiveListener {
+//                        Firebase.auth.signOut()
+//                        Intent(requireActivity(), AuthActivity::class.java).apply {
+//                            startActivity(this)
+//                            requireActivity().finish()
+//                        }
+//                    }
+//                }.show(parentFragmentManager, null)
+//            }
+//            true
+//        }
     }
 
 }
