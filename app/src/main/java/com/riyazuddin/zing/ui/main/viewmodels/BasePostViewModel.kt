@@ -5,18 +5,16 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.riyazuddin.zing.data.entities.Post
-import com.riyazuddin.zing.data.entities.PostLikes
 import com.riyazuddin.zing.data.entities.User
 import com.riyazuddin.zing.other.Event
 import com.riyazuddin.zing.other.Resource
-import com.riyazuddin.zing.repositories.MainRepository
+import com.riyazuddin.zing.repositories.abstraction.MainRepository
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 abstract class BasePostViewModel(
-    private val repository: MainRepository,
-    private val dispatcher: CoroutineDispatcher = Dispatchers.Main
+    private val repository: MainRepository
 ) : ViewModel() {
 
     private val _likePostStatus = MutableLiveData<Event<Resource<Boolean>>>()
@@ -32,7 +30,7 @@ abstract class BasePostViewModel(
         if (postId.isEmpty())
             return
         _postLikedUsersStatus.postValue(Event(Resource.Loading()))
-        viewModelScope.launch(dispatcher){
+        viewModelScope.launch{
             val result = repository.getPostLikedUsers(postId)
             _postLikedUsersStatus.postValue(Event(result))
         }
@@ -40,7 +38,7 @@ abstract class BasePostViewModel(
 
     fun toggleLikeForPost(post: Post) {
         _likePostStatus.postValue(Event(Resource.Loading()))
-        viewModelScope.launch(dispatcher) {
+        viewModelScope.launch {
             val result = repository.toggleLikeForPost(post)
             _likePostStatus.postValue(Event(result))
         }
@@ -48,7 +46,7 @@ abstract class BasePostViewModel(
 
     fun deletePost(post: Post) {
         _deletePostStatus.postValue(Event(Resource.Loading()))
-        viewModelScope.launch(dispatcher) {
+        viewModelScope.launch {
             val result = repository.deletePost(post)
             _deletePostStatus.postValue(Event(result))
         }

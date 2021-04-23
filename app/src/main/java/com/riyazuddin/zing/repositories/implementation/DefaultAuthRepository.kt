@@ -1,4 +1,4 @@
-package com.riyazuddin.zing.repositories
+package com.riyazuddin.zing.repositories.implementation
 
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -10,6 +10,7 @@ import com.riyazuddin.zing.other.Constants.FOLLOWING_COLLECTION
 import com.riyazuddin.zing.other.Constants.USERS_COLLECTION
 import com.riyazuddin.zing.other.Resource
 import com.riyazuddin.zing.other.safeCall
+import com.riyazuddin.zing.repositories.abstraction.AuthRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext

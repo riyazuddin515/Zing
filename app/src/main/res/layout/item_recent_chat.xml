@@ -39,13 +39,13 @@
             app:layout_constraintTop_toTopOf="@id/CIVProfilePic" />
 
         <com.google.android.material.textview.MaterialTextView
-            android:id="@+id/tvUsername"
+            android:id="@+id/tvLastMessage"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:fontFamily="sans-serif-light"
             android:textColor="@color/blackAndWhite"
             android:textSize="20sp"
-            tools:text="@string/username"
+            tools:text="Last Message"
             app:layout_constraintStart_toStartOf="@+id/tvName"
             app:layout_constraintTop_toBottomOf="@+id/tvName" />
     </androidx.constraintlayout.widget.ConstraintLayout>

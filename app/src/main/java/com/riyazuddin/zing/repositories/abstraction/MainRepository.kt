@@ -1,7 +1,8 @@
-package com.riyazuddin.zing.repositories
+package com.riyazuddin.zing.repositories.abstraction
 
 import android.net.Uri
 import com.algolia.search.model.response.ResponseSearch
+import com.firebase.ui.firestore.paging.FirestorePagingOptions
 import com.google.firebase.firestore.QuerySnapshot
 import com.riyazuddin.zing.data.entities.*
 import com.riyazuddin.zing.other.Resource

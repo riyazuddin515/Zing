@@ -3,6 +3,7 @@ package com.riyazuddin.zing.repositories
 import com.riyazuddin.zing.Auth
 import com.riyazuddin.zing.data.entities.User
 import com.riyazuddin.zing.other.Resource
+import com.riyazuddin.zing.repositories.abstraction.AuthRepository
 import java.util.*
 
 class FakeAuthRepository : AuthRepository {

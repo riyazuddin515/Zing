@@ -8,7 +8,7 @@ import androidx.lifecycle.viewModelScope
 import com.riyazuddin.zing.data.entities.User
 import com.riyazuddin.zing.other.Event
 import com.riyazuddin.zing.other.Resource
-import com.riyazuddin.zing.repositories.MainRepository
+import com.riyazuddin.zing.repositories.abstraction.MainRepository
 import kotlinx.coroutines.launch
 
 class FollowingViewModel @ViewModelInject constructor(

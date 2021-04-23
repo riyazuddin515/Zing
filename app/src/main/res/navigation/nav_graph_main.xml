@@ -15,15 +15,22 @@
             android:id="@+id/action_homeFragment_to_likedByFragment"
             app:destination="@id/likedByFragment"
             app:enterAnim="@anim/slide_in_from_left"
-            app:exitAnim="@anim/fade_out"
-            app:popEnterAnim="@anim/fade_in"
-            app:popExitAnim="@anim/slide_out_to_left" />
+            app:exitAnim="@anim/slide_out_to_right"
+            app:popEnterAnim="@anim/slide_in_from_right"
+            app:popExitAnim="@anim/slide_out_to_left"/>
         <action
             android:id="@+id/action_homeFragment_to_commentsFragment"
             app:destination="@id/commentsFragment"
             app:enterAnim="@anim/slide_in_from_left"
-            app:exitAnim="@anim/fade_out"
-            app:popEnterAnim="@anim/fade_in"
+            app:exitAnim="@anim/slide_out_to_right"
+            app:popEnterAnim="@anim/slide_in_from_right"
+            app:popExitAnim="@anim/slide_out_to_left"/>
+        <action
+            android:id="@+id/action_homeFragment_to_recentChatListFragment"
+            app:destination="@id/recentChatListFragment"
+            app:enterAnim="@anim/slide_in_from_left"
+            app:exitAnim="@anim/slide_out_to_right"
+            app:popEnterAnim="@anim/slide_in_from_right"
             app:popExitAnim="@anim/slide_out_to_left"/>
     </fragment>
 
@@ -48,22 +55,30 @@
             android:id="@+id/action_profileFragment_to_likedByFragment"
             app:destination="@id/likedByFragment"
             app:enterAnim="@anim/slide_in_from_left"
-            app:exitAnim="@anim/fade_out"
-            app:popEnterAnim="@anim/fade_in"
-            app:popExitAnim="@anim/slide_out_to_left" />
+            app:exitAnim="@anim/slide_out_to_right"
+            app:popEnterAnim="@anim/slide_in_from_right"
+            app:popExitAnim="@anim/slide_out_to_left"/>
         <action
             android:id="@+id/action_profileFragment_to_commentsFragment"
             app:destination="@id/commentsFragment"
             app:enterAnim="@anim/slide_in_from_left"
-            app:exitAnim="@anim/fade_out"
-            app:popEnterAnim="@anim/fade_in"
+            app:exitAnim="@anim/slide_out_to_right"
+            app:popEnterAnim="@anim/slide_in_from_right"
             app:popExitAnim="@anim/slide_out_to_left"/>
         <action
             android:id="@+id/action_profileFragment_to_followersFragment"
-            app:destination="@id/followersFragment" />
+            app:destination="@id/followersFragment"
+            app:enterAnim="@anim/slide_in_from_left"
+            app:exitAnim="@anim/slide_out_to_right"
+            app:popEnterAnim="@anim/slide_in_from_right"
+            app:popExitAnim="@anim/slide_out_to_left"/>
         <action
             android:id="@+id/action_profileFragment_to_followingFragment"
-            app:destination="@id/followingFragment" />
+            app:destination="@id/followingFragment"
+            app:enterAnim="@anim/slide_in_from_left"
+            app:exitAnim="@anim/slide_out_to_right"
+            app:popEnterAnim="@anim/slide_in_from_right"
+            app:popExitAnim="@anim/slide_out_to_left"/>
     </fragment>
 
     <fragment
@@ -74,13 +89,17 @@
         <action
             android:id="@+id/action_settingsFragment_to_profileInfo"
             app:destination="@id/profileInfo"
-            app:enterAnim="@anim/slide_in_from_bottom"
-            app:exitAnim="@anim/fade_out"
-            app:popEnterAnim="@anim/fade_in"
-            app:popExitAnim="@anim/slide_out_to_bottom" />
+            app:enterAnim="@anim/slide_in_from_left"
+            app:exitAnim="@anim/slide_out_to_right"
+            app:popEnterAnim="@anim/slide_in_from_right"
+            app:popExitAnim="@anim/slide_out_to_left"/>
         <action
             android:id="@+id/action_settingsFragment_to_currentPasswordVerification"
-            app:destination="@id/currentPasswordVerification" />
+            app:destination="@id/currentPasswordVerification"
+            app:enterAnim="@anim/slide_in_from_left"
+            app:exitAnim="@anim/slide_out_to_right"
+            app:popEnterAnim="@anim/slide_in_from_right"
+            app:popExitAnim="@anim/slide_out_to_left"/>
     </fragment>
 
     <fragment
@@ -95,22 +114,30 @@
             android:id="@+id/action_othersProfileFragment_to_likedByFragment"
             app:destination="@id/likedByFragment"
             app:enterAnim="@anim/slide_in_from_left"
-            app:exitAnim="@anim/fade_out"
-            app:popEnterAnim="@anim/fade_in"
-            app:popExitAnim="@anim/slide_out_to_left" />
+            app:exitAnim="@anim/slide_out_to_right"
+            app:popEnterAnim="@anim/slide_in_from_right"
+            app:popExitAnim="@anim/slide_out_to_left"/>
         <action
             android:id="@+id/action_othersProfileFragment_to_commentsFragment"
             app:destination="@id/commentsFragment"
             app:enterAnim="@anim/slide_in_from_left"
-            app:exitAnim="@anim/fade_out"
-            app:popEnterAnim="@anim/fade_in"
+            app:exitAnim="@anim/slide_out_to_right"
+            app:popEnterAnim="@anim/slide_in_from_right"
             app:popExitAnim="@anim/slide_out_to_left"/>
         <action
             android:id="@+id/action_othersProfileFragment_to_followersFragment"
-            app:destination="@id/followersFragment" />
+            app:destination="@id/followersFragment"
+            app:enterAnim="@anim/slide_in_from_left"
+            app:exitAnim="@anim/slide_out_to_right"
+            app:popEnterAnim="@anim/slide_in_from_right"
+            app:popExitAnim="@anim/slide_out_to_left"/>
         <action
             android:id="@+id/action_othersProfileFragment_to_followingFragment"
-            app:destination="@id/followingFragment" />
+            app:destination="@id/followingFragment"
+            app:enterAnim="@anim/slide_in_from_left"
+            app:exitAnim="@anim/slide_out_to_right"
+            app:popEnterAnim="@anim/slide_in_from_right"
+            app:popExitAnim="@anim/slide_out_to_left"/>
     </fragment>
 
     <action
@@ -121,7 +148,8 @@
     <fragment
         android:id="@+id/commentsFragment"
         android:name="com.riyazuddin.zing.ui.main.fragments.CommentsFragment"
-        android:label="CommentsFragment" >
+        android:label="CommentsFragment"
+        tools:layout="@layout/fragment_comments">
         <argument
             android:name="postId"
             app:argType="string" />
@@ -130,7 +158,8 @@
     <fragment
         android:id="@+id/likedByFragment"
         android:name="com.riyazuddin.zing.ui.main.fragments.LikedByFragment"
-        android:label="LikedByFragment" >
+        android:label="LikedByFragment"
+        tools:layout="@layout/fragment_liked_by">
         <argument
             android:name="postId"
             app:argType="string" />
@@ -138,25 +167,33 @@
     <fragment
         android:id="@+id/profileInfo"
         android:name="com.riyazuddin.zing.ui.main.fragments.settings.ProfileInfo"
-        android:label="ProfileInfo" />
+        android:label="ProfileInfo"
+        tools:layout="@layout/fragment_profile_info"/>
     <fragment
         android:id="@+id/currentPasswordVerification"
         android:name="com.riyazuddin.zing.ui.main.fragments.settings.CurrentPasswordVerification"
-        android:label="CurrentPasswordVerification" >
+        android:label="CurrentPasswordVerification"
+        tools:layout="@layout/fragment_current_password_verification">
         <action
             android:id="@+id/action_currentPasswordVerification_to_changePassword"
             app:destination="@id/changePassword"
-            app:popUpTo="@id/settingsFragment"/>
+            app:popUpTo="@id/settingsFragment"
+            app:enterAnim="@anim/slide_in_from_left"
+            app:exitAnim="@anim/slide_out_to_right"
+            app:popEnterAnim="@anim/slide_in_from_right"
+            app:popExitAnim="@anim/slide_out_to_left"/>
     </fragment>
     <fragment
         android:id="@+id/changePassword"
         android:name="com.riyazuddin.zing.ui.main.fragments.settings.ChangePassword"
-        android:label="ChangePassword" />
+        android:label="ChangePassword"
+        tools:layout="@layout/fragment_change_password"/>
 
     <fragment
         android:id="@+id/cameraFragment"
         android:name="com.riyazuddin.zing.ui.main.fragments.CameraFragment"
-        android:label="CameraFragment" >
+        android:label="CameraFragment"
+        tools:layout="@layout/fragment_camera">
         <action
             android:id="@+id/action_cameraFragment_to_capturePreviewFragment"
             app:destination="@id/capturePreviewFragment" />
@@ -168,12 +205,14 @@
     <fragment
         android:id="@+id/capturePreviewFragment"
         android:name="com.riyazuddin.zing.ui.main.fragments.CapturePreviewFragment"
-        android:label="CapturePreviewFragment" >
+        android:label="CapturePreviewFragment"
+        tools:layout="@layout/fragment_capture_preview">
     </fragment>
     <fragment
         android:id="@+id/followersFragment"
         android:name="com.riyazuddin.zing.ui.main.fragments.FollowersFragment"
-        android:label="FollowersFragment">
+        android:label="FollowersFragment"
+        tools:layout="@layout/fragment_followers">
         <argument
             android:name="uid"
             app:argType="string"/>
@@ -181,10 +220,64 @@
     <fragment
         android:id="@+id/followingFragment"
         android:name="com.riyazuddin.zing.ui.main.fragments.FollowingFragment"
-        android:label="FollowingFragment">
+        android:label="FollowingFragment"
+        tools:layout="@layout/fragment_following">
         <argument
             android:name="uid"
             app:argType="string"/>
+    </fragment>
+    <fragment
+        android:id="@+id/recentChatListFragment"
+        android:name="com.riyazuddin.zing.ui.main.fragments.chat.RecentChatListFragment"
+        android:label="RecentChatListFragment"
+        tools:layout="@layout/fragment_recent_chat_list">
+        <action
+            android:id="@+id/action_recentChatListFragment_to_newChatFragment"
+            app:destination="@id/newChatFragment"
+            app:enterAnim="@anim/slide_in_from_left"
+            app:exitAnim="@anim/slide_out_to_right"
+            app:popEnterAnim="@anim/slide_in_from_right"
+            app:popExitAnim="@anim/slide_out_to_left"/>
+        <action
+            android:id="@+id/action_recentChatListFragment_to_chatFragment"
+            app:destination="@id/chatFragment"
+            app:enterAnim="@anim/slide_in_from_left"
+            app:exitAnim="@anim/slide_out_to_right"
+            app:popEnterAnim="@anim/slide_in_from_right"
+            app:popExitAnim="@anim/slide_out_to_left"/>
+        <argument
+            android:name="currentUser"
+            app:argType="com.riyazuddin.zing.data.entities.User" />
+    </fragment>
+    <fragment
+        android:id="@+id/chatFragment"
+        android:name="com.riyazuddin.zing.ui.main.fragments.chat.ChatFragment"
+        android:label="ChatFragment"
+        tools:layout="@layout/fragment_chat">
+        <argument
+            android:name="otherEndUser"
+            app:argType="com.riyazuddin.zing.data.entities.User" />
+        <argument
+            android:name="currentUser"
+            app:argType="com.riyazuddin.zing.data.entities.User" />
+    </fragment>
+    <fragment
+        android:id="@+id/newChatFragment"
+        android:name="com.riyazuddin.zing.ui.main.fragments.chat.NewChatFragment"
+        android:label="NewChatFragment"
+        tools:layout="@layout/fragment_new_chat">
+        <action
+            android:id="@+id/action_newChatFragment_to_chatFragment"
+            app:destination="@id/chatFragment"
+            app:popUpTo="@id/newChatFragment"
+            app:popUpToInclusive="true"
+            app:enterAnim="@anim/slide_in_from_left"
+            app:exitAnim="@anim/slide_out_to_right"
+            app:popEnterAnim="@anim/slide_in_from_right"
+            app:popExitAnim="@anim/slide_out_to_left"/>
+        <argument
+            android:name="currentUser"
+            app:argType="com.riyazuddin.zing.data.entities.User" />
     </fragment>
 
 </navigation>

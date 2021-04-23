@@ -11,7 +11,7 @@ import com.riyazuddin.zing.data.entities.Comment
 import com.riyazuddin.zing.data.entities.User
 import com.riyazuddin.zing.other.Event
 import com.riyazuddin.zing.other.Resource
-import com.riyazuddin.zing.repositories.MainRepository
+import com.riyazuddin.zing.repositories.abstraction.MainRepository
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch

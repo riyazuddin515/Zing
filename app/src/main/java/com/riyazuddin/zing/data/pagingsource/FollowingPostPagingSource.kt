@@ -46,6 +46,8 @@ class FollowingPostPagingSource(
                     .get()
                     .await()
 
+                val c = currentPage!!.toObjects(Post::class.java)
+
                 val parsedPage = currentPage!!.toObjects(Post::class.java)
                     .onEach { post ->
                         val user = db.collection(USERS_COLLECTION)

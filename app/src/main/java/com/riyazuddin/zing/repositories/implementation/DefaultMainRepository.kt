@@ -1,4 +1,4 @@
-package com.riyazuddin.zing.repositories
+package com.riyazuddin.zing.repositories.implementation
 
 import android.net.Uri
 import com.algolia.search.client.ClientSearch
@@ -23,12 +23,15 @@ import com.riyazuddin.zing.other.Constants.POST_LIKES_COLLECTION
 import com.riyazuddin.zing.other.Constants.USERS_COLLECTION
 import com.riyazuddin.zing.other.Resource
 import com.riyazuddin.zing.other.safeCall
+import com.riyazuddin.zing.repositories.abstraction.MainRepository
 import io.ktor.client.features.logging.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 import java.util.*
+import javax.inject.Singleton
 
+@Singleton
 class DefaultMainRepository : MainRepository {
 
     private val auth = FirebaseAuth.getInstance()
@@ -370,7 +373,8 @@ class DefaultMainRepository : MainRepository {
         }
     }
 
-    override suspend fun getFollowersList(uid: String): Resource<Followers> = withContext(Dispatchers.IO) {
+    override suspend fun getFollowersList(uid: String): Resource<Followers> =
+        withContext(Dispatchers.IO) {
             safeCall {
                 val followersList = followersCollection.document(uid)
                     .get()
@@ -381,16 +385,17 @@ class DefaultMainRepository : MainRepository {
             }
         }
 
-    override suspend fun getFollowingList(uid: String): Resource<Following> = withContext(Dispatchers.IO){
-        safeCall {
-            val followingList = followingCollection.document(uid)
-                .get()
-                .await()
-                .toObject(Following::class.java)!!
+    override suspend fun getFollowingList(uid: String): Resource<Following> =
+        withContext(Dispatchers.IO) {
+            safeCall {
+                val followingList = followingCollection.document(uid)
+                    .get()
+                    .await()
+                    .toObject(Following::class.java)!!
 
-            Resource.Success(followingList)
+                Resource.Success(followingList)
+            }
         }
-    }
 
     override suspend fun algoliaSearch(searchQuery: String): Resource<ResponseSearch> =
         withContext(Dispatchers.IO) {
@@ -407,4 +412,8 @@ class DefaultMainRepository : MainRepository {
                 Resource.Success(result)
             }
         }
+
+    companion object {
+        const val TAG = "MainRepository"
+    }
 }

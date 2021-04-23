@@ -1,29 +1,23 @@
 package com.riyazuddin.zing.ui.main.viewmodels
 
-import android.content.Context
 import android.net.Uri
 import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.riyazuddin.zing.R
 import com.riyazuddin.zing.data.entities.UpdateProfile
 import com.riyazuddin.zing.data.entities.User
-import com.riyazuddin.zing.other.Constants.MAX_PASSWORD
-import com.riyazuddin.zing.other.Constants.MIN_PASSWORD
 import com.riyazuddin.zing.other.Event
 import com.riyazuddin.zing.other.Resource
-import com.riyazuddin.zing.other.snackBar
-import com.riyazuddin.zing.repositories.MainRepository
+import com.riyazuddin.zing.repositories.abstraction.MainRepository
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class SettingsViewModel @ViewModelInject constructor(
     private val repository: MainRepository,
-    private val dispatcher: CoroutineDispatcher = Dispatchers.Main,
-    private val applicationContext: Context
+    private val dispatcher: CoroutineDispatcher = Dispatchers.Main
 ) : ViewModel() {
 
     private val _userProfileStatus = MutableLiveData<Event<Resource<User>>>()

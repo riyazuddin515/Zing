@@ -1,4 +1,4 @@
-package com.riyazuddin.zing.repositories
+package com.riyazuddin.zing.repositories.abstraction
 
 import com.riyazuddin.zing.other.Resource
 

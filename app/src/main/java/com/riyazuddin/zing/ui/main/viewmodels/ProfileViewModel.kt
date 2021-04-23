@@ -15,16 +15,15 @@ import com.riyazuddin.zing.data.pagingsource.ProfilePostPagingSource
 import com.riyazuddin.zing.other.Constants.POST_PAGE_SIZE
 import com.riyazuddin.zing.other.Event
 import com.riyazuddin.zing.other.Resource
-import com.riyazuddin.zing.repositories.MainRepository
+import com.riyazuddin.zing.repositories.abstraction.MainRepository
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 
 class ProfileViewModel @ViewModelInject constructor(
-    private val repository: MainRepository,
-    private val dispatcher: CoroutineDispatcher = Dispatchers.Main
-) : BasePostViewModel(repository, dispatcher) {
+    private val repository: MainRepository
+) : BasePostViewModel(repository) {
 
     private val _followStatus = MutableLiveData<Event<Resource<Boolean>>>()
     val followStatus: LiveData<Event<Resource<Boolean>>> = _followStatus
@@ -46,7 +45,7 @@ class ProfileViewModel @ViewModelInject constructor(
 
     fun toggleFollowForUser(uid: String) {
         _followStatus.postValue(Event(Resource.Loading()))
-        viewModelScope.launch(dispatcher) {
+        viewModelScope.launch {
             val result = repository.toggleFollowForUser(uid)
             _followStatus.postValue(Event(result))
         }
@@ -54,7 +53,7 @@ class ProfileViewModel @ViewModelInject constructor(
 
     fun loadProfile(uid: String) {
         _loadProfileMetadata.postValue(Event(Resource.Loading()))
-        viewModelScope.launch(dispatcher) {
+        viewModelScope.launch {
             val result = repository.getUserProfile(uid)
             _loadProfileMetadata.postValue(Event(result))
         }

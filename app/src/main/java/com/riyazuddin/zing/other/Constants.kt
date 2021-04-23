@@ -10,13 +10,22 @@ object Constants {
     const val FOLLOWING_COLLECTION = "following"
     const val FOLLOWERS_COLLECTION = "followers"
     const val POST_LIKES_COLLECTION = "postLikes"
+    const val CHATS_COLLECTION = "chats"
+    const val MESSAGES_COLLECTION = "messages"
 
     const val POST_PAGE_SIZE = 10
+    const val NEW_CHAT_LIST_SIZE = 10
 
     const val MIN_PASSWORD = 8
-    const val MAX_PASSWORD = 15
     const val MIN_USERNAME = 3
-    const val MAX_USERNAME = 20
 
     const val SEARCH_TIME_DELAY = 500L
+
+    const val TEXT = "TEXT"
+    const val IMAGE = "IMAGE"
+
+    const val SENDING = "SENDING"
+    const val SENT = "SENT"
+    const val DELIVERED = "DELIVERED"
+    const val READ = "READ"
 }
