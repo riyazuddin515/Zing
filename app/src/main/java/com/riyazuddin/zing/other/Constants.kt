@@ -24,8 +24,11 @@ object Constants {
     const val TEXT = "TEXT"
     const val IMAGE = "IMAGE"
 
+    const val PENDING = "PENDING"
     const val SENDING = "SENDING"
     const val SENT = "SENT"
     const val DELIVERED = "DELIVERED"
-    const val READ = "READ"
+    const val SEEN = "SEEN"
+
+    const val NO_MORE_MESSAGES = "NO_MORE_MESSAGES"
 }

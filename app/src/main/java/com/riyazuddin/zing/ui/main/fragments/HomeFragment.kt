@@ -78,19 +78,19 @@ class HomeFragment : BasePostFragment(R.layout.fragment_home) {
             findNavController().navigate(R.id.action_homeFragment_to_recentChatListFragment, bundle)
         }
 
-        lifecycleScope.launch {
-            viewModel.pagingFlow.collect {
-                postAdapter.submitData(it)
-            }
-        }
-
-        lifecycleScope.launch {
-            postAdapter.loadStateFlow.collectLatest {
-                binding.progressBar.isVisible =
-                    it.refresh is LoadState.Loading ||
-                            it.append is LoadState.Loading
-            }
-        }
+//        lifecycleScope.launch {
+//            viewModel.pagingFlow.collect {
+//                postAdapter.submitData(it)
+//            }
+//        }
+//
+//        lifecycleScope.launch {
+//            postAdapter.loadStateFlow.collectLatest {
+//                binding.progressBar.isVisible =
+//                    it.refresh is LoadState.Loading ||
+//                            it.append is LoadState.Loading
+//            }
+//        }
 
         viewModel.loadCurrentUser(Firebase.auth.uid!!)
 

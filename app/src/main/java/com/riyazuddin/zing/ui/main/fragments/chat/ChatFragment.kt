@@ -1,12 +1,14 @@
 package com.riyazuddin.zing.ui.main.fragments.chat
 
+import android.media.MediaPlayer
 import android.os.Bundle
-import android.os.Message
 import android.util.Log
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.MutableLiveData
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -24,16 +26,18 @@ import com.riyazuddin.zing.ui.dialogs.CustomDialog
 import com.riyazuddin.zing.ui.main.viewmodels.ChatViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
-import kotlin.math.log
 
 @AndroidEntryPoint
 class ChatFragment : Fragment(R.layout.fragment_chat) {
 
-    private lateinit var binding: FragmentChatBinding
+    private var _binding: FragmentChatBinding? = null
+    private val binding get() = _binding!!
 
     private val viewModel: ChatViewModel by viewModels()
 
     private val args: ChatFragmentArgs by navArgs()
+
+    private lateinit var mediaPlayer: MediaPlayer
 
     @Inject
     lateinit var glide: RequestManager
@@ -41,9 +45,19 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
     @Inject
     lateinit var chatAdapter: ChatAdapter
 
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        _binding = FragmentChatBinding.inflate(inflater, container, false)
+        return binding.root
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        binding = FragmentChatBinding.bind(view)
+
+        mediaPlayer = MediaPlayer.create(requireContext(), R.raw.received_chat)
 
         binding.ivBack.setOnClickListener {
             findNavController().popBackStack(R.id.recentChatListFragment, false)
@@ -99,16 +113,35 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
             onLoading = {
                 Log.i(TAG, "subscribe: Sending message")
             }
-        ) {
-            Log.d(TAG, "subscribe() message send success: $it")
+        ) { sentMessage ->
+            Log.d(TAG, "subscribe() message send success: $sentMessage")
+            viewModel.updateChatListOnMessageSent(sentMessage)
             binding.TIEMessage.text?.clear()
         })
-        viewModel.chatList.observe(viewLifecycleOwner, EventObserver{
-            it.forEach { message ->
-                Log.i(TAG, "subscribeToObserver: ${message.message} ")
+
+        viewModel.chatList.observe(viewLifecycleOwner, EventObserver(
+            onError = {
+                    snackBar(it)
+                    binding.linearProgressIndicator.isVisible = false
+            },
+            onLoading = {
+                Log.i(TAG, "subscribe: loading")
+                binding.linearProgressIndicator.isVisible = true
             }
+        ) {
+            it.forEach { message ->
+                Log.i(TAG, "subscribeToObserver it: ${message.message} ")
+            }
+            binding.linearProgressIndicator.isVisible = false
             chatAdapter.messages = it
             chatAdapter.notifyDataSetChanged()
+        })
+        viewModel.playTone.observe(viewLifecycleOwner, EventObserver(
+            oneTimeConsume = true
+        ) {
+            if (it) {
+                mediaPlayer.start()
+            }
         })
     }
 
@@ -127,8 +160,13 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
                     val pos = layoutManager.findLastCompletelyVisibleItemPosition()
                     val numItems: Int = recyclerView.adapter!!.itemCount
 
+                    Log.i(TAG, "onScrolled: pos = $pos ----- numItem = $numItems")
+
+
                     if (pos + 1 == numItems) {
                         viewModel.getChatLoadMore(args.currentUser.uid, args.otherEndUser.uid)
+                        Log.i(TAG, "onScrolled: calling getChatLoadMore")
+//                        isLoadingMore = true
                     }
                 }
             })
@@ -140,11 +178,11 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
         }
     }
 
-    override fun onDestroy() {
-        Log.i(TAG, "onDestroy: ")
-//        chatAdapter.messages = listOf()
+    override fun onDestroyView() {
         viewModel.clearChatList()
-        super.onDestroy()
+        viewModel.chatList.removeObservers(viewLifecycleOwner)
+        _binding = null
+        super.onDestroyView()
     }
 
     companion object {

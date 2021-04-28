@@ -1,21 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:background="@color/colorPrimary">
+    android:background="@color/background">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/constraintLayout2"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:elevation="2dp"
+        android:background="@drawable/top_menu_background"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        android:background="@drawable/top_menu_background">
+        app:layout_constraintTop_toTopOf="parent">
 
         <ImageView
             android:id="@+id/ivBack"
@@ -33,15 +32,15 @@
         <de.hdodenhof.circleimageview.CircleImageView
             android:id="@+id/CIVProfilePic"
             android:layout_width="50dp"
-            android:padding="3dp"
             android:layout_height="?attr/actionBarSize"
-            android:layout_marginStart="5dp"
-            tools:src="@drawable/default_profile_pic"
+            android:layout_marginStart="3dp"
+            android:padding="3dp"
             app:layout_constraintBottom_toBottomOf="@+id/ivBack"
             app:layout_constraintEnd_toStartOf="@+id/tvUsername"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toEndOf="@+id/ivBack"
-            app:layout_constraintTop_toTopOf="@+id/ivBack" />
+            app:layout_constraintTop_toTopOf="@+id/ivBack"
+            tools:src="@drawable/default_profile_pic" />
 
         <com.google.android.material.textview.MaterialTextView
             android:id="@+id/tvUsername"
@@ -52,15 +51,26 @@
             android:textColor="@color/blackAndWhite"
             android:textSize="20sp"
             android:textStyle="bold"
-            app:layout_goneMarginStart="5dp"
-            tools:text="@string/username"
             app:layout_constraintBottom_toBottomOf="@+id/CIVProfilePic"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toEndOf="@+id/CIVProfilePic"
-            app:layout_constraintTop_toTopOf="@+id/CIVProfilePic" />
+            app:layout_constraintTop_toTopOf="@+id/CIVProfilePic"
+            app:layout_goneMarginStart="5dp"
+            tools:text="@string/username" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <com.google.android.material.progressindicator.LinearProgressIndicator
+        android:id="@+id/linearProgressIndicator"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:indeterminate="true"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/constraintLayout2" />
 
 
     <androidx.recyclerview.widget.RecyclerView
@@ -72,19 +82,19 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/constraintLayout2" />
+        app:layout_constraintTop_toBottomOf="@+id/linearProgressIndicator" />
 
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/constraintLayout5"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="@drawable/bottom_menu_background"
+        android:padding="5dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toStartOf="parent"
-        android:background="@drawable/bottom_menu_background"
-        android:padding="5dp">
+        app:layout_constraintStart_toStartOf="parent">
 
 
         <com.google.android.material.textfield.TextInputLayout
@@ -131,17 +141,16 @@
             android:layout_width="wrap_content"
             android:layout_height="0dp"
             android:layout_margin="5dp"
+            android:background="@android:color/transparent"
             android:contentDescription="@string/image"
             android:padding="5dp"
             android:src="@drawable/ic_send"
-            android:background="@android:color/transparent"
             app:layout_constraintBottom_toBottomOf="@+id/TILMessage"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toEndOf="@+id/btnAttachFile"
-            app:layout_constraintTop_toTopOf="@+id/TILMessage"/>
+            app:layout_constraintTop_toTopOf="@+id/TILMessage" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
-
 
 </androidx.constraintlayout.widget.ConstraintLayout>

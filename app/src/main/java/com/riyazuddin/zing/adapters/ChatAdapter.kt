@@ -10,10 +10,13 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.RequestManager
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
+import com.riyazuddin.zing.R
 import com.riyazuddin.zing.data.entities.Message
 import com.riyazuddin.zing.databinding.ItemChatLeftBinding
 import com.riyazuddin.zing.databinding.ItemChatRightBinding
 import com.riyazuddin.zing.other.Constants
+import com.riyazuddin.zing.other.Constants.PENDING
+import com.riyazuddin.zing.other.Constants.SENT
 import java.text.SimpleDateFormat
 import java.util.*
 import javax.inject.Inject
@@ -83,7 +86,7 @@ class ChatAdapter @Inject constructor(private val glide: RequestManager) :
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         val message = messages[position]
         val date =
-            SimpleDateFormat("hh:mm a", Locale.US).format(Date(message.date))
+            SimpleDateFormat("hh:mm a", Locale.US).format(Date(message.date)).replace("AM", "am").replace("PM","pm")
         if (message.senderAddReceiverUid.size == 2) {
             if (message.senderAddReceiverUid[0] == Firebase.auth.uid) {
                 val rightViewHolder = RightViewHolder(ItemChatRightBinding.bind(holder.itemView))
@@ -107,9 +110,18 @@ class ChatAdapter @Inject constructor(private val glide: RequestManager) :
                         tvMessage.text = message.message
                         tvMessage.isVisible = true
                     }
+                    if (message.status == PENDING){
+                        glide.load(R.drawable.ic_sending).into(ivStatus)
+                        ivStatus.isVisible = true
+                    }else if (message.status == SENT) {
+                        glide.load(R.drawable.ic_sent).into(ivStatus)
+                        ivStatus.isVisible = true
+                    }
                     root.setOnLongClickListener {
-                        onItemLongClickListener?.let {
-                            it(message, position)
+                        if (message.senderAddReceiverUid[0] == Firebase.auth.uid) {
+                            onItemLongClickListener?.let {
+                                it(message, position)
+                            }
                         }
                         true
                     }
@@ -136,8 +148,10 @@ class ChatAdapter @Inject constructor(private val glide: RequestManager) :
                         tvMessage.isVisible = true
                     }
                     root.setOnLongClickListener {
-                        onItemLongClickListener?.let {
-                            it(message, position)
+                        if (message.senderAddReceiverUid[0] == Firebase.auth.uid) {
+                            onItemLongClickListener?.let {
+                                it(message, position)
+                            }
                         }
                         true
                     }

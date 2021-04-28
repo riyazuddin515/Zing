@@ -1,7 +1,6 @@
 package com.riyazuddin.zing.repositories.abstraction
 
 import android.net.Uri
-import androidx.lifecycle.MutableLiveData
 import androidx.paging.Pager
 import com.google.firebase.firestore.QuerySnapshot
 import com.riyazuddin.zing.data.entities.Message
@@ -26,11 +25,19 @@ interface ChatRepository {
         receiveProfileUrl: String
     ): Resource<Message>
 
-    fun getChatLoadFirstQuery(currentUid: String, otherEndUserUid: String)
+    fun updateChatListOnMessageSent(message: Message)
 
-    fun getChatLoadMore(currentUid: String, otherEndUserUid: String)
+    suspend fun getChatLoadFirstQuery(currentUid: String, otherEndUserUid: String)
+
+    suspend fun getChatLoadMore(currentUid: String, otherEndUserUid: String)
 
     fun clearChatList()
 
+    fun clearRecentMessagesList()
+
+    suspend fun getLastMessageFirstQuery(currentUid: String)
+
     suspend fun deleteChatMessage(currentUid: String, otherEndUserUid: String, message: Message)
+
+    suspend fun getUser(uid: String): Resource<User>
 }

@@ -20,9 +20,9 @@
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:title="Comments"
             app:navigationIcon="@drawable/ic_arrow_back"
-            app:titleTextColor="@color/blackAndWhite"/>
+            app:title="Comments"
+            app:titleTextColor="@color/blackAndWhite" />
 
     </com.google.android.material.appbar.AppBarLayout>
 
@@ -42,14 +42,14 @@
         android:layout_width="40dp"
         android:layout_height="40dp"
         android:layout_marginStart="5dp"
-        tools:src="@drawable/default_profile_pic"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/TILComment" />
+        app:layout_constraintTop_toTopOf="@+id/TILComment"
+        tools:src="@drawable/default_profile_pic" />
 
     <com.google.android.material.textfield.TextInputLayout
-        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
         android:id="@+id/TILComment"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="2"
@@ -63,7 +63,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="5dp"
-            android:textColor="@color/blackAndWhite"/>
+            android:textColor="@color/blackAndWhite" />
 
     </com.google.android.material.textfield.TextInputLayout>
 
@@ -71,23 +71,25 @@
         android:id="@+id/btnSend"
         android:layout_width="60dp"
         android:layout_height="wrap_content"
+        android:layout_marginEnd="5dp"
         android:background="@color/whiteAndBlack"
         android:contentDescription="@string/send"
         android:padding="10dp"
         android:src="@drawable/ic_send"
-        android:layout_marginEnd="5dp"
         app:layout_constraintBottom_toBottomOf="@+id/TILComment"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@+id/TILComment" />
 
-    <ProgressBar
+    <com.google.android.material.progressindicator.CircularProgressIndicator
         android:id="@+id/progressBar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:indeterminate="true"
         android:visibility="gone"
         app:layout_constraintBottom_toTopOf="@+id/TILComment"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/appBar" />
+        app:layout_constraintTop_toBottomOf="@+id/appBar"
+        tools:visibility="visible" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,7 +1,9 @@
 package com.riyazuddin.zing.data.entities
 
+import com.google.firebase.firestore.Exclude
+
 data class LastMessage(
-    val message: Message,
+    val message: Message = Message(),
 
     var senderName: String = "",
     var senderUserName: String = "",
@@ -9,6 +11,9 @@ data class LastMessage(
 
     var receiverName: String = "",
     var receiverUsername: String = "",
-    var receiverProfilePicUrl: String = ""
+    var receiverProfilePicUrl: String = "",
+
+    @get:Exclude
+    var user: User = User()
 
 )

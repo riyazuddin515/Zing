@@ -11,6 +11,7 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
+import com.riyazuddin.zing.data.entities.LastMessage
 import com.riyazuddin.zing.data.entities.Message
 import com.riyazuddin.zing.data.entities.User
 import com.riyazuddin.zing.data.pagingsource.FollowingAndFollowersPagingSource
@@ -22,7 +23,9 @@ import com.riyazuddin.zing.repositories.implementation.DefaultChatRepository
 import dagger.hilt.android.scopes.FragmentScoped
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
+import javax.inject.Singleton
 
+@Singleton
 class ChatViewModel @ViewModelInject constructor(
     private val repository: ChatRepository
 ) : ViewModel() {
@@ -33,12 +36,24 @@ class ChatViewModel @ViewModelInject constructor(
     private val _chatList:  MutableLiveData<Event<Resource<List<Message>>>> = (repository as DefaultChatRepository).chatList
     val chatList: LiveData<Event<Resource<List<Message>>>> = _chatList
 
+    val playTone: LiveData<Event<Resource<Boolean>>> = (repository as DefaultChatRepository).playTone
+
+    private val _recentMessagesList: MutableLiveData<Event<Resource<List<LastMessage>>>> = (repository as DefaultChatRepository).lastMessageList
+    val recentMessagesList: LiveData<Event<Resource<List<LastMessage>>>> = _recentMessagesList
+
     fun getChatLoadFirstQuery(currentUid: String, otherEndUserUid: String) {
-        repository.getChatLoadFirstQuery(currentUid, otherEndUserUid)
+        _chatList.postValue(Event(Resource.Loading()))
+        viewModelScope.launch {
+            repository.getChatLoadFirstQuery(currentUid, otherEndUserUid)
+        }
+
     }
 
     fun getChatLoadMore(currentUid: String, otherEndUserUid: String){
-        repository.getChatLoadMore(currentUid, otherEndUserUid)
+        _chatList.postValue(Event(Resource.Loading()))
+        viewModelScope.launch {
+            repository.getChatLoadMore(currentUid, otherEndUserUid)
+        }
     }
 
     suspend fun getFollowingAndFollowersUsers(uid: String): Flow<PagingData<User>> {
@@ -69,6 +84,17 @@ class ChatViewModel @ViewModelInject constructor(
         }
     }
 
+    fun updateChatListOnMessageSent(message: Message){
+        repository.updateChatListOnMessageSent(message)
+    }
+
+    fun getLastMessageFirstQuery(currentUid: String) {
+        _recentMessagesList.postValue(Event(Resource.Loading()))
+        viewModelScope.launch {
+            repository.getLastMessageFirstQuery(currentUid)
+        }
+    }
+
     fun deleteMessage(currentUid: String, otherEndUserUid: String, message: Message){
         viewModelScope.launch {
             repository.deleteChatMessage(currentUid, otherEndUserUid, message)
@@ -78,11 +104,12 @@ class ChatViewModel @ViewModelInject constructor(
 
     fun clearChatList(){
         _chatList.postValue(Event(Resource.Success(listOf())))
-        chatList.value.let {
-            Log.i("chatViewModel", "clearChatList: ${it?.getContentHasBeenHandled()?.data?.size}")
-            Log.i("chatViewModel", "clearChatList: ${it?.getContentHasBeenHandled()?.data}")
-        }
         repository.clearChatList()
+    }
+
+    fun clearRecentMessagesList() {
+        _recentMessagesList.postValue(Event(Resource.Success(listOf())))
+        repository.clearRecentMessagesList()
     }
 
 }
