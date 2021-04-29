@@ -5,6 +5,7 @@ object Constants {
     const val DEFAULT_PROFILE_PICTURE_URL = "https://firebasestorage.googleapis.com/v0/b/zing515.appspot.com/o/img_avatar.png?alt=media&token=ec8797be-e330-4aa2-b818-aab826de94c9"
 
     const val USERS_COLLECTION = "users"
+    const val USERS_STATE_COLLECTION = "usersState"
     const val POSTS_COLLECTION = "posts"
     const val COMMENTS_COLLECTION = "comments"
     const val FOLLOWING_COLLECTION = "following"

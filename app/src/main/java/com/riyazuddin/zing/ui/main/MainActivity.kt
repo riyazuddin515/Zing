@@ -1,14 +1,24 @@
 package com.riyazuddin.zing.ui.main
 
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.ui.setupWithNavController
+import com.google.android.material.snackbar.Snackbar
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.database.ktx.database
+import com.google.firebase.firestore.SetOptions
+import com.google.firebase.ktx.Firebase
 import com.riyazuddin.zing.R
+import com.riyazuddin.zing.data.entities.User
 import com.riyazuddin.zing.databinding.ActivityMainBinding
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
@@ -37,7 +47,5 @@ class MainActivity : AppCompatActivity() {
                 else -> binding.bottomNavigation.visibility = View.GONE
             }
         }
-
     }
-
 }

@@ -1,5 +1,6 @@
 package com.riyazuddin.zing.ui.main.viewmodels
 
+import android.util.Log
 import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -29,11 +30,23 @@ class HomeViewModel @ViewModelInject constructor(
         FollowingPostPagingSource(FirebaseFirestore.getInstance())
     }.flow.cachedIn(viewModelScope)
 
+    fun onlineOfflineToggle(uid: String) {
+        viewModelScope.launch {
+            Log.i(TAG, "onlineOfflineToggle: calling")
+            repository.onlineOfflineToggle(uid)
+            Log.i(TAG, "onlineOfflineToggle: called")
+        }
+    }
+
     fun loadCurrentUser(uid: String) {
         _loadCurrentUserStatus.postValue(Event(Resource.Loading()))
         viewModelScope.launch {
             val result = repository.getUserProfile(uid)
             _loadCurrentUserStatus.postValue(Event(result))
         }
+    }
+
+    companion object{
+        const val TAG = "HomeViewModel"
     }
 }

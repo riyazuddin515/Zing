@@ -17,5 +17,9 @@ data class User(
     var followersCount: Int = 0,
     var postCount: Int = 0,
     @get:Exclude
+    var online: Boolean = false,
+    @get:Exclude
+    var lastSeen: Long = 0L,
+    @get:Exclude
     var isFollowing: Boolean = false,
 ): Serializable

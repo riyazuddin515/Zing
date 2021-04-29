@@ -1,18 +1,25 @@
 package com.riyazuddin.zing.repositories.implementation
 
 import android.net.Uri
+import android.util.Log
 import com.algolia.search.client.ClientSearch
 import com.algolia.search.model.APIKey
 import com.algolia.search.model.ApplicationID
 import com.algolia.search.model.IndexName
 import com.algolia.search.model.response.ResponseSearch
+import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.*
+import com.google.firebase.database.ktx.database
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
+import com.google.firebase.firestore.SetOptions
+import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
 import com.riyazuddin.zing.BuildConfig
+import com.riyazuddin.zing.R
 import com.riyazuddin.zing.data.entities.*
 import com.riyazuddin.zing.other.Constants.COMMENTS_COLLECTION
 import com.riyazuddin.zing.other.Constants.DEFAULT_PROFILE_PICTURE_URL
@@ -21,11 +28,14 @@ import com.riyazuddin.zing.other.Constants.FOLLOWING_COLLECTION
 import com.riyazuddin.zing.other.Constants.POSTS_COLLECTION
 import com.riyazuddin.zing.other.Constants.POST_LIKES_COLLECTION
 import com.riyazuddin.zing.other.Constants.USERS_COLLECTION
+import com.riyazuddin.zing.other.Constants.USERS_STATE_COLLECTION
 import com.riyazuddin.zing.other.Resource
 import com.riyazuddin.zing.other.safeCall
 import com.riyazuddin.zing.repositories.abstraction.MainRepository
 import io.ktor.client.features.logging.*
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 import java.util.*
@@ -43,6 +53,65 @@ class DefaultMainRepository : MainRepository {
     private val followersCollection = firestore.collection(FOLLOWERS_COLLECTION)
     private val postLikesCollection = firestore.collection(POST_LIKES_COLLECTION)
     private val storage = FirebaseStorage.getInstance()
+
+    override suspend fun onlineOfflineToggle(uid: String) {
+        withContext(Dispatchers.IO) {
+            safeCall {
+                val userStatusDatabaseRef = FirebaseDatabase.getInstance().reference.child("status/$uid")
+                val usersStateCollection = firestore.collection(USERS_STATE_COLLECTION).document(uid)
+
+                val isOfflineForDatabase = mapOf(
+                    "state" to "offline",
+                    "last_change" to ServerValue.TIMESTAMP
+                )
+
+                val isOnlineForDatabase = mapOf(
+                    "state" to "online",
+                    "last_change" to ServerValue.TIMESTAMP
+                )
+
+                val isOfflineForFirestore = mapOf(
+                    "state" to "offline",
+                    "last_change" to FieldValue.serverTimestamp()
+                )
+
+                val isOnlineForFirestore = mapOf(
+                    "state" to "online",
+                    "last_change" to FieldValue.serverTimestamp()
+                )
+                Log.i(TAG, "onlineOfflineToggle: addingValueEvenListener")
+
+//                val database = Firebase.database.reference
+//                database.child("user").setValue(User("riyaz",uid)).await()
+                FirebaseDatabase.getInstance().getReference(".info/connected")
+                    .addValueEventListener(object :
+                        ValueEventListener {
+                        override fun onDataChange(snapshot: DataSnapshot) {
+                            Log.i(TAG, "onDataChange: indise")
+                            if (snapshot.value == false) {
+                                GlobalScope.launch {
+                                    usersStateCollection
+                                        .set(isOfflineForFirestore, SetOptions.merge())
+                                }
+                                return
+                            }
+                            Log.i(TAG, "onDataChange: local")
+                            userStatusDatabaseRef.onDisconnect().setValue(isOfflineForDatabase)
+                                .addOnCompleteListener {
+                                    Log.i(TAG, "onDataChange: inside")
+                                    userStatusDatabaseRef.setValue(isOnlineForDatabase)
+                                    usersStateCollection.set(isOnlineForFirestore, SetOptions.merge())
+                                }
+                        }
+
+                        override fun onCancelled(error: DatabaseError) {
+
+                        }
+                    })
+                Resource.Success(Any())
+            }
+        }
+    }
 
     override suspend fun createPost(imageUri: Uri, caption: String) = withContext(Dispatchers.IO) {
         safeCall {

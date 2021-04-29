@@ -9,6 +9,8 @@ import com.riyazuddin.zing.other.Resource
 
 interface MainRepository {
 
+    suspend fun onlineOfflineToggle(uid: String)
+
     /**
      * create a post
      */

@@ -93,6 +93,9 @@ class HomeFragment : BasePostFragment(R.layout.fragment_home) {
 //        }
 
         viewModel.loadCurrentUser(Firebase.auth.uid!!)
+        Log.i(TAG, "onViewCreated: onlineOfflineToggle calling")
+        viewModel.onlineOfflineToggle(Firebase.auth.uid!!)
+        Log.i(TAG, "onViewCreated: onlineOfflineToggle called")
 
         postAdapter.setOnUserClickListener {
             findNavController().navigate(
