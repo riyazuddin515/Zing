@@ -8,7 +8,6 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
-import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import com.riyazuddin.zing.R
@@ -52,14 +51,14 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
                 binding.TILEmail.error = this.getString(R.string.error_fields_can_not_be_empty)
             else if (!Patterns.EMAIL_ADDRESS.matcher(email).matches())
                 binding.TILPassword.error = this.getString(R.string.error_not_a_valid_email)
-            else if(password.isEmpty())
+            else if (password.isEmpty())
                 binding.TILPassword.error = getString(R.string.error_fields_can_not_be_empty)
             else if (password.length < Constants.MIN_PASSWORD)
                 binding.TILPassword.error = this.getString(
                     R.string.error_password_too_short,
                     Constants.MIN_PASSWORD
                 )
-            else{
+            else {
                 it.isEnabled = false
                 viewModel.login(
                     binding.TIEEmail.text.toString(),
@@ -85,22 +84,28 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
             binding.btnLogin.isEnabled = true
 
             val currentUser = Firebase.auth.currentUser
-            currentUser?.let { user ->
-                user.reload()
-                if (user.isEmailVerified) {
 
-                    Intent(requireActivity(), MainActivity::class.java).apply {
-                        startActivity(this)
-                        requireActivity().finish()
-                    }
-                } else {
-                    Snackbar.make(requireView(), "Verify Email", Snackbar.LENGTH_LONG)
-                        .setAction("Send Email") {
-                            user.sendEmailVerification()
-                        }.show()
+            currentUser?.let {
+                Intent(requireActivity(), MainActivity::class.java).apply {
+                    startActivity(this)
+                    requireActivity().finish()
                 }
-
             }
+//            currentUser?.let { user ->
+//                user.reload()
+//                if (user.isEmailVerified) {
+//                    Intent(requireActivity(), MainActivity::class.java).apply {
+//                        startActivity(this)
+//                        requireActivity().finish()
+//                    }
+//                } else {
+//                    Snackbar.make(requireView(), "Verify Email", Snackbar.LENGTH_LONG)
+//                        .setAction("Send Email") {
+//                            user.sendEmailVerification()
+//                        }.show()
+//                }
+//
+//            }
         })
     }
 }

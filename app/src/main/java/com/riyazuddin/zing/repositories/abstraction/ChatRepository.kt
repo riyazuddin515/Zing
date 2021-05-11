@@ -27,6 +27,8 @@ interface ChatRepository {
 
     fun updateChatListOnMessageSent(message: Message)
 
+    suspend fun updateMessageStatusAsSeen(message: Message): Resource<String>
+
     suspend fun getChatLoadFirstQuery(currentUid: String, otherEndUserUid: String)
 
     suspend fun getChatLoadMore(currentUid: String, otherEndUserUid: String)
@@ -35,7 +37,9 @@ interface ChatRepository {
 
     fun clearRecentMessagesList()
 
-    suspend fun getLastMessageFirstQuery(currentUid: String)
+    suspend fun getLastMessageFirstQuery()
+
+    suspend fun getLastMessageLoadMore()
 
     suspend fun deleteChatMessage(currentUid: String, otherEndUserUid: String, message: Message)
 

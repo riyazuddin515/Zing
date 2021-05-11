@@ -5,13 +5,14 @@
     android:id="@+id/clProfile"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/background">
+    tools:background="@color/colorPrimary">
 
-    <com.google.android.material.appbar.AppBarLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/appBarLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@drawable/top_menu_background"
+        android:elevation="0dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
@@ -22,9 +23,12 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@drawable/top_menu_background"
-            app:titleTextColor="@color/blackAndWhite"/>
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:titleTextColor="@color/blackAndWhite" />
 
-    </com.google.android.material.appbar.AppBarLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.core.widget.NestedScrollView
         android:id="@+id/nestedScrollView"
@@ -43,8 +47,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="5dp"
-                app:cardCornerRadius="15dp"
                 app:cardBackgroundColor="@color/whiteAndBlack"
+                app:cardCornerRadius="15dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.5"
                 app:layout_constraintStart_toStartOf="parent"
@@ -74,11 +78,11 @@
                         android:layout_width="0dp"
                         android:layout_height="0dp"
                         android:layout_marginTop="10dp"
-                        tools:src="@drawable/default_profile_pic"
                         app:layout_constraintDimensionRatio="1:1"
                         app:layout_constraintEnd_toEndOf="@id/guideline2"
                         app:layout_constraintStart_toStartOf="@id/guideline1"
-                        app:layout_constraintTop_toTopOf="parent" />
+                        app:layout_constraintTop_toTopOf="parent"
+                        tools:src="@drawable/default_profile_pic" />
 
                     <com.google.android.material.textview.MaterialTextView
                         android:id="@+id/tvName"
@@ -89,12 +93,12 @@
                         android:textColor="@color/blackAndWhite"
                         android:textSize="20sp"
                         android:textStyle="bold"
-                        tools:text="@string/name"
                         app:layout_constraintBottom_toTopOf="@+id/tvBio"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toEndOf="@+id/guideline2"
                         app:layout_constraintTop_toTopOf="@+id/CIVProfilePic"
-                        app:layout_constraintVertical_chainStyle="packed" />
+                        app:layout_constraintVertical_chainStyle="packed"
+                        tools:text="@string/name" />
 
                     <com.google.android.material.textview.MaterialTextView
                         android:id="@+id/tvBio"
@@ -104,12 +108,12 @@
                         android:gravity="start"
                         android:textColor="@color/blackAndWhite"
                         android:textSize="18sp"
-                        tools:text="@string/username"
                         android:textStyle="normal"
                         app:layout_constraintBottom_toBottomOf="@+id/CIVProfilePic"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="@+id/tvName"
-                        app:layout_constraintTop_toBottomOf="@+id/tvName" />
+                        app:layout_constraintTop_toBottomOf="@+id/tvName"
+                        tools:text="@string/username" />
 
                     <androidx.constraintlayout.widget.ConstraintLayout
                         android:id="@+id/tvCountLayout"
@@ -142,12 +146,12 @@
                                 android:layout_height="wrap_content"
                                 android:textColor="@color/blackAndWhite"
                                 android:textSize="18sp"
-                                tools:text="5"
                                 app:layout_constraintBottom_toTopOf="@+id/tvPost"
                                 app:layout_constraintEnd_toEndOf="@+id/tvPost"
                                 app:layout_constraintStart_toStartOf="@+id/tvPost"
                                 app:layout_constraintTop_toTopOf="parent"
-                                app:layout_constraintVertical_chainStyle="packed" />
+                                app:layout_constraintVertical_chainStyle="packed"
+                                tools:text="5" />
 
                             <com.google.android.material.textview.MaterialTextView
                                 android:id="@+id/tvPost"
@@ -180,12 +184,12 @@
                                 android:layout_height="wrap_content"
                                 android:textColor="@color/blackAndWhite"
                                 android:textSize="18sp"
-                                tools:text="5"
                                 app:layout_constraintBottom_toTopOf="@+id/tvFollowing"
                                 app:layout_constraintEnd_toEndOf="@+id/tvFollowing"
                                 app:layout_constraintStart_toStartOf="@+id/tvFollowing"
                                 app:layout_constraintTop_toTopOf="parent"
-                                app:layout_constraintVertical_chainStyle="packed" />
+                                app:layout_constraintVertical_chainStyle="packed"
+                                tools:text="5" />
 
                             <com.google.android.material.textview.MaterialTextView
                                 android:id="@+id/tvFollowing"
@@ -218,12 +222,12 @@
                                 android:layout_height="wrap_content"
                                 android:textColor="@color/blackAndWhite"
                                 android:textSize="18sp"
-                                tools:text="5"
                                 app:layout_constraintBottom_toTopOf="@+id/tvFollowers"
                                 app:layout_constraintEnd_toEndOf="@+id/tvFollowers"
                                 app:layout_constraintStart_toStartOf="@+id/tvFollowers"
                                 app:layout_constraintTop_toTopOf="parent"
-                                app:layout_constraintVertical_chainStyle="packed" />
+                                app:layout_constraintVertical_chainStyle="packed"
+                                tools:text="5" />
 
                             <com.google.android.material.textview.MaterialTextView
                                 android:id="@+id/tvFollowers"
@@ -258,13 +262,13 @@
                         android:id="@+id/progressBarProfileMetadata"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:visibility="gone"
-                        tools:visibility="visible"
                         android:indeterminate="true"
+                        android:visibility="gone"
                         app:layout_constraintBottom_toTopOf="@+id/btnToggleFollow"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent" />
+                        app:layout_constraintTop_toTopOf="parent"
+                        tools:visibility="visible" />
 
 
                 </androidx.constraintlayout.widget.ConstraintLayout>
@@ -280,21 +284,32 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/profileDataCardView"
+                app:layout_constraintVertical_bias="0.0"
+                tools:itemCount="2"
                 tools:listitem="@layout/item_post" />
 
-            <com.google.android.material.progressindicator.CircularProgressIndicator
+            <androidx.cardview.widget.CardView
                 android:id="@+id/progressBar"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="8dp"
+                app:cardBackgroundColor="@color/white"
+                app:cardCornerRadius="10dp"
+                android:layout_marginTop="5dp"
+                android:layout_marginBottom="5dp"
                 android:visibility="gone"
                 tools:visibility="visible"
-                android:indeterminate="true"
+                app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/rvPostList" />
+                app:layout_constraintTop_toBottomOf="@+id/rvPostList">
 
+                <com.google.android.material.progressindicator.CircularProgressIndicator
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:indeterminate="true"
+                    app:indicatorColor="@color/colorPrimary" />
 
+            </androidx.cardview.widget.CardView>
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 

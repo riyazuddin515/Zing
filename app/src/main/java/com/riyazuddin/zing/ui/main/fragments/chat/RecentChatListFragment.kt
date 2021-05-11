@@ -66,7 +66,7 @@ class RecentChatListFragment : Fragment(R.layout.fragment_recent_chat_list) {
 
         subscribeToObservers()
         setupRecyclerView()
-        viewModel.getLastMessageFirstQuery(Firebase.auth.uid!!)
+        viewModel.getLastMessageFirstQuery()
 
         lastMessageAdapter.setOnItemClickListener { lastMessage, user ->
             val bundle = Bundle().apply {

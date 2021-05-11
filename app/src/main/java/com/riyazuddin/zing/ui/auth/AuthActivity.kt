@@ -30,13 +30,18 @@ class AuthActivity : AppCompatActivity() {
         }
 
         Firebase.auth.currentUser?.let {
-            it.reload()
-            if (it.isEmailVerified) {
-                Intent(this, MainActivity::class.java).apply {
-                    startActivity(this)
-                    finish()
-                }
+            Intent(this, MainActivity::class.java).apply {
+                startActivity(this)
+                finish()
             }
+
+//            it.reload()
+//            if (it.isEmailVerified) {
+//                Intent(this, MainActivity::class.java).apply {
+//                    startActivity(this)
+//                    finish()
+//                }
+//            }
         }
 
     }

@@ -1,5 +1,13 @@
 package com.riyazuddin.zing.repositories.implementation
 
+import com.riyazuddin.zing.BuildConfig
+import com.algolia.search.client.ClientSearch
+import com.algolia.search.dsl.attributesForFaceting
+import com.algolia.search.dsl.settings
+import com.algolia.search.model.APIKey
+import com.algolia.search.model.ApplicationID
+import com.algolia.search.model.IndexName
+import com.algolia.search.model.response.ResponseSearch
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.riyazuddin.zing.data.entities.Followers
@@ -11,6 +19,7 @@ import com.riyazuddin.zing.other.Constants.USERS_COLLECTION
 import com.riyazuddin.zing.other.Resource
 import com.riyazuddin.zing.other.safeCall
 import com.riyazuddin.zing.repositories.abstraction.AuthRepository
+import io.ktor.client.features.logging.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
@@ -33,8 +42,8 @@ class DefaultAuthRepository : AuthRepository {
                 val uid = result.user!!.uid
                 val user = User(name, uid, username)
                 firestore.collection(USERS_COLLECTION).document(uid).set(user).await()
-                firestore.collection(FOLLOWING_COLLECTION).document(uid).set(Following(uid = uid)).await()
-                firestore.collection(FOLLOWERS_COLLECTION).document(uid).set(Followers(uid = uid)).await()
+                firestore.collection(FOLLOWING_COLLECTION).document(uid).set(Following()).await()
+                firestore.collection(FOLLOWERS_COLLECTION).document(uid).set(Followers()).await()
 
                 Resource.Success(true)
             }
@@ -62,8 +71,7 @@ class DefaultAuthRepository : AuthRepository {
     override suspend fun searchUsername(query: String): Resource<Boolean> {
         return withContext(Dispatchers.IO) {
             safeCall {
-                val result =
-                    firestore.collection(USERS_COLLECTION).whereEqualTo("username", query).get()
+                val result = firestore.collection(USERS_COLLECTION).whereEqualTo("username", query).get()
                         .await()
                 if (result.isEmpty)
                     Resource.Success(true)
@@ -71,5 +79,29 @@ class DefaultAuthRepository : AuthRepository {
                     Resource.Success(false)
             }
         }
+
     }
+
+    override suspend fun algoliaUsernameSearch(searchQuery: String): Resource<ResponseSearch> =
+        withContext(Dispatchers.IO) {
+            safeCall {
+                val client = ClientSearch(
+                    ApplicationID(BuildConfig.ALGOLIA_APP_ID),
+                    APIKey(BuildConfig.ALGOLIA_SEARCH_KEY),
+                    LogLevel.ALL
+                )
+                val settings = settings {
+                    attributesForFaceting {
+                        +"username" // or FilterOnly(username) for filtering purposes only
+                    }
+                }
+
+                val index = client.initIndex(IndexName("user_search"))
+                index.setSettings(settings)
+
+                val queryObj = com.algolia.search.model.search.Query(searchQuery)
+                val result = index.search(queryObj)
+                Resource.Success(result)
+            }
+        }
 }

@@ -1,5 +1,6 @@
 package com.riyazuddin.zing.repositories.abstraction
 
+import com.algolia.search.model.response.ResponseSearch
 import com.riyazuddin.zing.other.Resource
 
 interface AuthRepository {
@@ -16,4 +17,6 @@ interface AuthRepository {
     suspend fun sendPasswordResetLink(email: String): Resource<String>
 
     suspend fun searchUsername(query: String): Resource<Boolean>
+
+    suspend fun algoliaUsernameSearch(searchQuery: String): Resource<ResponseSearch>
 }

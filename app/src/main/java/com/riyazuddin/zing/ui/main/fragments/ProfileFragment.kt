@@ -71,7 +71,7 @@ open class ProfileFragment : BasePostFragment(R.layout.fragment_profile) {
         }
         lifecycleScope.launch {
             postAdapter.loadStateFlow.collectLatest {
-                binding.progressBar.isVisible =
+                 binding.progressBar.isVisible =
                     it.refresh is LoadState.Loading ||
                             it.append is LoadState.Loading
             }

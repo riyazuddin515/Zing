@@ -1,6 +1,7 @@
 package com.riyazuddin.zing.adapters
 
 import android.graphics.Typeface
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.core.view.isVisible
@@ -15,18 +16,30 @@ import com.riyazuddin.zing.data.entities.Message
 import com.riyazuddin.zing.databinding.ItemChatLeftBinding
 import com.riyazuddin.zing.databinding.ItemChatRightBinding
 import com.riyazuddin.zing.other.Constants
-import com.riyazuddin.zing.other.Constants.PENDING
+import com.riyazuddin.zing.other.Constants.DELIVERED
+import com.riyazuddin.zing.other.Constants.SEEN
+import com.riyazuddin.zing.other.Constants.SENDING
 import com.riyazuddin.zing.other.Constants.SENT
+import com.riyazuddin.zing.ui.main.viewmodels.ChatViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.*
 import javax.inject.Inject
 
-class ChatAdapter @Inject constructor(private val glide: RequestManager) :
+class ChatAdapter @Inject constructor(
+    private val glide: RequestManager,
+    private val viewModel: ChatViewModel
+    ) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     companion object {
         const val MSG_TYPE_LEFT = 0
         const val MSG_TYPE_RIGHT = 1
+        
+        const val TAG = "ChatAdapter"
     }
 
     private val differCallback = object : DiffUtil.ItemCallback<Message>() {
@@ -54,8 +67,8 @@ class ChatAdapter @Inject constructor(private val glide: RequestManager) :
     override fun getItemViewType(position: Int): Int {
         val message = messages[position]
 
-        if (message.senderAddReceiverUid.size == 2) {
-            return if (message.senderAddReceiverUid[0] == Firebase.auth.uid) {
+        if (message.senderAndReceiverUid.size == 2) {
+            return if (message.senderAndReceiverUid[0] == Firebase.auth.uid) {
                 MSG_TYPE_RIGHT
             } else MSG_TYPE_LEFT
         }
@@ -86,9 +99,10 @@ class ChatAdapter @Inject constructor(private val glide: RequestManager) :
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         val message = messages[position]
         val date =
-            SimpleDateFormat("hh:mm a", Locale.US).format(Date(message.date)).replace("AM", "am").replace("PM","pm")
-        if (message.senderAddReceiverUid.size == 2) {
-            if (message.senderAddReceiverUid[0] == Firebase.auth.uid) {
+            SimpleDateFormat("hh:mm a", Locale.US).format(Date(message.date)).replace("AM", "am")
+                .replace("PM", "pm")
+        if (message.senderAndReceiverUid.size == 2) {
+            if (message.senderAndReceiverUid[0] == Firebase.auth.uid) {
                 val rightViewHolder = RightViewHolder(ItemChatRightBinding.bind(holder.itemView))
                 rightViewHolder.binding.apply {
                     tvDate.text = date
@@ -110,15 +124,26 @@ class ChatAdapter @Inject constructor(private val glide: RequestManager) :
                         tvMessage.text = message.message
                         tvMessage.isVisible = true
                     }
-                    if (message.status == PENDING){
-                        glide.load(R.drawable.ic_sending).into(ivStatus)
-                        ivStatus.isVisible = true
-                    }else if (message.status == SENT) {
-                        glide.load(R.drawable.ic_sent).into(ivStatus)
-                        ivStatus.isVisible = true
+                    when (message.status) {
+                        SENDING -> {
+                            glide.load(R.drawable.ic_sending).into(ivStatus)
+                            ivStatus.isVisible = true
+                        }
+                        SENT -> {
+                            glide.load(R.drawable.ic_sent).into(ivStatus)
+                            ivStatus.isVisible = true
+                        }
+                        DELIVERED -> {
+                            glide.load(R.drawable.ic_delivered).into(ivStatus)
+                            ivStatus.isVisible = true
+                        }
+                        SEEN -> {
+                            glide.load(R.drawable.ic_seen_ticks).into(ivStatus)
+                            ivStatus.isVisible = true
+                        }
                     }
                     root.setOnLongClickListener {
-                        if (message.senderAddReceiverUid[0] == Firebase.auth.uid) {
+                        if (message.senderAndReceiverUid[0] == Firebase.auth.uid) {
                             onItemLongClickListener?.let {
                                 it(message, position)
                             }
@@ -148,7 +173,7 @@ class ChatAdapter @Inject constructor(private val glide: RequestManager) :
                         tvMessage.isVisible = true
                     }
                     root.setOnLongClickListener {
-                        if (message.senderAddReceiverUid[0] == Firebase.auth.uid) {
+                        if (message.senderAndReceiverUid[0] == Firebase.auth.uid) {
                             onItemLongClickListener?.let {
                                 it(message, position)
                             }
@@ -156,6 +181,13 @@ class ChatAdapter @Inject constructor(private val glide: RequestManager) :
                         true
                     }
                 }
+                if (message.status != SEEN){
+                    GlobalScope.launch(Dispatchers.IO){
+                        viewModel.updateMessageStatusAsSeen(message)
+                        Log.i(TAG, "onBindViewHolder: invoked updateMessageStatusAsSeen()")
+                    }
+                }
+
             }
         }
 

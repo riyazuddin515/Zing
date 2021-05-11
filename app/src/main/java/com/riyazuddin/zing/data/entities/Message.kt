@@ -11,7 +11,7 @@ data class Message(
     val url: String = "",
     val type: String = "",
     val date: Long = 0L,
-    val senderAddReceiverUid: List<String> = listOf(),
+    val senderAndReceiverUid: List<String> = listOf(),
     var status: String = SENT,
     @get:Exclude
     var userProfileImage: String = "",

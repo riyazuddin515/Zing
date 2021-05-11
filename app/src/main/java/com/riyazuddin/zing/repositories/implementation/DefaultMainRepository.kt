@@ -7,19 +7,16 @@ import com.algolia.search.model.APIKey
 import com.algolia.search.model.ApplicationID
 import com.algolia.search.model.IndexName
 import com.algolia.search.model.response.ResponseSearch
-import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
-import com.google.firebase.database.ktx.database
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.SetOptions
-import com.google.firebase.ktx.Firebase
+import com.google.firebase.messaging.FirebaseMessaging
 import com.google.firebase.storage.FirebaseStorage
 import com.riyazuddin.zing.BuildConfig
-import com.riyazuddin.zing.R
 import com.riyazuddin.zing.data.entities.*
 import com.riyazuddin.zing.other.Constants.COMMENTS_COLLECTION
 import com.riyazuddin.zing.other.Constants.DEFAULT_PROFILE_PICTURE_URL
@@ -28,7 +25,6 @@ import com.riyazuddin.zing.other.Constants.FOLLOWING_COLLECTION
 import com.riyazuddin.zing.other.Constants.POSTS_COLLECTION
 import com.riyazuddin.zing.other.Constants.POST_LIKES_COLLECTION
 import com.riyazuddin.zing.other.Constants.USERS_COLLECTION
-import com.riyazuddin.zing.other.Constants.USERS_STATE_COLLECTION
 import com.riyazuddin.zing.other.Resource
 import com.riyazuddin.zing.other.safeCall
 import com.riyazuddin.zing.repositories.abstraction.MainRepository
@@ -57,8 +53,10 @@ class DefaultMainRepository : MainRepository {
     override suspend fun onlineOfflineToggle(uid: String) {
         withContext(Dispatchers.IO) {
             safeCall {
-                val userStatusDatabaseRef = FirebaseDatabase.getInstance().reference.child("status/$uid")
-                val usersStateCollection = firestore.collection(USERS_STATE_COLLECTION).document(uid)
+                val userStatusDatabaseRef =
+                    FirebaseDatabase.getInstance().reference.child("status/$uid")
+
+                val token = FirebaseMessaging.getInstance().token.await()
 
                 val isOfflineForDatabase = mapOf(
                     "state" to "offline",
@@ -72,12 +70,14 @@ class DefaultMainRepository : MainRepository {
 
                 val isOfflineForFirestore = mapOf(
                     "state" to "offline",
-                    "last_change" to FieldValue.serverTimestamp()
+                    "last_change" to System.currentTimeMillis(),
+                    "token" to token
                 )
 
                 val isOnlineForFirestore = mapOf(
                     "state" to "online",
-                    "last_change" to FieldValue.serverTimestamp()
+                    "last_change" to System.currentTimeMillis(),
+                    "token" to token
                 )
                 Log.i(TAG, "onlineOfflineToggle: addingValueEvenListener")
 
@@ -90,7 +90,7 @@ class DefaultMainRepository : MainRepository {
                             Log.i(TAG, "onDataChange: indise")
                             if (snapshot.value == false) {
                                 GlobalScope.launch {
-                                    usersStateCollection
+                                    usersCollection.document(uid)
                                         .set(isOfflineForFirestore, SetOptions.merge())
                                 }
                                 return
@@ -100,7 +100,8 @@ class DefaultMainRepository : MainRepository {
                                 .addOnCompleteListener {
                                     Log.i(TAG, "onDataChange: inside")
                                     userStatusDatabaseRef.setValue(isOnlineForDatabase)
-                                    usersStateCollection.set(isOnlineForFirestore, SetOptions.merge())
+                                    usersCollection.document(uid)
+                                        .set(isOnlineForFirestore, SetOptions.merge())
                                 }
                         }
 
@@ -290,12 +291,12 @@ class DefaultMainRepository : MainRepository {
                     )
                     transition.update(
                         usersCollection.document(currentUserUid),
-                        "following",
+                        "followingCount",
                         FieldValue.increment(-1)
                     )
                     transition.update(
                         usersCollection.document(uid),
-                        "followers",
+                        "followersCount",
                         FieldValue.increment(-1)
                     )
 
@@ -313,12 +314,12 @@ class DefaultMainRepository : MainRepository {
                     )
                     transition.update(
                         usersCollection.document(currentUserUid),
-                        "following",
+                        "followingCount",
                         FieldValue.increment(1)
                     )
                     transition.update(
                         usersCollection.document(uid),
-                        "followers",
+                        "followersCount",
                         FieldValue.increment(1)
                     )
                 }

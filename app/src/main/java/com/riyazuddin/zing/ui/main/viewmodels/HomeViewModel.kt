@@ -14,7 +14,9 @@ import com.riyazuddin.zing.data.pagingsource.FollowingPostPagingSource
 import com.riyazuddin.zing.other.Constants.POST_PAGE_SIZE
 import com.riyazuddin.zing.other.Event
 import com.riyazuddin.zing.other.Resource
+import com.riyazuddin.zing.repositories.abstraction.ChatRepository
 import com.riyazuddin.zing.repositories.abstraction.MainRepository
+import com.riyazuddin.zing.repositories.implementation.DefaultChatRepository
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch

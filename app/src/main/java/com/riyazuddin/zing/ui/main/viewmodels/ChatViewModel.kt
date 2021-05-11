@@ -88,10 +88,16 @@ class ChatViewModel @ViewModelInject constructor(
         repository.updateChatListOnMessageSent(message)
     }
 
-    fun getLastMessageFirstQuery(currentUid: String) {
+    suspend fun updateMessageStatusAsSeen(message: Message){
+        viewModelScope.launch {
+            repository.updateMessageStatusAsSeen(message)
+        }
+    }
+
+    fun getLastMessageFirstQuery() {
         _recentMessagesList.postValue(Event(Resource.Loading()))
         viewModelScope.launch {
-            repository.getLastMessageFirstQuery(currentUid)
+            repository.getLastMessageFirstQuery()
         }
     }
 
@@ -108,7 +114,7 @@ class ChatViewModel @ViewModelInject constructor(
     }
 
     fun clearRecentMessagesList() {
-        _recentMessagesList.postValue(Event(Resource.Success(listOf())))
+//        _recentMessagesList.postValue(Event(Resource.Success(listOf())))
         repository.clearRecentMessagesList()
     }
 

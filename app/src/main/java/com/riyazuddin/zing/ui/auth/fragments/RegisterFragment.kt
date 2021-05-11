@@ -12,6 +12,8 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.textfield.TextInputLayout
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
 import com.riyazuddin.zing.R
 import com.riyazuddin.zing.databinding.FragmentRegisterBinding
 import com.riyazuddin.zing.other.Constants
@@ -50,8 +52,14 @@ class RegisterFragment : Fragment(R.layout.fragment_register) {
             job = lifecycleScope.launch {
                 delay(SEARCH_TIME_DELAY)
                 editable?.let {
-                    if (it.length >= MIN_USERNAME)
-                        viewModel.searchUsername(it.toString())
+                    if (it.isEmpty() || it.length < MIN_USERNAME) {
+                        binding.TILUsername.endIconMode = TextInputLayout.END_ICON_NONE
+                    }else if (it.contains(" ")) {
+                        binding.TILUsername.error = "No space allowed"
+                    } else if (it.length >= MIN_USERNAME) {
+//                        viewModel.searchUsername(it.toString())
+                        viewModel.checkUserNameAvailability(it.toString())
+                    }
                 }
             }
         }
@@ -106,7 +114,8 @@ class RegisterFragment : Fragment(R.layout.fragment_register) {
             binding.progressBar.isVisible = false
             binding.btnRegister.isEnabled = true
             snackBar(getString(R.string.registration_success))
-            findNavController().navigate(R.id.action_registerFragment_to_checkMailFragment)
+            Firebase.auth.signOut()
+//            findNavController().navigate(R.id.action_registerFragment_to_checkMailFragment)
         })
 
         viewModel.isUsernameAvailable.observe(viewLifecycleOwner, EventObserver(

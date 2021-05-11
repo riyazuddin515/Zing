@@ -1,11 +1,10 @@
 package com.riyazuddin.zing.ui.main.fragments
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
@@ -44,11 +43,12 @@ class HomeFragment : BasePostFragment(R.layout.fragment_home) {
             return vm
         }
 
-//    private val viewModel: HomeViewModel by lazy { basePostViewModel as HomeViewModel }
+    //    private val viewModel: HomeViewModel by lazy { basePostViewModel as HomeViewModel }
     private lateinit var viewModel: HomeViewModel
 
     private var currentUser: User? = null
 
+    @SuppressLint("UnsafeExperimentalUsageError")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -78,19 +78,56 @@ class HomeFragment : BasePostFragment(R.layout.fragment_home) {
             findNavController().navigate(R.id.action_homeFragment_to_recentChatListFragment, bundle)
         }
 
-//        lifecycleScope.launch {
-//            viewModel.pagingFlow.collect {
-//                postAdapter.submitData(it)
-//            }
-//        }
+//        binding.btnSendNotification.setOnClickListener {
+//            val cu = "{\"uid\":\"BbZaXWWWnuV5Dx7qQv7EtUTSQ392\",\"profilePicUrl\":\"https:\\/\\/firebasestorage.googleapis.com\\/v0\\/b\\/zing515.appspot.com\\/o\\/profilePics%2FBbZaXWWWnuV5Dx7qQv7EtUTSQ392?alt=media&token=48cd48a7-37fd-422c-a2a0-961702004c1c\",\"name\":\"Mohammed Fayazuddin\",\"bio\":\"I'm on Zing now\",\"postCount\":\"2\",\"followersCount\":\"1\",\"followingCount\":\"1\",\"username\":\"fayazuddin786\"}"
+////            val ou = "{\"uid\":\"mmcvWxGSMfPmPvYu1ZJVX0RsZEP2\",\"profilePicUrl\":\"https:\\/\\/firebasestorage.googleapis.com\\/v0\\/b\\/zing515.appspot.com\\/o\\/profilePics%2FBbZaXWWWnuV5Dx7qQv7EtUTSQ392?alt=media&token=48cd48a7-37fd-422c-a2a0-961702004c1c\",\"name\":\"Riyazuddin\",\"bio\":\"I'm on Zing now\",\"postCount\":\"1\",\"followersCount\":\"1\",\"followingCount\":\"1\",\"username\":\"riyazuddin515\"}"
+//            val ou = "{\"uid\":\"mmcvWxGSMfPmPvYu1ZJVX0RsZEP2\",\"profilePicUrl\":\"https:\\/\\/firebasestorage.googleapis.com\\/v0\\/b\\/zing515.appspot.com\\/o\\/profilePics%2FmmcvWxGSMfPmPvYu1ZJVX0RsZEP2?alt=media&token=d1864538-3c7f-4a7a-a14b-f200fe052885\",\"name\":\"Riyazuddin\",\"bio\":\"I'm on Zing now\",\"postCount\":\"1\",\"followersCount\":\"1\",\"followingCount\":\"1\",\"username\":\"riyazuddin515\"}"
+//            val c = Gson().fromJson(cu, User::class.java)
+//            val o = Gson().fromJson(ou, User::class.java)
+//            Log.i(TAG, "onViewCreated: $c")
 //
-//        lifecycleScope.launch {
-//            postAdapter.loadStateFlow.collectLatest {
-//                binding.progressBar.isVisible =
-//                    it.refresh is LoadState.Loading ||
-//                            it.append is LoadState.Loading
-//            }
+////            val pendingIntent = NavDeepLinkBuilder(requireContext())
+////                .setGraph(R.navigation.nav_graph_main)
+////                .setDestination(R.id.chatFragment)
+////                .setArguments(ChatFragmentArgs(o, c).toBundle())
+////                .createPendingIntent()
+//
+//            val pendingIntent = findNavController()
+//                .createDeepLink()
+//                .setGraph(R.navigation.nav_graph_main)
+//                .setDestination(R.id.chatFragment)
+//                .setArguments(ChatFragmentArgs(o, c).toBundle())
+//                .createPendingIntent()
+//
+//            val builder = NotificationCompat.Builder(requireContext(), Constants.CHANNEL_ID)
+//                .setSmallIcon(R.drawable.ic_chat)
+//                .setContentTitle("title")
+//                .setContentText("body")
+//                .setContentIntent(pendingIntent)
+//                .setPriority(NotificationCompat.PRIORITY_HIGH)
+//                .setCategory(NotificationCompat.CATEGORY_SOCIAL)
+//                .setAutoCancel(true)
+//
+////            val notificationManager: NotificationManager =
+////                getSystemService(requireContext()) as NotificationManager
+//
+//            NotificationManagerCompat.from(requireContext()).notify(1, builder.build())
+//
+////            notificationManager.notify(1, builder.build())
 //        }
+        lifecycleScope.launch {
+            viewModel.pagingFlow.collect {
+                postAdapter.submitData(it)
+            }
+        }
+
+        lifecycleScope.launch {
+            postAdapter.loadStateFlow.collectLatest {
+                binding.progressBar.isVisible =
+                    it.refresh is LoadState.Loading ||
+                            it.append is LoadState.Loading
+            }
+        }
 
         viewModel.loadCurrentUser(Firebase.auth.uid!!)
         Log.i(TAG, "onViewCreated: onlineOfflineToggle calling")
@@ -106,7 +143,7 @@ class HomeFragment : BasePostFragment(R.layout.fragment_home) {
         }
     }
 
-    private fun subscribeToObservers(){
+    private fun subscribeToObservers() {
         viewModel.loadCurrentUserStatus.observe(viewLifecycleOwner, EventObserver(
             oneTimeConsume = true,
             onError = { snackBar(it) },
@@ -127,7 +164,7 @@ class HomeFragment : BasePostFragment(R.layout.fragment_home) {
         }
     }
 
-    companion object{
+    companion object {
         const val TAG = "HomeFragment"
     }
 
