@@ -2,7 +2,6 @@ package com.riyazuddin.zing.ui.main.fragments.chat
 
 import android.os.Bundle
 import android.view.View
-import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
@@ -13,11 +12,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import com.riyazuddin.zing.R
-import com.riyazuddin.zing.adapters.UserAdapter
 import com.riyazuddin.zing.adapters.UserAdapterPagingData
 import com.riyazuddin.zing.databinding.FragmentNewChatBinding
-import com.riyazuddin.zing.other.EventObserver
-import com.riyazuddin.zing.other.snackBar
 import com.riyazuddin.zing.ui.main.viewmodels.ChatViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collect
@@ -44,7 +40,6 @@ class NewChatFragment : Fragment(R.layout.fragment_new_chat) {
         }
 
         setupRecyclerView()
-        subscribeToObservers()
 
         lifecycleScope.launch {
             viewModel.getFollowingAndFollowersUsers(Firebase.auth.uid!!).collect {
@@ -59,10 +54,6 @@ class NewChatFragment : Fragment(R.layout.fragment_new_chat) {
             }
             findNavController().navigate(R.id.action_newChatFragment_to_chatFragment, bundle)
         }
-    }
-
-    private fun subscribeToObservers() {
-
     }
 
     private fun setupRecyclerView() {

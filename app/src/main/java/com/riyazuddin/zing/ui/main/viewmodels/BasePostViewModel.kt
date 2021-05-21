@@ -9,8 +9,6 @@ import com.riyazuddin.zing.data.entities.User
 import com.riyazuddin.zing.other.Event
 import com.riyazuddin.zing.other.Resource
 import com.riyazuddin.zing.repositories.abstraction.MainRepository
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 abstract class BasePostViewModel(
@@ -30,7 +28,7 @@ abstract class BasePostViewModel(
         if (postId.isEmpty())
             return
         _postLikedUsersStatus.postValue(Event(Resource.Loading()))
-        viewModelScope.launch{
+        viewModelScope.launch {
             val result = repository.getPostLikedUsers(postId)
             _postLikedUsersStatus.postValue(Event(result))
         }

@@ -39,17 +39,22 @@ class OthersProfileFragment : ProfileFragment() {
             viewModel.toggleFollowForUser(uid)
         }
 
-        binding.followersLayout.setOnClickListener {
-            val bundle = Bundle().apply {
-                putString("uid", uid)
-            }
+        val bundle = Bundle().apply {
+            putString("uid", uid)
+        }
+
+        binding.tvFollowersCount.setOnClickListener {
             findNavController().navigate(R.id.action_othersProfileFragment_to_followersFragment, bundle)
         }
 
-        binding.followingLayout.setOnClickListener {
-            val bundle = Bundle().apply {
-                putString("uid", uid)
-            }
+        binding.tvFollowingCount.setOnClickListener {
+            findNavController().navigate(R.id.action_othersProfileFragment_to_followingFragment, bundle)
+        }
+        binding.tvFollowers.setOnClickListener {
+            findNavController().navigate(R.id.action_othersProfileFragment_to_followersFragment, bundle)
+        }
+
+        binding.tvFollowing.setOnClickListener {
             findNavController().navigate(R.id.action_othersProfileFragment_to_followingFragment, bundle)
         }
     }
@@ -76,17 +81,17 @@ class OthersProfileFragment : ProfileFragment() {
             val set2 = ConstraintSet()
             set1.clone(requireContext(), R.layout.fragment_profile)
             set2.clone(requireContext(), R.layout.fragment_profile_anim)
-            TransitionManager.beginDelayedTransition(binding.clProfile, changeBounce)
+            TransitionManager.beginDelayedTransition(binding.profileLayout, changeBounce)
             if (user.isFollowing) {
                 text = requireContext().getString(R.string.unfollow)
-                setBackgroundColor(Color.RED)
-                setTextColor(Color.WHITE)
-                set1.applyTo(binding.clProfile)
-            } else {
-                text = requireContext().getString(R.string.follow)
                 setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.colorAccent))
                 setTextColor(Color.WHITE)
-                set2.applyTo(binding.clProfile)
+                set1.applyTo(binding.profileLayout)
+            } else {
+                text = requireContext().getString(R.string.follow)
+                setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.blue))
+                setTextColor(Color.WHITE)
+                set2.applyTo(binding.profileLayout)
             }
         }
     }

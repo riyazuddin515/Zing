@@ -115,24 +115,25 @@ class HomeFragment : BasePostFragment(R.layout.fragment_home) {
 //
 ////            notificationManager.notify(1, builder.build())
 //        }
-        lifecycleScope.launch {
-            viewModel.pagingFlow.collect {
-                postAdapter.submitData(it)
-            }
-        }
+//        lifecycleScope.launch {
+//            viewModel.pagingFlow.collect {
+//                postAdapter.submitData(it)
+//            }
+//        }
+//
+//        lifecycleScope.launch {
+//            postAdapter.loadStateFlow.collectLatest {
+//                binding.progressBar.isVisible =
+//                    it.refresh is LoadState.Loading ||
+//                            it.append is LoadState.Loading
+//            }
+//        }
 
-        lifecycleScope.launch {
-            postAdapter.loadStateFlow.collectLatest {
-                binding.progressBar.isVisible =
-                    it.refresh is LoadState.Loading ||
-                            it.append is LoadState.Loading
-            }
+        if (currentUser == null) {
+            viewModel.loadCurrentUser(Firebase.auth.uid!!)
+        }else{
+            binding.ibRecentChat.isVisible = true
         }
-
-        viewModel.loadCurrentUser(Firebase.auth.uid!!)
-        Log.i(TAG, "onViewCreated: onlineOfflineToggle calling")
-        viewModel.onlineOfflineToggle(Firebase.auth.uid!!)
-        Log.i(TAG, "onViewCreated: onlineOfflineToggle called")
 
         postAdapter.setOnUserClickListener {
             findNavController().navigate(
@@ -160,7 +161,6 @@ class HomeFragment : BasePostFragment(R.layout.fragment_home) {
             adapter?.stateRestorationPolicy =
                 RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
             layoutManager = LinearLayoutManager(requireContext())
-//            itemAnimator = null
         }
     }
 

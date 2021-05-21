@@ -23,7 +23,7 @@ class FollowingViewModel @ViewModelInject constructor(
             return
         _followingListUsers.postValue(Event(Resource.Loading()))
         viewModelScope.launch {
-            val result = repository.getFollowers(uid)
+            val result = repository.getFollowing(uid)
             _followingListUsers.postValue(Event(result))
         }
     }

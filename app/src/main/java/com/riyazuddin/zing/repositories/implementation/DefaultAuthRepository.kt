@@ -1,6 +1,5 @@
 package com.riyazuddin.zing.repositories.implementation
 
-import com.riyazuddin.zing.BuildConfig
 import com.algolia.search.client.ClientSearch
 import com.algolia.search.dsl.attributesForFaceting
 import com.algolia.search.dsl.settings
@@ -8,8 +7,10 @@ import com.algolia.search.model.APIKey
 import com.algolia.search.model.ApplicationID
 import com.algolia.search.model.IndexName
 import com.algolia.search.model.response.ResponseSearch
+import com.algolia.search.model.search.Query
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.riyazuddin.zing.BuildConfig
 import com.riyazuddin.zing.data.entities.Followers
 import com.riyazuddin.zing.data.entities.Following
 import com.riyazuddin.zing.data.entities.User
@@ -23,7 +24,9 @@ import io.ktor.client.features.logging.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
+import javax.inject.Singleton
 
+@Singleton
 class DefaultAuthRepository : AuthRepository {
 
     private val auth = FirebaseAuth.getInstance()
@@ -71,7 +74,8 @@ class DefaultAuthRepository : AuthRepository {
     override suspend fun searchUsername(query: String): Resource<Boolean> {
         return withContext(Dispatchers.IO) {
             safeCall {
-                val result = firestore.collection(USERS_COLLECTION).whereEqualTo("username", query).get()
+                val result =
+                    firestore.collection(USERS_COLLECTION).whereEqualTo("username", query).get()
                         .await()
                 if (result.isEmpty)
                     Resource.Success(true)
@@ -99,7 +103,7 @@ class DefaultAuthRepository : AuthRepository {
                 val index = client.initIndex(IndexName("user_search"))
                 index.setSettings(settings)
 
-                val queryObj = com.algolia.search.model.search.Query(searchQuery)
+                val queryObj = Query(searchQuery)
                 val result = index.search(queryObj)
                 Resource.Success(result)
             }

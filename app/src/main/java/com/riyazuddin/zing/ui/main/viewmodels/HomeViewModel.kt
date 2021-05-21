@@ -10,15 +10,11 @@ import androidx.paging.PagingConfig
 import androidx.paging.cachedIn
 import com.google.firebase.firestore.FirebaseFirestore
 import com.riyazuddin.zing.data.entities.User
-import com.riyazuddin.zing.data.pagingsource.FollowingPostPagingSource
 import com.riyazuddin.zing.other.Constants.POST_PAGE_SIZE
 import com.riyazuddin.zing.other.Event
 import com.riyazuddin.zing.other.Resource
-import com.riyazuddin.zing.repositories.abstraction.ChatRepository
 import com.riyazuddin.zing.repositories.abstraction.MainRepository
-import com.riyazuddin.zing.repositories.implementation.DefaultChatRepository
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
+import com.riyazuddin.zing.repositories.pagingsource.FeedPagingSource
 import kotlinx.coroutines.launch
 
 class HomeViewModel @ViewModelInject constructor(
@@ -29,7 +25,7 @@ class HomeViewModel @ViewModelInject constructor(
     val loadCurrentUserStatus: LiveData<Event<Resource<User>>> = _loadCurrentUserStatus
 
     val pagingFlow = Pager(PagingConfig(POST_PAGE_SIZE)) {
-        FollowingPostPagingSource(FirebaseFirestore.getInstance())
+        FeedPagingSource(FirebaseFirestore.getInstance())
     }.flow.cachedIn(viewModelScope)
 
     fun onlineOfflineToggle(uid: String) {
@@ -48,7 +44,7 @@ class HomeViewModel @ViewModelInject constructor(
         }
     }
 
-    companion object{
+    companion object {
         const val TAG = "HomeViewModel"
     }
 }

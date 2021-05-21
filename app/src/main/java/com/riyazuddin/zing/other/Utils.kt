@@ -1,8 +1,6 @@
 package com.riyazuddin.zing.other
 
-import java.text.DateFormat
 import java.text.SimpleDateFormat
-import java.time.format.DateTimeFormatter
 import java.util.*
 
 class Utils {

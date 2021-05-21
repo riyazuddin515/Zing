@@ -1,5 +1,8 @@
 package com.riyazuddin.zing.ui.main.fragments.chat
 
+import android.app.Application
+import android.app.NotificationManager
+import android.content.Context
 import android.media.MediaPlayer
 import android.os.Bundle
 import android.util.Log
@@ -20,12 +23,17 @@ import com.riyazuddin.zing.R
 import com.riyazuddin.zing.adapters.ChatAdapter
 import com.riyazuddin.zing.databinding.FragmentChatBinding
 import com.riyazuddin.zing.other.Constants
+import com.riyazuddin.zing.other.Constants.CHATTING_WITH
+import com.riyazuddin.zing.other.Constants.NOTIFICATION_ID
+import com.riyazuddin.zing.other.Constants.NO_MORE_MESSAGES
+import com.riyazuddin.zing.other.Constants.NO_ONE
 import com.riyazuddin.zing.other.EventObserver
 import com.riyazuddin.zing.other.snackBar
 import com.riyazuddin.zing.ui.dialogs.CustomDialog
 import com.riyazuddin.zing.ui.main.viewmodels.ChatViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
+
 
 @AndroidEntryPoint
 class ChatFragment : Fragment(R.layout.fragment_chat) {
@@ -56,6 +64,17 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        val sp = requireActivity().getSharedPreferences(CHATTING_WITH, Application.MODE_PRIVATE)
+        sp.edit().let {
+            it.putString(Constants.UID, args.otherEndUser.uid)
+            it.apply()
+        }
+
+        //Removing all existing notification as soon as activity starts
+        val notificationManager: NotificationManager =
+            requireActivity().getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.cancel(args.otherEndUser.uid, NOTIFICATION_ID)
 
         mediaPlayer = MediaPlayer.create(requireContext(), R.raw.received_chat)
 
@@ -121,8 +140,10 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
 
         viewModel.chatList.observe(viewLifecycleOwner, EventObserver(
             onError = {
+                if (it != NO_MORE_MESSAGES) {
                     snackBar(it)
-                    binding.linearProgressIndicator.isVisible = false
+                }
+                binding.linearProgressIndicator.isVisible = false
             },
             onLoading = {
                 Log.i(TAG, "subscribe: loading")
@@ -135,6 +156,7 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
             binding.linearProgressIndicator.isVisible = false
             chatAdapter.messages = it
             chatAdapter.notifyDataSetChanged()
+
         })
         viewModel.playTone.observe(viewLifecycleOwner, EventObserver(
             oneTimeConsume = true
@@ -183,6 +205,12 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
         viewModel.chatList.removeObservers(viewLifecycleOwner)
         _binding = null
         super.onDestroyView()
+
+        val sp = requireActivity().getSharedPreferences(CHATTING_WITH, Application.MODE_PRIVATE)
+        sp.edit().let {
+            it.putString(Constants.UID, NO_ONE)
+            it.apply()
+        }
     }
 
     companion object {

@@ -1,5 +1,7 @@
 package com.riyazuddin.zing.ui.main.fragments.chat
 
+import android.app.NotificationManager
+import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -12,12 +14,10 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.google.firebase.auth.ktx.auth
-import com.google.firebase.ktx.Firebase
 import com.riyazuddin.zing.R
 import com.riyazuddin.zing.adapters.LastMessageAdapter
-import com.riyazuddin.zing.data.entities.User
 import com.riyazuddin.zing.databinding.FragmentRecentChatListBinding
+import com.riyazuddin.zing.other.Constants
 import com.riyazuddin.zing.other.EventObserver
 import com.riyazuddin.zing.other.snackBar
 import com.riyazuddin.zing.ui.main.viewmodels.ChatViewModel
@@ -40,7 +40,7 @@ class RecentChatListFragment : Fragment(R.layout.fragment_recent_chat_list) {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         _binding = FragmentRecentChatListBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -80,7 +80,9 @@ class RecentChatListFragment : Fragment(R.layout.fragment_recent_chat_list) {
     private fun subscribeToObservers() {
         viewModel.recentMessagesList.observe(viewLifecycleOwner, EventObserver(
             onError = {
-                snackBar(it)
+                if (it != Constants.NO_MORE_MESSAGES) {
+                    snackBar(it)
+                }
                 binding.progressBar.isVisible = false
             },
             onLoading = {
@@ -100,6 +102,23 @@ class RecentChatListFragment : Fragment(R.layout.fragment_recent_chat_list) {
         binding.rvRecentChatList.apply {
             adapter = lastMessageAdapter
             layoutManager = LinearLayoutManager(requireContext())
+            addOnScrollListener(object : RecyclerView.OnScrollListener() {
+                override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                    super.onScrolled(recyclerView, dx, dy)
+
+                    val layoutManager = recyclerView.layoutManager as LinearLayoutManager
+                    val pos = layoutManager.findLastCompletelyVisibleItemPosition()
+                    val numItems: Int = recyclerView.adapter!!.itemCount
+
+                    Log.i(TAG, "onScrolled: pos = $pos ----- numItem = $numItems")
+
+                    if (pos + 1 == numItems) {
+                        viewModel.getLastMessageLoadMore()
+                        Log.i(TAG, "onScrolled: calling getChatLoadMore")
+//                        isLoadingMore = true
+                    }
+                }
+            })
         }
     }
 
@@ -108,6 +127,14 @@ class RecentChatListFragment : Fragment(R.layout.fragment_recent_chat_list) {
         viewModel.clearRecentMessagesList()
         _binding = null
         super.onDestroyView()
+    }
+
+    override fun onStart() {
+        super.onStart()
+        //Removing all existing notification as soon as activity starts
+        val notificationManager: NotificationManager =
+            requireActivity().getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.cancelAll()
     }
 
     companion object {

@@ -56,26 +56,14 @@ open class ProfileFragment : BasePostFragment(R.layout.fragment_profile) {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         binding = FragmentProfileBinding.inflate(layoutInflater)
 
         setUpRecyclerView()
 
         binding.btnToggleFollow.isVisible = false
+        viewModel.setUid(uid)
         viewModel.loadProfile(uid)
 
-        lifecycleScope.launch {
-            viewModel.getPagingFlowOfPost(uid).collect {
-                postAdapter.submitData(it)
-            }
-        }
-        lifecycleScope.launch {
-            postAdapter.loadStateFlow.collectLatest {
-                 binding.progressBar.isVisible =
-                    it.refresh is LoadState.Loading ||
-                            it.append is LoadState.Loading
-            }
-        }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -83,19 +71,36 @@ open class ProfileFragment : BasePostFragment(R.layout.fragment_profile) {
 
         subscribeToObservers()
 
-        binding.followersLayout.setOnClickListener {
-            val bundle = Bundle().apply {
-                putString("uid", uid)
+        lifecycleScope.launch {
+            viewModel.flowOfProfilePosts.collect {
+                postAdapter.submitData(it)
             }
-            findNavController().navigate(R.id.action_profileFragment_to_followersFragment, bundle)
+        }
+        lifecycleScope.launch {
+            postAdapter.loadStateFlow.collectLatest {
+                binding.progressBar.isVisible =
+                    it.refresh is LoadState.Loading ||
+                            it.append is LoadState.Loading
+            }
         }
 
-        binding.followingLayout.setOnClickListener {
-            val bundle = Bundle().apply {
-                putString("uid", uid)
-            }
+        val bundle = Bundle().apply {
+            putString("uid", uid)
+        }
+
+        binding.tvFollowersCount.setOnClickListener {
+            findNavController().navigate(R.id.action_profileFragment_to_followersFragment, bundle)
+        }
+        binding.tvFollowingCount.setOnClickListener {
             findNavController().navigate(R.id.action_profileFragment_to_followingFragment, bundle)
         }
+        binding.tvFollowers.setOnClickListener {
+            findNavController().navigate(R.id.action_profileFragment_to_followersFragment, bundle)
+        }
+        binding.tvFollowing.setOnClickListener {
+            findNavController().navigate(R.id.action_profileFragment_to_followingFragment, bundle)
+        }
+
     }
 
     private fun subscribeToObservers() {
@@ -118,13 +123,12 @@ open class ProfileFragment : BasePostFragment(R.layout.fragment_profile) {
             binding.tvPostCount.text = user.postCount.toString()
             binding.tvFollowingCount.text = user.followingCount.toString()
             binding.tvFollowersCount.text = user.followersCount.toString()
-            binding.tvCountLayout.isVisible = true
         })
 
         basePostViewModel.deletePostStatus.observe(viewLifecycleOwner, EventObserver(
             onError = {
                 snackBar(it)
-                Log.e(TAG, "subscribeToObservers: $it", )
+                Log.e(TAG, "subscribeToObservers: $it")
             }
         ) { deletedPost ->
             postAdapter.refresh()
@@ -135,13 +139,14 @@ open class ProfileFragment : BasePostFragment(R.layout.fragment_profile) {
     private fun setUpRecyclerView() {
         binding.rvPostList.apply {
             adapter = postAdapter
-            adapter?.stateRestorationPolicy = RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
+            adapter?.stateRestorationPolicy =
+                RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
             layoutManager = LinearLayoutManager(requireContext())
             itemAnimator = null
         }
     }
-    
-    companion object{
+
+    companion object {
         const val TAG = "ProfileFagLog"
     }
 }

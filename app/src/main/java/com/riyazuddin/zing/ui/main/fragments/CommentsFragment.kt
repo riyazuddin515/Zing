@@ -1,7 +1,6 @@
 package com.riyazuddin.zing.ui.main.fragments
 
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
@@ -113,7 +112,7 @@ class CommentsFragment : Fragment(R.layout.fragment_comments) {
         }
     }
 
-    companion object{
+    companion object {
         const val TAG = "CommentsFrag"
     }
 }

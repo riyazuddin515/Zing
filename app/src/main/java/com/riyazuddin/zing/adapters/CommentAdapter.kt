@@ -6,7 +6,6 @@ import androidx.recyclerview.widget.AsyncListDiffer
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.RequestManager
-import com.riyazuddin.zing.R
 import com.riyazuddin.zing.data.entities.Comment
 import com.riyazuddin.zing.databinding.ItemCommentBinding
 import java.text.SimpleDateFormat

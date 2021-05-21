@@ -24,7 +24,6 @@ import com.riyazuddin.zing.ui.main.viewmodels.ChatViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.*
 import javax.inject.Inject
@@ -32,13 +31,13 @@ import javax.inject.Inject
 class ChatAdapter @Inject constructor(
     private val glide: RequestManager,
     private val viewModel: ChatViewModel
-    ) :
+) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     companion object {
         const val MSG_TYPE_LEFT = 0
         const val MSG_TYPE_RIGHT = 1
-        
+
         const val TAG = "ChatAdapter"
     }
 
@@ -181,8 +180,8 @@ class ChatAdapter @Inject constructor(
                         true
                     }
                 }
-                if (message.status != SEEN){
-                    GlobalScope.launch(Dispatchers.IO){
+                if (message.status != SEEN) {
+                    GlobalScope.launch(Dispatchers.IO) {
                         viewModel.updateMessageStatusAsSeen(message)
                         Log.i(TAG, "onBindViewHolder: invoked updateMessageStatusAsSeen()")
                     }

@@ -22,4 +22,4 @@ data class User(
     var lastSeen: Long = 0L,
     @get:Exclude
     var isFollowing: Boolean = false,
-): Serializable
+) : Serializable

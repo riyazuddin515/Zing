@@ -12,7 +12,6 @@ import com.riyazuddin.zing.adapters.UserAdapter
 import com.riyazuddin.zing.databinding.FragmentLikedByBinding
 import com.riyazuddin.zing.other.EventObserver
 import com.riyazuddin.zing.other.snackBar
-import com.riyazuddin.zing.ui.main.viewmodels.BasePostViewModel
 import com.riyazuddin.zing.ui.main.viewmodels.HomeViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject

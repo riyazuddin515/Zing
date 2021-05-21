@@ -24,11 +24,16 @@ fun View.slideUp(context: Context, animTime: Long, startOffset: Long) {
 
 fun slideUpViews(context: Context, vararg views: View, animTime: Long = 300L, delay: Long = 150) {
     for (i in views.indices) {
-        views[i].slideUp(context, animTime, delay*i)
+        views[i].slideUp(context, animTime, delay * i)
     }
 }
 
-fun TextView.leftDrawable(@DrawableRes id: Int = 0, @DimenRes sizeRes: Int = 0, @ColorInt color: Int = 0, @ColorRes colorRes: Int = 0) {
+fun TextView.leftDrawable(
+    @DrawableRes id: Int = 0,
+    @DimenRes sizeRes: Int = 0,
+    @ColorInt color: Int = 0,
+    @ColorRes colorRes: Int = 0
+) {
     val drawable = ContextCompat.getDrawable(context, id)
     if (sizeRes != 0) {
         val size = resources.getDimension(sizeRes)

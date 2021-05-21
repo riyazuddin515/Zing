@@ -19,7 +19,7 @@ import kotlinx.coroutines.launch
 class CommentViewModel @ViewModelInject constructor(
     private val repository: MainRepository,
     private val dispatcher: CoroutineDispatcher = Dispatchers.Main
-) : ViewModel(){
+) : ViewModel() {
 
 
     private val _createCommentStatus = MutableLiveData<Event<Resource<Comment>>>()
@@ -31,7 +31,7 @@ class CommentViewModel @ViewModelInject constructor(
     private val _userProfileStatus = MutableLiveData<Event<Resource<User>>>()
     val userProfileStatus: LiveData<Event<Resource<User>>> = _userProfileStatus
 
-    fun createComment(commentText: String, postId: String){
+    fun createComment(commentText: String, postId: String) {
         if (commentText.isEmpty())
             return
         _createCommentStatus.postValue(Event(Resource.Loading()))
@@ -40,16 +40,18 @@ class CommentViewModel @ViewModelInject constructor(
             _createCommentStatus.postValue(Event(result))
         }
     }
-    fun getComments(postId: String){
+
+    fun getComments(postId: String) {
         _commentsListStatus.postValue(Event(Resource.Loading()))
-        viewModelScope.launch(dispatcher){
+        viewModelScope.launch(dispatcher) {
             val result = repository.getPostComments(postId)
             _commentsListStatus.postValue(Event(result))
         }
     }
-    fun getUserProfile(){
+
+    fun getUserProfile() {
         _userProfileStatus.postValue(Event(Resource.Loading()))
-        viewModelScope.launch(dispatcher){
+        viewModelScope.launch(dispatcher) {
             val result = repository.getUserProfile(Firebase.auth.uid!!)
             _userProfileStatus.postValue(Event(result))
         }

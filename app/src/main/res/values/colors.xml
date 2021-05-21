@@ -5,6 +5,7 @@
     <color name="colorPrimaryDark">#ff6787</color>
     <color name="colorAccent">#ff0036</color>
 
+    <color name="blue">#1565c0</color>
 
     <color name="mainTextColor">#000000</color>
     <color name="altTextColor">#808F97</color>

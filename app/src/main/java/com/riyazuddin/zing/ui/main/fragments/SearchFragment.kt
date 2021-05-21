@@ -10,7 +10,6 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.algolia.instantsearch.helper.android.list.autoScrollToStart
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import com.riyazuddin.zing.R
@@ -24,7 +23,6 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.serialization.json.jsonPrimitive
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -78,11 +76,11 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
             val users = mutableListOf<User>()
             hits.forEach { hit ->
                 val user = User(
-                    name = hit.json.getValue("name").toString().replace("\"",""),
-                    uid = hit.json.getValue("uid").toString().replace("\"",""),
-                    username = hit.json.getValue("username").toString().replace("\"",""),
-                    profilePicUrl = hit.json.getValue("profilePicUrl").toString().replace("\"",""),
-                    bio = hit.json.getValue("bio").toString().replace("\"",""),
+                    name = hit.json.getValue("name").toString().replace("\"", ""),
+                    uid = hit.json.getValue("uid").toString().replace("\"", ""),
+                    username = hit.json.getValue("username").toString().replace("\"", ""),
+                    profilePicUrl = hit.json.getValue("profilePicUrl").toString().replace("\"", ""),
+                    bio = hit.json.getValue("bio").toString().replace("\"", ""),
                     followingCount = hit.json.getValue("followingCount").toString().toInt(),
                     followersCount = hit.json.getValue("followersCount").toString().toInt(),
                     postCount = hit.json.getValue("postCount").toString().toInt()
@@ -103,7 +101,7 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
         }
     }
 
-    companion object{
+    companion object {
         const val TAG = "SearchFragment"
     }
 }

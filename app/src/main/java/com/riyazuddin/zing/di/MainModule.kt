@@ -1,7 +1,7 @@
 package com.riyazuddin.zing.di
 
-import com.riyazuddin.zing.repositories.implementation.DefaultMainRepository
 import com.riyazuddin.zing.repositories.abstraction.MainRepository
+import com.riyazuddin.zing.repositories.implementation.DefaultMainRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

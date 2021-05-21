@@ -38,7 +38,7 @@ class ForgotPassword : Fragment(R.layout.fragment_forgot_password) {
                 binding.TILEmail.error = this.getString(R.string.error_fields_can_not_be_empty)
             else if (!Patterns.EMAIL_ADDRESS.matcher(email).matches())
                 binding.TILEmail.error = this.getString(R.string.error_not_a_valid_email)
-            else{
+            else {
                 it.isEnabled = false
                 viewModel.sendPasswordResetLink(
                     binding.TIEEmail.text.toString()

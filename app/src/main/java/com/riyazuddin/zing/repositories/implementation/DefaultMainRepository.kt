@@ -25,6 +25,7 @@ import com.riyazuddin.zing.other.Constants.FOLLOWING_COLLECTION
 import com.riyazuddin.zing.other.Constants.POSTS_COLLECTION
 import com.riyazuddin.zing.other.Constants.POST_LIKES_COLLECTION
 import com.riyazuddin.zing.other.Constants.USERS_COLLECTION
+import com.riyazuddin.zing.other.Constants.USERS_STAT_COLLECTION
 import com.riyazuddin.zing.other.Resource
 import com.riyazuddin.zing.other.safeCall
 import com.riyazuddin.zing.repositories.abstraction.MainRepository
@@ -43,6 +44,7 @@ class DefaultMainRepository : MainRepository {
     private val auth = FirebaseAuth.getInstance()
     private val firestore = FirebaseFirestore.getInstance()
     private val usersCollection = firestore.collection(USERS_COLLECTION)
+    private val usersStatCollection = firestore.collection(USERS_STAT_COLLECTION)
     private val postsCollection = firestore.collection(POSTS_COLLECTION)
     private val commentsCollection = firestore.collection(COMMENTS_COLLECTION)
     private val followingCollection = firestore.collection(FOLLOWING_COLLECTION)
@@ -60,29 +62,27 @@ class DefaultMainRepository : MainRepository {
 
                 val isOfflineForDatabase = mapOf(
                     "state" to "offline",
-                    "last_change" to ServerValue.TIMESTAMP
+                    "lastSeen" to ServerValue.TIMESTAMP
                 )
 
                 val isOnlineForDatabase = mapOf(
                     "state" to "online",
-                    "last_change" to ServerValue.TIMESTAMP
+                    "lastSeen" to ServerValue.TIMESTAMP
                 )
 
                 val isOfflineForFirestore = mapOf(
                     "state" to "offline",
-                    "last_change" to System.currentTimeMillis(),
+                    "lastSeen" to System.currentTimeMillis(),
                     "token" to token
                 )
 
                 val isOnlineForFirestore = mapOf(
                     "state" to "online",
-                    "last_change" to System.currentTimeMillis(),
+                    "lastSeen" to System.currentTimeMillis(),
                     "token" to token
                 )
                 Log.i(TAG, "onlineOfflineToggle: addingValueEvenListener")
 
-//                val database = Firebase.database.reference
-//                database.child("user").setValue(User("riyaz",uid)).await()
                 FirebaseDatabase.getInstance().getReference(".info/connected")
                     .addValueEventListener(object :
                         ValueEventListener {
@@ -90,7 +90,7 @@ class DefaultMainRepository : MainRepository {
                             Log.i(TAG, "onDataChange: indise")
                             if (snapshot.value == false) {
                                 GlobalScope.launch {
-                                    usersCollection.document(uid)
+                                    usersStatCollection.document(uid)
                                         .set(isOfflineForFirestore, SetOptions.merge())
                                 }
                                 return
@@ -100,7 +100,7 @@ class DefaultMainRepository : MainRepository {
                                 .addOnCompleteListener {
                                     Log.i(TAG, "onDataChange: inside")
                                     userStatusDatabaseRef.setValue(isOnlineForDatabase)
-                                    usersCollection.document(uid)
+                                    usersStatCollection.document(uid)
                                         .set(isOnlineForFirestore, SetOptions.merge())
                                 }
                         }

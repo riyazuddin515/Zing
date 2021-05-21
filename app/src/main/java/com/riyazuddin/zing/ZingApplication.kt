@@ -6,14 +6,30 @@ import android.app.NotificationManager
 import android.content.Context
 import android.os.Build
 import com.riyazuddin.zing.other.Constants.CHANNEL_ID
+import com.riyazuddin.zing.other.Constants.CHATTING_WITH
+import com.riyazuddin.zing.other.Constants.NO_ONE
+import com.riyazuddin.zing.other.Constants.UID
 import dagger.hilt.android.HiltAndroidApp
 
 @HiltAndroidApp
-class ZingApplication: Application(){
+class ZingApplication : Application() {
 
     override fun onCreate() {
         super.onCreate()
 
+        setSharedPreference()
+        createNotificationChannel()
+    }
+
+    private fun setSharedPreference() {
+        val sp = getSharedPreferences(CHATTING_WITH, MODE_PRIVATE)
+        sp.edit().let {
+            it.putString(UID, NO_ONE)
+            it.apply()
+        }
+    }
+
+    private fun createNotificationChannel() {
         // Create the NotificationChannel, but only on API 26+ because
         // the NotificationChannel class is new and not in the support library
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -30,4 +46,5 @@ class ZingApplication: Application(){
             notificationManager.createNotificationChannel(channel)
         }
     }
+
 }

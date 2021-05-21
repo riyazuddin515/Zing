@@ -1,7 +1,6 @@
 package com.riyazuddin.zing.adapters
 
 import android.graphics.Typeface
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.core.view.isVisible
@@ -11,16 +10,11 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.RequestManager
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
-import com.riyazuddin.zing.R
 import com.riyazuddin.zing.data.entities.LastMessage
 import com.riyazuddin.zing.data.entities.User
 import com.riyazuddin.zing.databinding.ItemRecentChatBinding
-import com.riyazuddin.zing.other.Constants.DELIVERED
 import com.riyazuddin.zing.other.Constants.IMAGE
 import com.riyazuddin.zing.other.Constants.SEEN
-import com.riyazuddin.zing.other.Constants.SENDING
-import com.riyazuddin.zing.other.Constants.SENT
-import com.riyazuddin.zing.other.leftDrawable
 import java.text.SimpleDateFormat
 import java.util.*
 import javax.inject.Inject
@@ -60,7 +54,8 @@ class LastMessageAdapter @Inject constructor(private val glide: RequestManager) 
     override fun onBindViewHolder(holder: LastMessageViewHolder, position: Int) {
         val lastMessage = lastMessages[position]
         holder.binding.apply {
-            val isCurrentUserIsSender = Firebase.auth.uid == lastMessage.message.senderAndReceiverUid[0]
+            val isCurrentUserIsSender =
+                Firebase.auth.uid == lastMessage.message.senderAndReceiverUid[0]
 
             if (isCurrentUserIsSender) {
                 glide.load(lastMessage.receiverProfilePicUrl).into(CIVProfilePic)
@@ -69,13 +64,14 @@ class LastMessageAdapter @Inject constructor(private val glide: RequestManager) 
                 glide.load(lastMessage.senderProfilePicUrl).into(CIVProfilePic)
                 tvName.text = lastMessage.senderName
 
-                if (lastMessage.message.status != SEEN){
+                if (lastMessage.message.status != SEEN) {
                     tvLastMessage.typeface = Typeface.DEFAULT_BOLD
                     ivUnSeen.isVisible = true
                 }
             }
             val date =
-                SimpleDateFormat("hh:mm a", Locale.US).format(Date(lastMessage.message.date)).replace("AM", "am").replace("PM","pm")
+                SimpleDateFormat("hh:mm a", Locale.US).format(Date(lastMessage.message.date))
+                    .replace("AM", "am").replace("PM", "pm")
             tvDate.text = date
             if (lastMessage.message.type == IMAGE) {
                 val s = "🖼 Photo"
@@ -93,7 +89,7 @@ class LastMessageAdapter @Inject constructor(private val glide: RequestManager) 
                             profilePicUrl = lastMessage.receiverProfilePicUrl
                         )
                         it(lastMessage, user)
-                    }else{
+                    } else {
                         val user = User(
                             name = lastMessage.senderName,
                             uid = lastMessage.message.senderAndReceiverUid[0],

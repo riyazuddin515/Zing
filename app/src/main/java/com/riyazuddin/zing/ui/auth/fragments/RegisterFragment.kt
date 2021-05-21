@@ -54,7 +54,7 @@ class RegisterFragment : Fragment(R.layout.fragment_register) {
                 editable?.let {
                     if (it.isEmpty() || it.length < MIN_USERNAME) {
                         binding.TILUsername.endIconMode = TextInputLayout.END_ICON_NONE
-                    }else if (it.contains(" ")) {
+                    } else if (it.contains(" ")) {
                         binding.TILUsername.error = "No space allowed"
                     } else if (it.length >= MIN_USERNAME) {
 //                        viewModel.searchUsername(it.toString())
@@ -62,6 +62,10 @@ class RegisterFragment : Fragment(R.layout.fragment_register) {
                     }
                 }
             }
+        }
+
+        binding.TIEEmail.addTextChangedListener {
+            binding.TIEEmail.error = null
         }
 
         binding.btnRegister.setOnClickListener {
@@ -73,7 +77,11 @@ class RegisterFragment : Fragment(R.layout.fragment_register) {
             val repeatPassword = binding.TIERepeatPassword.text.toString()
 
             if (name.isEmpty() || username.isEmpty() || email.isEmpty() || password.isEmpty())
-                Toast.makeText(requireContext(), getString(R.string.error_fields_can_not_be_empty), Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    requireContext(),
+                    getString(R.string.error_fields_can_not_be_empty),
+                    Toast.LENGTH_SHORT
+                ).show()
             else if (username.length < MIN_USERNAME)
                 binding.TILUsername.error = this.getString(
                     R.string.error_username_too_long,
@@ -88,7 +96,7 @@ class RegisterFragment : Fragment(R.layout.fragment_register) {
                 )
             else if (repeatPassword != password)
                 binding.TILRepeatPassword.error = this.getString(R.string.error_password_not_match)
-            else{
+            else {
                 it.isEnabled = false
                 viewModel.register(
                     binding.TIEName.text.toString(),

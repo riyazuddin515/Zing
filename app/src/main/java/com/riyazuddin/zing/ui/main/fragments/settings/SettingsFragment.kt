@@ -17,24 +17,24 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
         super.onViewCreated(view, savedInstanceState)
         binding = FragmentSettingsBinding.bind(view)
 
-        val appSharedPreferences = requireActivity().getSharedPreferences("AppSharedPreferences",0)
+        val appSharedPreferences = requireActivity().getSharedPreferences("AppSharedPreferences", 0)
         val sharedPreferencesEdit: SharedPreferences.Editor = appSharedPreferences.edit()
-        val isNightModeNo: Boolean = appSharedPreferences.getBoolean("NightMode",false)
+        val isNightModeNo: Boolean = appSharedPreferences.getBoolean("NightMode", false)
 
-        if (isNightModeNo){
+        if (isNightModeNo) {
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
-        }else{
+        } else {
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
         }
 
         binding.btnSwitch.setOnClickListener {
-            if (isNightModeNo){
+            if (isNightModeNo) {
                 AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
-                sharedPreferencesEdit.putBoolean("NightMode",false)
+                sharedPreferencesEdit.putBoolean("NightMode", false)
                 sharedPreferencesEdit.apply()
-            }else{
+            } else {
                 AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
-                sharedPreferencesEdit.putBoolean("NightMode",true)
+                sharedPreferencesEdit.putBoolean("NightMode", true)
                 sharedPreferencesEdit.apply()
             }
         }

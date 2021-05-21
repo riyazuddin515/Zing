@@ -10,7 +10,7 @@ import com.riyazuddin.zing.R
 import com.riyazuddin.zing.databinding.FragmentCheckMailBinding
 
 
-class CheckMailFragment: Fragment(R.layout.fragment_check_mail) {
+class CheckMailFragment : Fragment(R.layout.fragment_check_mail) {
 
     private lateinit var binding: FragmentCheckMailBinding
 

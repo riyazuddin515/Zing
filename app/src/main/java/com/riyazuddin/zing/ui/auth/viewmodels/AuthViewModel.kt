@@ -80,7 +80,7 @@ class AuthViewModel @ViewModelInject constructor(
             val result = mainRepository.algoliaSearch(query)
             result.data?.hits.let { hits ->
                 hits?.forEach { hit ->
-                    val username = hit.json.getValue("username").toString().replace("\"","")
+                    val username = hit.json.getValue("username").toString().replace("\"", "")
                     Log.i("AuthViewModel", "checkUserNameAvailability: $username")
                     if (username.equals(query, true)) {
                         exists = true
@@ -91,7 +91,7 @@ class AuthViewModel @ViewModelInject constructor(
             }
             if (exists) {
                 _isUsernameAvailable.postValue(Event(Resource.Error("Already taken")))
-            }else{
+            } else {
                 _isUsernameAvailable.postValue(Event(Resource.Success(true)))
             }
         }

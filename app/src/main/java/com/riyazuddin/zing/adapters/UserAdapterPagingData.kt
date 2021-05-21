@@ -2,17 +2,17 @@ package com.riyazuddin.zing.adapters
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import androidx.paging.PagingData
 import androidx.paging.PagingDataAdapter
-import androidx.recyclerview.widget.AsyncListDiffer
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.RequestManager
 import com.riyazuddin.zing.data.entities.User
 import com.riyazuddin.zing.databinding.ItemUserBinding
-import java.io.Serializable
 import javax.inject.Inject
 
+/**
+ * This adapter is used to display users for new chat
+ */
 class UserAdapterPagingData @Inject constructor(val glide: RequestManager) :
     PagingDataAdapter<User, UserAdapterPagingData.UserViewHolder>(Companion) {
 

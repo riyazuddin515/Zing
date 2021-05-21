@@ -57,6 +57,7 @@ dependencies {
 
     // Architectural Components
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:2.2.0"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
 
     def paging_version = "3.0.0-alpha08"
     implementation "androidx.paging:paging-runtime-ktx:$paging_version"

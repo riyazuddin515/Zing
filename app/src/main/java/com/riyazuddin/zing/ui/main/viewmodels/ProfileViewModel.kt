@@ -11,13 +11,11 @@ import androidx.paging.cachedIn
 import com.google.firebase.firestore.FirebaseFirestore
 import com.riyazuddin.zing.data.entities.Post
 import com.riyazuddin.zing.data.entities.User
-import com.riyazuddin.zing.data.pagingsource.ProfilePostPagingSource
 import com.riyazuddin.zing.other.Constants.POST_PAGE_SIZE
 import com.riyazuddin.zing.other.Event
 import com.riyazuddin.zing.other.Resource
 import com.riyazuddin.zing.repositories.abstraction.MainRepository
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
+import com.riyazuddin.zing.repositories.pagingsource.ProfilePostPagingSource
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 
@@ -31,6 +29,15 @@ class ProfileViewModel @ViewModelInject constructor(
     private val _loadProfileMetadata = MutableLiveData<Event<Resource<User>>>()
     val loadProfileMetadata: LiveData<Event<Resource<User>>> = _loadProfileMetadata
 
+    private var uid: String = ""
+
+    fun setUid(uid: String) {
+        this.uid = uid
+    }
+
+    val flowOfProfilePosts = Pager(PagingConfig(POST_PAGE_SIZE)){
+        ProfilePostPagingSource(FirebaseFirestore.getInstance(),uid)
+    }.flow.cachedIn(viewModelScope)
 
     fun getPagingFlowOfPost(uid: String): Flow<PagingData<Post>> {
         val pagingSource = ProfilePostPagingSource(
@@ -40,6 +47,8 @@ class ProfileViewModel @ViewModelInject constructor(
         return Pager(PagingConfig(POST_PAGE_SIZE)) {
             pagingSource
         }.flow.cachedIn(viewModelScope)
+
+
     }
 
 

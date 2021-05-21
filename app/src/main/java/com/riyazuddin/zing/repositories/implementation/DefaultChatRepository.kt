@@ -12,11 +12,11 @@ import com.google.firebase.storage.FirebaseStorage
 import com.riyazuddin.zing.data.entities.LastMessage
 import com.riyazuddin.zing.data.entities.Message
 import com.riyazuddin.zing.data.entities.User
-import com.riyazuddin.zing.data.pagingsource.FollowingAndFollowersPagingSource
 import com.riyazuddin.zing.other.Constants
 import com.riyazuddin.zing.other.Constants.DATE
 import com.riyazuddin.zing.other.Constants.MESSAGE
 import com.riyazuddin.zing.other.Constants.MESSAGES_COLLECTION
+import com.riyazuddin.zing.other.Constants.MESSAGE_ID
 import com.riyazuddin.zing.other.Constants.NO_MORE_MESSAGES
 import com.riyazuddin.zing.other.Constants.RECEIVER_NAME
 import com.riyazuddin.zing.other.Constants.RECEIVER_PROFILE_PIC_URL
@@ -36,6 +36,7 @@ import com.riyazuddin.zing.other.Event
 import com.riyazuddin.zing.other.Resource
 import com.riyazuddin.zing.other.safeCall
 import com.riyazuddin.zing.repositories.abstraction.ChatRepository
+import com.riyazuddin.zing.repositories.pagingsource.FollowingAndFollowersPagingSource
 import kotlinx.coroutines.*
 import kotlinx.coroutines.tasks.await
 import java.util.*
@@ -217,6 +218,7 @@ class DefaultChatRepository : ChatRepository {
                     value?.let { querySnapshot ->
                         if (isFirstPageFirstLoad) {
                             if (querySnapshot.size() - 1 < 0) {
+                                chatList.postValue(Event(Resource.Success(listOf())))
                                 return@addSnapshotListener
                             } else {
                                 lastVisible = querySnapshot.documents[querySnapshot.size() - 1]
@@ -278,12 +280,13 @@ class DefaultChatRepository : ChatRepository {
                     when {
                         querySnapshot.size() - 1 < 0 -> {
                             Log.i(TAG, "getChatLoadMore: query less than zero")
+                            chatList.postValue(Event(Resource.Error(NO_MORE_MESSAGES)))
                             return@addSnapshotListener
                         }
                         lastVisible == querySnapshot.documents[querySnapshot.size() - 1] -> {
                             Log.i(TAG, "getChatLoadMore: same as previous")
                             nextListener?.remove()
-                            lastMessageList.postValue(Event(Resource.Error(NO_MORE_MESSAGES)))
+                            chatList.postValue(Event(Resource.Error(NO_MORE_MESSAGES)))
                             return@addSnapshotListener
                         }
                         else -> {
@@ -339,9 +342,12 @@ class DefaultChatRepository : ChatRepository {
     override suspend fun getLastMessageFirstQuery() {
         withContext(Dispatchers.IO) {
             val query =
-                chatsCollection.whereArrayContains("$MESSAGE.$SENDER_AND_RECEIVER_UID", Firebase.auth.uid!!)
+                chatsCollection.whereArrayContains(
+                    "$MESSAGE.$SENDER_AND_RECEIVER_UID",
+                    Firebase.auth.uid!!
+                )
                     .orderBy("$MESSAGE.$DATE", Query.Direction.DESCENDING)
-                    .limit(10)
+                    .limit(3)
 
             lastMessageFirstListenerRegistration = query.addSnapshotListener { value, error ->
                 error?.let {
@@ -412,23 +418,33 @@ class DefaultChatRepository : ChatRepository {
 
     override suspend fun getLastMessageLoadMore() {
         withContext(Dispatchers.IO) {
+            
             val nextQuery = chatsCollection
                 .whereArrayContains("$MESSAGE.$SENDER_AND_RECEIVER_UID", Firebase.auth.uid!!)
                 .orderBy("$MESSAGE.$DATE", Query.Direction.DESCENDING)
-                .startAfter(lastMessageLastVisible)
-                .limit(10)
+                .startAfter(lastMessageLastVisible?.get("$MESSAGE.$DATE"))
+                .limit(3)
+
 
             lastMessageNextListenerRegistration = nextQuery.addSnapshotListener { value, error ->
                 error?.let {
-                    Log.e(TAG, "getLastMessageFirstQuery: ", it)
+                    Log.e(TAG, "getLastMessageLoadMore: ", it)
                     lastMessageList.postValue(Event(Resource.Error(it.message!!)))
                     return@addSnapshotListener
                 }
 
                 value?.let { querySnapshot ->
+                    Log.i(TAG, "getLastMessageLoadMore: Last Visible = ${lastMessageLastVisible?.get(
+                        RECEIVER_NAME)}")
+                    Log.i(TAG, "getLastMessageLoadMore: size = ${querySnapshot.size()}")
+                    for (doc in querySnapshot.documents) {
+                        val lastMessage = doc.toObject(LastMessage::class.java)
+                        Log.i(TAG, "getLastMessageLoadMore: ${lastMessage?.message?.message} --- ${lastMessage?.receiverName}")
+                    }
                     when {
                         querySnapshot.size() - 1 < 0 -> {
                             Log.i(TAG, "getLastMessageLoadMore: query less than zero")
+                            lastMessageList.postValue(Event(Resource.Error(NO_MORE_MESSAGES)))
                             return@addSnapshotListener
                         }
                         lastMessageLastVisible == querySnapshot.documents[querySnapshot.size() - 1] -> {

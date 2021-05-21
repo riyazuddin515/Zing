@@ -2,12 +2,16 @@ package com.riyazuddin.zing.other
 
 object Constants {
 
+    const val CHATTING_WITH = "chatting_with"
+    const val NO_ONE = "NO_ONE"
+    const val NOTIFICATION_ID = 1
     const val CHANNEL_ID = "chat_channel_id"
 
-    const val DEFAULT_PROFILE_PICTURE_URL = "https://firebasestorage.googleapis.com/v0/b/zing515.appspot.com/o/img_avatar.png?alt=media&token=ec8797be-e330-4aa2-b818-aab826de94c9"
+    const val DEFAULT_PROFILE_PICTURE_URL =
+        "https://firebasestorage.googleapis.com/v0/b/zing515.appspot.com/o/img_avatar.png?alt=media&token=ec8797be-e330-4aa2-b818-aab826de94c9"
 
     const val USERS_COLLECTION = "users"
-    const val USERS_STATE_COLLECTION = "usersState"
+    const val USERS_STAT_COLLECTION = "usersStat"
     const val POSTS_COLLECTION = "posts"
     const val COMMENTS_COLLECTION = "comments"
     const val FOLLOWING_COLLECTION = "following"
@@ -49,7 +53,7 @@ object Constants {
     const val RECEIVER_USERNAME = "receiverUsername"
     const val RECEIVER_PROFILE_PIC_URL = "receiverProfilePicUrl"
 
-    const val POST_PAGE_SIZE = 1
+    const val POST_PAGE_SIZE = 3
     const val NEW_CHAT_LIST_SIZE = 10
 
     const val MIN_PASSWORD = 8
@@ -69,4 +73,5 @@ object Constants {
 
     const val SUCCESS = "SUCCESS"
     const val FAILURE = "FAILURE"
+
 }

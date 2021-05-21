@@ -1,8 +1,8 @@
 package com.riyazuddin.zing.adapters
 
-import android.content.Context
-import android.view.*
-import android.view.animation.AnimationUtils
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
@@ -17,8 +17,9 @@ import com.riyazuddin.zing.other.Utils.Companion.getTimeAgo
 import javax.inject.Inject
 
 
-class PostAdapter @Inject constructor(val glide: RequestManager, private val applicationContext: Context) :
-    PagingDataAdapter<Post, PostAdapter.PostViewHolder>(Companion) {
+class PostAdapter @Inject constructor(
+    val glide: RequestManager
+) : PagingDataAdapter<Post, PostAdapter.PostViewHolder>(Companion) {
 
     class PostViewHolder(val binding: ItemPostBinding) : RecyclerView.ViewHolder(binding.root)
 
@@ -50,7 +51,8 @@ class PostAdapter @Inject constructor(val glide: RequestManager, private val app
             tvUsername.text = post.username
             val likeCount = post.likeCount
             tvLikedBy.isVisible = likeCount != 0
-            val likesText = if(likeCount == 1) "1 like" else "${String.format("%,d",likeCount)} likes"
+            val likesText =
+                if (likeCount == 1) "1 like" else "${String.format("%,d", likeCount)} likes"
             tvLikedBy.text = likesText
             tvPostedOn.text = getTimeAgo(post.date)
             if (post.caption.isEmpty())
