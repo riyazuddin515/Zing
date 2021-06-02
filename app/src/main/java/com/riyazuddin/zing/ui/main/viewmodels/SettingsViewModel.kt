@@ -26,9 +26,6 @@ class SettingsViewModel @ViewModelInject constructor(
     private val _imageUri = MutableLiveData<Uri>()
     val imageUri: LiveData<Uri> = _imageUri
 
-    private val _isUsernameAvailable = MutableLiveData<Event<Resource<Boolean>>>()
-    val isUsernameAvailable: LiveData<Event<Resource<Boolean>>> = _isUsernameAvailable
-
     private val _updateProfileStatus = MutableLiveData<Event<Resource<Any>>>()
     val updateProfileStatus: LiveData<Event<Resource<Any>>> = _updateProfileStatus
 
@@ -49,19 +46,6 @@ class SettingsViewModel @ViewModelInject constructor(
         _imageUri.postValue(uri)
     }
 
-    fun searchUsername(query: String) {
-        if (query.isEmpty())
-            return
-
-        _isUsernameAvailable.postValue(Event(Resource.Loading()))
-        viewModelScope.launch(dispatcher) {
-            val result = repository.searchUsername(query)
-            if (result.data!!)
-                _isUsernameAvailable.postValue(Event(Resource.Success(true)))
-            else _isUsernameAvailable.postValue(Event(Resource.Error("Already taken")))
-        }
-    }
-
     fun updateProfile(updateProfile: UpdateProfile, imageUri: Uri?) =
         viewModelScope.launch(dispatcher) {
             _updateProfileStatus.postValue(Event(Resource.Loading()))
@@ -79,7 +63,7 @@ class SettingsViewModel @ViewModelInject constructor(
         }
     }
 
-    fun changePassword(newPassword: String, confirmNewPassword: String) {
+    fun changePassword(newPassword: String) {
         _changePasswordStatus.postValue(Event(Resource.Loading()))
         viewModelScope.launch(dispatcher) {
             val result = repository.changePassword(newPassword)

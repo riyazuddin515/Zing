@@ -22,10 +22,13 @@ import com.riyazuddin.zing.R
 import com.riyazuddin.zing.data.entities.UpdateProfile
 import com.riyazuddin.zing.data.entities.User
 import com.riyazuddin.zing.databinding.FragmentProfileInfoBinding
+import com.riyazuddin.zing.other.Constants
 import com.riyazuddin.zing.other.Constants.MIN_USERNAME
 import com.riyazuddin.zing.other.Constants.SEARCH_TIME_DELAY
 import com.riyazuddin.zing.other.EventObserver
+import com.riyazuddin.zing.other.Validator
 import com.riyazuddin.zing.other.snackBar
+import com.riyazuddin.zing.ui.auth.viewmodels.AuthViewModel
 import com.riyazuddin.zing.ui.main.viewmodels.SettingsViewModel
 import com.theartofdev.edmodo.cropper.CropImage
 import com.theartofdev.edmodo.cropper.CropImageView
@@ -45,6 +48,7 @@ class ProfileInfo : Fragment(R.layout.fragment_profile_info) {
 
     private lateinit var binding: FragmentProfileInfoBinding
     private val viewModel: SettingsViewModel by viewModels()
+    private val authViewModel: AuthViewModel by viewModels()
 
     private var imageUri: Uri? = null
     private lateinit var cropContent: ActivityResultLauncher<String>
@@ -104,12 +108,16 @@ class ProfileInfo : Fragment(R.layout.fragment_profile_info) {
             job = lifecycleScope.launch {
                 delay(SEARCH_TIME_DELAY)
                 editable?.let {
-                    if (it.toString() != user.username && it.length >= MIN_USERNAME) {
-                        viewModel.searchUsername(it.toString())
-                    } else {
-                        binding.TILUsername.error = null
-                        binding.btnUpdate.isEnabled = true
-                        binding.TILUsername.endIconMode = TextInputLayout.END_ICON_NONE
+                    binding.TILUsername.endIconMode = TextInputLayout.END_ICON_NONE
+                    when {
+                        it.length < MIN_USERNAME -> binding.TILUsername.error =
+                            getString(R.string.error_username_too_short, MIN_USERNAME)
+                        it.length > Constants.MAX_USERNAME -> binding.TILUsername.error =
+                            getString(R.string.error_username_too_long, Constants.MAX_USERNAME)
+                        it.contains(" ") -> binding.TILUsername.error = "No space allowed"
+
+//                        Validator.validateUsername(it.toString()) -> authViewModel.checkUserNameAvailability(it.toString())
+                        else -> binding.TILUsername.error = Constants.VALID_USERNAME_MESSAGE
                     }
                 }
             }
@@ -151,7 +159,7 @@ class ProfileInfo : Fragment(R.layout.fragment_profile_info) {
             snackBar("Profile successfully updated")
         })
 
-        viewModel.isUsernameAvailable.observe(viewLifecycleOwner, EventObserver(
+        authViewModel.isUsernameAvailable.observe(viewLifecycleOwner, EventObserver(
             onError = {
                 binding.TILUsername.endIconMode = TextInputLayout.END_ICON_NONE
                 binding.TILUsername.error = it
@@ -159,16 +167,11 @@ class ProfileInfo : Fragment(R.layout.fragment_profile_info) {
             onLoading = {
                 binding.TILUsername.error = null
                 binding.TILUsername.endIconMode = TextInputLayout.END_ICON_NONE
-                binding.btnUpdate.isEnabled = false
             }
         ) {
-            binding.btnUpdate.isEnabled = true
             binding.TILUsername.endIconMode = TextInputLayout.END_ICON_CUSTOM
-            binding.TILUsername.endIconDrawable = ResourcesCompat.getDrawable(
-                resources,
-                R.drawable.ic_outline_check_circle,
-                activity?.theme
-            )
+            binding.TILUsername.endIconDrawable =
+                ResourcesCompat.getDrawable(resources, R.drawable.ic_outline_check_circle, null)
         })
     }
 }

@@ -62,17 +62,6 @@ class AuthViewModel @ViewModelInject constructor(
         }
     }
 
-    fun searchUsername(query: String) {
-        _isUsernameAvailable.postValue(Event(Resource.Loading()))
-        viewModelScope.launch {
-            val result = repository.searchUsername(query)
-            if (result.data!!)
-                _isUsernameAvailable.postValue(Event(Resource.Success(true)))
-            else
-                _isUsernameAvailable.postValue(Event(Resource.Error("Already taken")))
-        }
-    }
-
     fun checkUserNameAvailability(query: String) {
         var exists = false
         _isUsernameAvailable.postValue(Event(Resource.Loading()))

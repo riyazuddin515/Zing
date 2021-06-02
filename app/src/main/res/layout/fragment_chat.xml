@@ -115,16 +115,20 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="@string/enter_your_message"
+                android:scrollbars="vertical"
                 android:textColor="@color/blackAndWhite"
-                android:textColorHint="@color/blackAndWhite" />
+                android:textColorHint="@color/blackAndWhite"
+                android:maxLines="5"
+                tools:text="A paragraph is a series of related sentences developing a central idea, called the topic. Try to think about paragraphs in terms of thematic unity: a paragraph is a sentence or a group of sentences that supports one central, unified idea. Paragraphs add one idea at a time to your broader argument. A paragraph is a series of related sentences developing a central idea, called the topic. Try to think about paragraphs in terms of thematic unity: a paragraph is a sentence or a group of sentences that supports one central, unified idea. Paragraphs add one idea at a time to your broader argument."/>
 
         </com.google.android.material.textfield.TextInputLayout>
 
         <ImageButton
             android:id="@+id/btnAttachFile"
             android:layout_width="wrap_content"
-            android:layout_height="0dp"
+            android:layout_height="wrap_content"
             android:layout_margin="5dp"
+            android:layout_marginBottom="4dp"
             android:background="@android:color/transparent"
             android:contentDescription="@string/image"
             android:padding="5dp"
@@ -133,7 +137,6 @@
             app:layout_constraintEnd_toStartOf="@+id/btnSend"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toEndOf="@+id/TILMessage"
-            app:layout_constraintTop_toTopOf="@+id/TILMessage"
             app:tint="@color/black" />
 
         <ImageButton
@@ -148,8 +151,7 @@
             app:layout_constraintBottom_toBottomOf="@+id/TILMessage"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toEndOf="@+id/btnAttachFile"
-            app:layout_constraintTop_toTopOf="@+id/TILMessage" />
+            app:layout_constraintStart_toEndOf="@+id/btnAttachFile" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

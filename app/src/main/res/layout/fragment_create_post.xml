@@ -6,19 +6,16 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:background="@color/whiteAndBlack">
 
-    <com.google.android.material.appbar.AppBarLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/appBarLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/whiteAndBlack"
+        android:background="@drawable/top_menu_background"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
 
             <com.google.android.material.appbar.MaterialToolbar
                 android:id="@+id/materialToolbar"
@@ -35,19 +32,16 @@
                 android:id="@+id/btnClose"
                 android:layout_width="50dp"
                 android:layout_height="0dp"
-                android:src="@drawable/ic_close"
-                android:contentDescription="@string/post"
-                android:tint="@color/blackAndWhite"
                 android:background="@android:color/transparent"
+                android:contentDescription="@string/post"
+                android:src="@drawable/ic_close"
+                android:tint="@color/blackAndWhite"
                 app:layout_constraintBottom_toBottomOf="@+id/materialToolbar"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="@+id/materialToolbar" />
 
-        </androidx.constraintlayout.widget.ConstraintLayout>
 
-
-
-    </com.google.android.material.appbar.AppBarLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <ImageView
         android:id="@+id/IMVCreatePost"

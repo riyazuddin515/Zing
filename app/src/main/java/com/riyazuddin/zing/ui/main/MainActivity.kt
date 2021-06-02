@@ -47,7 +47,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         Log.i(TAG, "onCreated: onlineOfflineToggle calling")
-        viewModel.onlineOfflineToggle(Firebase.auth.uid!!)
+//        viewModel.onlineOfflineToggle(Firebase.auth.uid!!)
         Log.i(TAG, "onCreated: onlineOfflineToggle called")
 
 

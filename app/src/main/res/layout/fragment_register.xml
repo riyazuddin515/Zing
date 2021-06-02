@@ -76,7 +76,9 @@
                     android:id="@+id/TIEName"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="textPersonName" />
+                    android:inputType="textPersonName"
+                    android:maxLength="20"
+                    android:maxLines="1"/>
 
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -97,7 +99,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:inputType="text|textNoSuggestions"
-                    android:maxLength="20" />
+                    android:maxLength="15" />
 
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -190,12 +192,12 @@
                 android:layout_height="wrap_content"
                 android:indeterminate="true"
                 android:visibility="gone"
-                tools:visibility="visible"
+                android:layout_marginTop="4dp"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.5"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintEnd_toEndOf="@+id/TILRepeatPassword"
+                app:layout_constraintStart_toStartOf="@+id/TILRepeatPassword"
+                app:layout_constraintTop_toBottomOf="@+id/TILRepeatPassword"
+                tools:visibility="visible" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 

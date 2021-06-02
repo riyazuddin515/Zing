@@ -5,8 +5,11 @@ import android.view.View
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Observer
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
+import androidx.paging.LoadState
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.RequestManager
 import com.google.firebase.auth.ktx.auth
@@ -17,8 +20,11 @@ import com.riyazuddin.zing.data.entities.User
 import com.riyazuddin.zing.databinding.FragmentCommentsBinding
 import com.riyazuddin.zing.other.EventObserver
 import com.riyazuddin.zing.other.snackBar
+import com.riyazuddin.zing.ui.dialogs.CustomDialog
 import com.riyazuddin.zing.ui.main.viewmodels.CommentViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -49,6 +55,11 @@ class CommentsFragment : Fragment(R.layout.fragment_comments) {
             findNavController().navigateUp()
         }
 
+        binding.swipeRefreshLayout.setOnRefreshListener {
+            commentAdapter.refresh()
+            binding.swipeRefreshLayout.isRefreshing = false
+        }
+
         commentAdapter.setOnUserClickListener {
             if (Firebase.auth.uid == it.commentedBy)
                 findNavController().navigate(R.id.profileFragment)
@@ -60,30 +71,40 @@ class CommentsFragment : Fragment(R.layout.fragment_comments) {
                 )
         }
 
+        viewLifecycleOwner.lifecycleScope.launch {
+            commentAdapter.loadStateFlow.collectLatest {
+                binding.progressBar.isVisible =
+                    it.refresh is LoadState.Loading ||
+                            it.append is LoadState.Loading
+            }
+        }
+
+        commentAdapter.setOnCommentDeleteClickListener {
+            CustomDialog(
+                getString(R.string.delete_comment_dialog_title),
+                getString(R.string.delete_comment_dialog_message)
+            ).apply {
+                setPositiveListener {
+                    viewModel.deleteComment(it)
+                }
+            }.show(childFragmentManager, null)
+        }
+
         binding.btnSend.setOnClickListener {
             viewModel.createComment(binding.TIEComment.text.toString(), args.postId)
         }
     }
 
     private fun subscribeToObservers() {
+        viewModel.postComments.observe(viewLifecycleOwner, {
+            commentAdapter.submitData(viewLifecycleOwner.lifecycle, it)
+        })
+
         viewModel.userProfileStatus.observe(viewLifecycleOwner, EventObserver(
             onError = { snackBar(it) }
         ) {
             currentUser = it
             glide.load(it.profilePicUrl).into(binding.CIVProfilePic)
-        })
-
-        viewModel.commentsListStatus.observe(viewLifecycleOwner, EventObserver(
-            onError = {
-                binding.progressBar.isVisible = false
-                snackBar(it)
-            },
-            onLoading = {
-                binding.progressBar.isVisible = true
-            }
-        ) { comments ->
-            binding.progressBar.isVisible = false
-            commentAdapter.comments = comments
         })
 
         viewModel.createCommentStatus.observe(viewLifecycleOwner, EventObserver(
@@ -99,8 +120,20 @@ class CommentsFragment : Fragment(R.layout.fragment_comments) {
             snackBar("Comment Posted")
             comment.username = currentUser.username
             comment.userProfilePic = currentUser.profilePicUrl
-            commentAdapter.comments += comment
-            binding.rvComments.smoothScrollToPosition(commentAdapter.itemCount)
+
+            viewModel.insertCommentInLiveData(comment)
+        })
+
+        viewModel.deleteCommentStatus.observe(viewLifecycleOwner, EventObserver(
+            onError = {
+                snackBar(it)
+            },
+            onLoading = {
+                snackBar("Deleting...")
+            }
+        ){
+            snackBar("Comment Deleted!")
+            viewModel.deleteCommentInLiveData(it)
         })
     }
 

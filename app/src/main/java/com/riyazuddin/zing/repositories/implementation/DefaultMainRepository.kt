@@ -22,8 +22,12 @@ import com.riyazuddin.zing.other.Constants.COMMENTS_COLLECTION
 import com.riyazuddin.zing.other.Constants.DEFAULT_PROFILE_PICTURE_URL
 import com.riyazuddin.zing.other.Constants.FOLLOWERS_COLLECTION
 import com.riyazuddin.zing.other.Constants.FOLLOWING_COLLECTION
+import com.riyazuddin.zing.other.Constants.LAST_SEEN
 import com.riyazuddin.zing.other.Constants.POSTS_COLLECTION
+import com.riyazuddin.zing.other.Constants.POST_COUNT
 import com.riyazuddin.zing.other.Constants.POST_LIKES_COLLECTION
+import com.riyazuddin.zing.other.Constants.STATE
+import com.riyazuddin.zing.other.Constants.TOKEN
 import com.riyazuddin.zing.other.Constants.USERS_COLLECTION
 import com.riyazuddin.zing.other.Constants.USERS_STAT_COLLECTION
 import com.riyazuddin.zing.other.Resource
@@ -52,7 +56,7 @@ class DefaultMainRepository : MainRepository {
     private val postLikesCollection = firestore.collection(POST_LIKES_COLLECTION)
     private val storage = FirebaseStorage.getInstance()
 
-    override suspend fun onlineOfflineToggle(uid: String) {
+    override suspend fun onlineOfflineToggleWithDeviceToken(uid: String) {
         withContext(Dispatchers.IO) {
             safeCall {
                 val userStatusDatabaseRef =
@@ -61,25 +65,25 @@ class DefaultMainRepository : MainRepository {
                 val token = FirebaseMessaging.getInstance().token.await()
 
                 val isOfflineForDatabase = mapOf(
-                    "state" to "offline",
-                    "lastSeen" to ServerValue.TIMESTAMP
+                    STATE to "offline",
+                    LAST_SEEN to ServerValue.TIMESTAMP
                 )
 
                 val isOnlineForDatabase = mapOf(
-                    "state" to "online",
-                    "lastSeen" to ServerValue.TIMESTAMP
+                    STATE to "online",
+                    LAST_SEEN to ServerValue.TIMESTAMP
                 )
 
                 val isOfflineForFirestore = mapOf(
-                    "state" to "offline",
-                    "lastSeen" to System.currentTimeMillis(),
-                    "token" to token
+                    STATE to  "offline",
+                    LAST_SEEN to System.currentTimeMillis(),
+                    TOKEN to  token
                 )
 
                 val isOnlineForFirestore = mapOf(
-                    "state" to "online",
-                    "lastSeen" to System.currentTimeMillis(),
-                    "token" to token
+                    STATE to "online",
+                    LAST_SEEN to System.currentTimeMillis(),
+                    TOKEN to token
                 )
                 Log.i(TAG, "onlineOfflineToggle: addingValueEvenListener")
 
@@ -114,16 +118,25 @@ class DefaultMainRepository : MainRepository {
         }
     }
 
+    override suspend fun removeDeviceToken(uid: String) = withContext(Dispatchers.IO){
+        safeCall {
+            usersStatCollection.document(uid).update(TOKEN, "").await()
+            Resource.Success(true)
+        }
+    }
+
     override suspend fun createPost(imageUri: Uri, caption: String) = withContext(Dispatchers.IO) {
         safeCall {
             val uid = auth.uid!!
             val postID = UUID.randomUUID().toString()
             val postDownloadUrl = storage.reference.child("posts/$uid/$postID").putFile(imageUri)
                 .await().metadata?.reference?.downloadUrl?.await().toString()
-            val post = Post(postID, uid, System.currentTimeMillis(), postDownloadUrl, caption)
-            postsCollection.document(postID).set(post).await()
-            usersCollection.document(uid).update("postCount", FieldValue.increment(1)).await()
-            postLikesCollection.document(postID).set(PostLikes()).await()
+            firestore.runBatch { batch ->
+                val post = Post(postID, uid, System.currentTimeMillis(), postDownloadUrl, caption)
+                batch.set(postsCollection.document(postID), post)
+                batch.update(usersCollection.document(uid), POST_COUNT, FieldValue.increment(1))
+                batch.set(postLikesCollection.document(postID), PostLikes())
+            }.await()
             Resource.Success(Any())
         }
     }
@@ -183,6 +196,7 @@ class DefaultMainRepository : MainRepository {
             }
         }
 
+
     override suspend fun getUsers(uids: List<String>) = withContext(Dispatchers.IO) {
         safeCall {
             val chunks = uids.chunked(10)
@@ -221,7 +235,6 @@ class DefaultMainRepository : MainRepository {
             var isLiked = false
             firestore.runTransaction { transition ->
                 val uid = auth.uid!!
-
                 val currentLikes = transition.get(postLikesCollection.document(post.postId))
                     .toObject(PostLikes::class.java)?.likedBy ?: listOf()
 
@@ -350,11 +363,9 @@ class DefaultMainRepository : MainRepository {
     override suspend fun createComment(commentText: String, postId: String) =
         withContext(Dispatchers.IO) {
             safeCall {
-                val uid = auth.uid!!
                 val commentId = UUID.randomUUID().toString()
-                val date = System.currentTimeMillis()
-                val comment = Comment(commentId, commentText, postId, date, uid)
-                commentsCollection.document(commentId).set(comment).await()
+                val comment = Comment(commentId, commentText, postId, System.currentTimeMillis(), auth.uid!!)
+                commentsCollection.document(postId).collection(COMMENTS_COLLECTION).document(commentId).set(comment).await()
                 Resource.Success(comment)
             }
         }
@@ -407,20 +418,6 @@ class DefaultMainRepository : MainRepository {
             }
         }
 
-    /**
-     * method used to check username availability
-     */
-    override suspend fun searchUsername(query: String): Resource<Boolean> {
-        return withContext(Dispatchers.IO) {
-            safeCall {
-                val result = usersCollection.whereEqualTo("username", query).get().await()
-                if (result.isEmpty)
-                    Resource.Success(true)
-                else
-                    Resource.Success(false)
-            }
-        }
-    }
 
     override suspend fun verifyAccount(currentPassword: String): Resource<Any> =
         withContext(Dispatchers.IO) {
@@ -482,6 +479,19 @@ class DefaultMainRepository : MainRepository {
                 Resource.Success(result)
             }
         }
+
+    override suspend fun deleteComment(comment: Comment): Resource<Comment> = withContext(Dispatchers.IO){
+        safeCall {
+            commentsCollection
+                .document(comment.postId)
+                .collection(COMMENTS_COLLECTION)
+                .document(comment.commentId)
+                .delete()
+                .await()
+
+            Resource.Success(comment)
+        }
+    }
 
     companion object {
         const val TAG = "MainRepository"

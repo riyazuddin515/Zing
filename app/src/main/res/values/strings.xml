@@ -28,14 +28,29 @@
     <string name="post">Post</string>
     <string name="settings">Settings</string>
     <string name="error_fields_can_not_be_empty">Fields can\'t be Empty</string>
-    <string name="error_not_a_valid_email">Enter Valid Email Address</string>
-    <string name="error_password_too_short">The password must be at least %d digits long</string>
-    <string name="error_password_too_long">The password must be less than %d digits long</string>
+
+    <string name="error_name_empty">Name can not be empty</string>
+    <string name="error_name_too_short">Name can\'t have less than %d characters</string>
+    <string name="error_name_too_long">Name can\'t have more than %d characters</string>
+    <string name="error_name_valid_message">Name must be in a-z,A-z</string>
+
+    <string name="error_username_empty">Username can not be empty</string>
     <string name="error_username_too_short">The username can\'t have less than %d characters</string>
     <string name="error_username_too_long">The username can\'t have more than %d characters</string>
-    <string name="registration_success">Registration Success! Verify your Email</string>
+    <string name="error_username_valid_message">Username start with alphabet and can have alphabet, digit and _</string>
+
+    <string name="error_email_empty">Email can not be empty</string>
+    <string name="error_not_a_valid_email">Enter Valid Email Address</string>
+
+    <string name="error_password_empty">Password can not be empty</string>
+    <string name="error_password_too_short">The password must be at least %d digits long</string>
+    <string name="error_password_too_long">The password must be less than %d digits long</string>
+
     <string name="repeat_password">Repeat Password</string>
     <string name="error_password_not_match">Password doesn\'t match</string>
+
+    <string name="registration_success">Registration Success! Verify your Email</string>
+
     <string name="a_mail_with_password_reset_link_will_be_sent_to_you_email_address">A mail with password reset link will be sent to you email address.</string>
     <string name="send_mail">Send Mail</string>
     <string name="first_name">First Name</string>
@@ -49,8 +64,10 @@
     <string name="mail_icon">mail_icon</string>
     <string name="error_select_an_image">Please select an Image</string>
     <string name="caption">caption</string>
-    <string name="delete_post_dialog_title">Do you want to delete that post?</string>
+    <string name="delete_post_dialog_title">Delete this post?</string>
     <string name="delete_post_dialog_message">This action cannot be undone.</string>
+    <string name="delete_comment_dialog_title">Delete this comment?</string>
+    <string name="delete_comment_dialog_message">This action cannot be undone.</string>
     <string name="delete_post_dialog_positive">Yes</string>
     <string name="delete_post_dialog_negative">No</string>
     <string name="unfollow">UnFollow</string>
@@ -168,4 +185,5 @@
         "when a user tries to pick up one of cards.\n\n"
     </string>
     <string name="action_settings">Settings</string>
+    <string name="enter_valid_email">Enter Valid Email</string>
 </resources>

@@ -38,6 +38,7 @@ class FeedPagingSource(
                 followingList = db.collection(FOLLOWING_COLLECTION)
                     .document(uid).get().await().toObject(Following::class.java)
                     ?.following ?: listOf()
+                followingList = followingList + uid
                 firstLoad = false
             }
 

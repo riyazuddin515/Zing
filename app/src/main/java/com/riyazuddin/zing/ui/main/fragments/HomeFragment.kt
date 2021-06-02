@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import android.widget.Toast
 import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
@@ -43,8 +44,7 @@ class HomeFragment : BasePostFragment(R.layout.fragment_home) {
             return vm
         }
 
-    //    private val viewModel: HomeViewModel by lazy { basePostViewModel as HomeViewModel }
-    private lateinit var viewModel: HomeViewModel
+    private val viewModel: HomeViewModel by lazy { basePostViewModel as HomeViewModel }
 
     private var currentUser: User? = null
 
@@ -54,19 +54,14 @@ class HomeFragment : BasePostFragment(R.layout.fragment_home) {
 
         binding = FragmentHomeBinding.bind(view)
 
-        viewModel = basePostViewModel as HomeViewModel
-
         subscribeToObservers()
         setUpRecyclerView()
 
         binding.btnLogout.setOnClickListener {
+
             CustomDialog("Log Out", " Are you sure to logout of the app?").apply {
                 setPositiveListener {
-                    Firebase.auth.signOut()
-                    Intent(requireActivity(), AuthActivity::class.java).apply {
-                        startActivity(this)
-                        requireActivity().finish()
-                    }
+                    viewModel.removeDeviceToken(Firebase.auth.uid!!)
                 }
             }.show(parentFragmentManager, null)
         }
@@ -115,23 +110,18 @@ class HomeFragment : BasePostFragment(R.layout.fragment_home) {
 //
 ////            notificationManager.notify(1, builder.build())
 //        }
-//        lifecycleScope.launch {
-//            viewModel.pagingFlow.collect {
-//                postAdapter.submitData(it)
-//            }
-//        }
-//
-//        lifecycleScope.launch {
-//            postAdapter.loadStateFlow.collectLatest {
-//                binding.progressBar.isVisible =
-//                    it.refresh is LoadState.Loading ||
-//                            it.append is LoadState.Loading
-//            }
-//        }
+
+        lifecycleScope.launch {
+            postAdapter.loadStateFlow.collectLatest {
+                binding.progressBar.isVisible =
+                    it.refresh is LoadState.Loading ||
+                            it.append is LoadState.Loading
+            }
+        }
 
         if (currentUser == null) {
             viewModel.loadCurrentUser(Firebase.auth.uid!!)
-        }else{
+        } else {
             binding.ibRecentChat.isVisible = true
         }
 
@@ -142,9 +132,24 @@ class HomeFragment : BasePostFragment(R.layout.fragment_home) {
                 )
             )
         }
+
+        binding.swipeRefreshLayout.setOnRefreshListener {
+            postAdapter.refresh()
+            binding.swipeRefreshLayout.isRefreshing = false
+        }
     }
 
     private fun subscribeToObservers() {
+        viewModel.feedPagingFlow.observe(viewLifecycleOwner, {
+            postAdapter.submitData(viewLifecycleOwner.lifecycle, it)
+        })
+        viewModel.deletePostStatus.observe(viewLifecycleOwner, EventObserver(
+            oneTimeConsume = true,
+            onError = { snackBar(it) },
+            onLoading = { snackBar("Deleting...")}
+        ){ deletedPost ->
+            viewModel.removePostFromLiveData(deletedPost)
+        })
         viewModel.loadCurrentUserStatus.observe(viewLifecycleOwner, EventObserver(
             oneTimeConsume = true,
             onError = { snackBar(it) },
@@ -152,6 +157,23 @@ class HomeFragment : BasePostFragment(R.layout.fragment_home) {
         ) {
             currentUser = it
             binding.ibRecentChat.isVisible = true
+        })
+        viewModel.removeDeviceTokeStatus.observe(viewLifecycleOwner, EventObserver(
+            oneTimeConsume = true,
+            onError = { snackBar(it) },
+            onLoading = {
+                Toast.makeText(requireContext(), "Logging Out", Toast.LENGTH_SHORT).show()
+            }
+        ) {
+            if (it) {
+                Firebase.auth.signOut()
+                Intent(requireActivity(), AuthActivity::class.java).apply {
+                    startActivity(this)
+                    requireActivity().finish()
+                }
+            } else {
+                snackBar("can't logout. Try again")
+            }
         })
     }
 

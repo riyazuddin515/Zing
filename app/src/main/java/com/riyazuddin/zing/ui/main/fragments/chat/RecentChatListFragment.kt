@@ -68,7 +68,7 @@ class RecentChatListFragment : Fragment(R.layout.fragment_recent_chat_list) {
         setupRecyclerView()
         viewModel.getLastMessageFirstQuery()
 
-        lastMessageAdapter.setOnItemClickListener { lastMessage, user ->
+        lastMessageAdapter.setOnItemClickListener { _, user ->
             val bundle = Bundle().apply {
                 putSerializable("otherEndUser", user)
                 putSerializable("currentUser", args.currentUser)

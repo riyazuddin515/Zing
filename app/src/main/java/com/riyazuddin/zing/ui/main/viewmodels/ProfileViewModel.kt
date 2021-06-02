@@ -3,11 +3,9 @@ package com.riyazuddin.zing.ui.main.viewmodels
 import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
-import androidx.paging.Pager
-import androidx.paging.PagingConfig
-import androidx.paging.PagingData
-import androidx.paging.cachedIn
+import androidx.paging.*
 import com.google.firebase.firestore.FirebaseFirestore
 import com.riyazuddin.zing.data.entities.Post
 import com.riyazuddin.zing.data.entities.User
@@ -16,7 +14,6 @@ import com.riyazuddin.zing.other.Event
 import com.riyazuddin.zing.other.Resource
 import com.riyazuddin.zing.repositories.abstraction.MainRepository
 import com.riyazuddin.zing.repositories.pagingsource.ProfilePostPagingSource
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 
 class ProfileViewModel @ViewModelInject constructor(
@@ -35,22 +32,13 @@ class ProfileViewModel @ViewModelInject constructor(
         this.uid = uid
     }
 
-    val flowOfProfilePosts = Pager(PagingConfig(POST_PAGE_SIZE)){
-        ProfilePostPagingSource(FirebaseFirestore.getInstance(),uid)
-    }.flow.cachedIn(viewModelScope)
-
-    fun getPagingFlowOfPost(uid: String): Flow<PagingData<Post>> {
-        val pagingSource = ProfilePostPagingSource(
-            FirebaseFirestore.getInstance(),
-            uid
-        )
-        return Pager(PagingConfig(POST_PAGE_SIZE)) {
-            pagingSource
-        }.flow.cachedIn(viewModelScope)
-
-
-    }
-
+    private val _flowOfProfilePosts: MutableLiveData<PagingData<Post>> =
+        Pager(PagingConfig(POST_PAGE_SIZE)) {
+            ProfilePostPagingSource(FirebaseFirestore.getInstance(), uid)
+        }.flow.cachedIn(viewModelScope).asLiveData().let {
+            it as MutableLiveData<PagingData<Post>>
+        }
+    val flowOfProfilePosts: LiveData<PagingData<Post>> = _flowOfProfilePosts
 
     fun toggleFollowForUser(uid: String) {
         _followStatus.postValue(Event(Resource.Loading()))
@@ -65,6 +53,14 @@ class ProfileViewModel @ViewModelInject constructor(
         viewModelScope.launch {
             val result = repository.getUserProfile(uid)
             _loadProfileMetadata.postValue(Event(result))
+        }
+    }
+
+    fun removeFromLiveData(post: Post) {
+        flowOfProfilePosts.value?.filter {
+            it.postId != post.postId
+        }.let {
+            _flowOfProfilePosts.postValue(it)
         }
     }
 }

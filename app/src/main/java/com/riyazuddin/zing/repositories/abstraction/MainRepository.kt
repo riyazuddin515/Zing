@@ -7,7 +7,9 @@ import com.riyazuddin.zing.other.Resource
 
 interface MainRepository {
 
-    suspend fun onlineOfflineToggle(uid: String)
+    suspend fun onlineOfflineToggleWithDeviceToken(uid: String)
+
+    suspend fun removeDeviceToken(uid: String): Resource<Boolean>
 
     /**
      * create a post
@@ -24,10 +26,20 @@ interface MainRepository {
      */
     suspend fun getUserProfile(uid: String): Resource<User>
 
+    /**
+     * gets post of a profile associated with
+     * provides uid
+     */
     suspend fun getPostForProfile(uid: String): Resource<List<Post>>
 
+    /**
+     * toggle Like for post
+     */
     suspend fun toggleLikeForPost(post: Post): Resource<Boolean>
 
+    /**
+     * delete post
+     */
     suspend fun deletePost(post: Post): Resource<Post>
 
     /**
@@ -36,8 +48,14 @@ interface MainRepository {
      */
     suspend fun toggleFollowForUser(uid: String): Resource<Boolean>
 
+    /**
+     * Feed
+     */
     suspend fun getPostForFollows(): Resource<List<Post>>
 
+    /**
+     * create comment
+     */
     suspend fun createComment(commentText: String, postId: String): Resource<Comment>
 
     suspend fun getPostComments(postId: String): Resource<List<Comment>>
@@ -49,7 +67,7 @@ interface MainRepository {
     /**
      * method used to check username availability
      */
-    suspend fun searchUsername(query: String): Resource<Boolean>
+    suspend fun algoliaSearch(searchQuery: String): Resource<ResponseSearch>
 
     suspend fun verifyAccount(currentPassword: String): Resource<Any>
 
@@ -67,5 +85,6 @@ interface MainRepository {
 
     suspend fun getPostLikedUsers(postId: String): Resource<List<User>>
 
-    suspend fun algoliaSearch(searchQuery: String): Resource<ResponseSearch>
+    suspend fun deleteComment(comment: Comment): Resource<Comment>
+
 }

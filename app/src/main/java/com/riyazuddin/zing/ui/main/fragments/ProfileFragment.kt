@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.paging.LoadState
@@ -14,6 +15,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.auth.FirebaseAuth
 import com.riyazuddin.zing.R
+import com.riyazuddin.zing.data.entities.User
 import com.riyazuddin.zing.databinding.FragmentProfileBinding
 import com.riyazuddin.zing.other.EventObserver
 import com.riyazuddin.zing.other.snackBar
@@ -71,12 +73,7 @@ open class ProfileFragment : BasePostFragment(R.layout.fragment_profile) {
 
         subscribeToObservers()
 
-        lifecycleScope.launch {
-            viewModel.flowOfProfilePosts.collect {
-                postAdapter.submitData(it)
-            }
-        }
-        lifecycleScope.launch {
+        viewLifecycleOwner.lifecycleScope.launch {
             postAdapter.loadStateFlow.collectLatest {
                 binding.progressBar.isVisible =
                     it.refresh is LoadState.Loading ||
@@ -104,6 +101,9 @@ open class ProfileFragment : BasePostFragment(R.layout.fragment_profile) {
     }
 
     private fun subscribeToObservers() {
+        viewModel.flowOfProfilePosts.observe(viewLifecycleOwner, {
+            postAdapter.submitData(viewLifecycleOwner.lifecycle, it)
+        })
         viewModel.loadProfileMetadata.observe(viewLifecycleOwner, EventObserver(
             onError = {
                 binding.progressBarProfileMetadata.isVisible = false
@@ -126,13 +126,15 @@ open class ProfileFragment : BasePostFragment(R.layout.fragment_profile) {
         })
 
         basePostViewModel.deletePostStatus.observe(viewLifecycleOwner, EventObserver(
+            oneTimeConsume = true,
             onError = {
                 snackBar(it)
                 Log.e(TAG, "subscribeToObservers: $it")
             }
         ) { deletedPost ->
-            postAdapter.refresh()
             snackBar("Post Deleted.")
+            binding.tvPostCount.text = (binding.tvPostCount.text.toString().toInt() - 1).toString()
+            viewModel.removeFromLiveData(deletedPost)
         })
     }
 

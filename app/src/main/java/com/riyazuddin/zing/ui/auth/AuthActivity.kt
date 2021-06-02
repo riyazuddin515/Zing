@@ -20,29 +20,27 @@ class AuthActivity : AppCompatActivity() {
         binding = ActivityAuthBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        val appSharedPreferences = getSharedPreferences("AppSharedPreferences", 0)
-        val isNightModeNo: Boolean = appSharedPreferences.getBoolean("NightMode", false)
+//        val appSharedPreferences = getSharedPreferences("AppSharedPreferences", 0)
+//        val isNightModeNo: Boolean = appSharedPreferences.getBoolean("NightMode", false)
+//
+//        if (isNightModeNo) {
+//            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
+//        } else {
+//            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+//        }
 
-        if (isNightModeNo) {
-            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
-        } else {
-            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
-        }
+    }
 
+    override fun onStart() {
+        super.onStart()
         Firebase.auth.currentUser?.let {
-            Intent(this, MainActivity::class.java).apply {
-                startActivity(this)
-                finish()
+            it.reload()
+            if (it.isEmailVerified) {
+                Intent(this, MainActivity::class.java).apply {
+                    startActivity(this)
+                    finish()
+                }
             }
-
-//            it.reload()
-//            if (it.isEmailVerified) {
-//                Intent(this, MainActivity::class.java).apply {
-//                    startActivity(this)
-//                    finish()
-//                }
-//            }
         }
-
     }
 }

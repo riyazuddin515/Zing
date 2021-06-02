@@ -37,24 +37,28 @@ class ChangePassword : Fragment(R.layout.fragment_change_password) {
             val newPassword = binding.TIENewPassword.text.toString()
             val confirmNewPassword = binding.TIERepeatNewPassword.text.toString()
 
-            if (newPassword.isEmpty() || confirmNewPassword.isEmpty()) {
+            if (newPassword.isEmpty() || confirmNewPassword.isEmpty())
                 Toast.makeText(
                     requireContext(),
                     getString(R.string.error_fields_can_not_be_empty),
                     Toast.LENGTH_SHORT
                 ).show()
-            } else if (newPassword.length < Constants.MIN_PASSWORD) {
+            else if (newPassword.length < Constants.MIN_PASSWORD)
                 binding.TIENewPassword.error = getString(
                     R.string.error_password_too_short,
                     Constants.MIN_PASSWORD
                 )
-            } else if (newPassword != confirmNewPassword) {
+            else if (newPassword.length > Constants.MAX_USERNAME)
+                binding.TIENewPassword.error = getString(
+                    R.string.error_username_too_long,
+                    Constants.MAX_USERNAME
+                )
+            else if (newPassword != confirmNewPassword)
                 binding.TIERepeatNewPassword.error = getString(R.string.error_password_not_match)
-            } else {
+            else {
                 it.isEnabled = false
                 viewModel.changePassword(
-                    binding.TIENewPassword.text.toString(),
-                    binding.TIERepeatNewPassword.text.toString()
+                    binding.TIENewPassword.text.toString()
                 )
             }
         }

@@ -2,10 +2,14 @@ package com.riyazuddin.zing.adapters
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.core.view.isVisible
+import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.AsyncListDiffer
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.RequestManager
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
 import com.riyazuddin.zing.data.entities.Comment
 import com.riyazuddin.zing.databinding.ItemCommentBinding
 import java.text.SimpleDateFormat
@@ -13,25 +17,20 @@ import java.util.*
 import javax.inject.Inject
 
 class CommentAdapter @Inject constructor(private val glide: RequestManager) :
-    RecyclerView.Adapter<CommentAdapter.CommentViewHolder>() {
+    PagingDataAdapter<Comment, CommentAdapter.CommentViewHolder>(Companion) {
 
     inner class CommentViewHolder(val binding: ItemCommentBinding) :
         RecyclerView.ViewHolder(binding.root)
 
-    private val differCallback = object : DiffUtil.ItemCallback<Comment>() {
+    companion object : DiffUtil.ItemCallback<Comment>() {
         override fun areItemsTheSame(oldItem: Comment, newItem: Comment): Boolean {
-            return oldItem.hashCode() == newItem.hashCode()
+            return oldItem.commentId == newItem.commentId
         }
 
         override fun areContentsTheSame(oldItem: Comment, newItem: Comment): Boolean {
-            return oldItem.commentId == newItem.commentId
+            return oldItem == newItem
         }
     }
-    private val differ = AsyncListDiffer(this, differCallback)
-
-    var comments: List<Comment>
-        get() = differ.currentList
-        set(value) = differ.submitList(value)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CommentViewHolder {
         return CommentViewHolder(
@@ -43,11 +42,9 @@ class CommentAdapter @Inject constructor(private val glide: RequestManager) :
         )
     }
 
-    override fun getItemCount() = comments.size
-
     override fun onBindViewHolder(holder: CommentViewHolder, position: Int) {
         holder.binding.apply {
-            val comment = comments[position]
+            val comment = getItem(position)?: return
             glide.load(comment.userProfilePic).into(CIVProfilePic)
             tvUsername.text = comment.username
             tvCommentText.text = comment.comment
@@ -65,7 +62,21 @@ class CommentAdapter @Inject constructor(private val glide: RequestManager) :
                     click(comment)
                 }
             }
+
+            if(comment.commentedBy == Firebase.auth.uid!!){
+                btnDelete.isVisible = true
+                btnDelete.setOnClickListener {
+                    onCommentDeleteClickListener?.let {
+                        it(comment)
+                    }
+                }
+            }
         }
+    }
+
+    private var onCommentDeleteClickListener: ((Comment) -> Unit)? = null
+    fun setOnCommentDeleteClickListener(listener: (Comment) -> Unit ){
+        onCommentDeleteClickListener = listener
     }
 
     private var onUserClickListener: ((Comment) -> Unit)? = null
