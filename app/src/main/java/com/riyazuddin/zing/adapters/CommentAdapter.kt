@@ -4,7 +4,6 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.paging.PagingDataAdapter
-import androidx.recyclerview.widget.AsyncListDiffer
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.RequestManager
@@ -44,12 +43,12 @@ class CommentAdapter @Inject constructor(private val glide: RequestManager) :
 
     override fun onBindViewHolder(holder: CommentViewHolder, position: Int) {
         holder.binding.apply {
-            val comment = getItem(position)?: return
+            val comment = getItem(position) ?: return
             glide.load(comment.userProfilePic).into(CIVProfilePic)
             tvUsername.text = comment.username
             tvCommentText.text = comment.comment
             val date =
-                SimpleDateFormat("d MMM yyyy HH:mm", Locale.ENGLISH).format(Date(comment.date))
+                SimpleDateFormat("d MMM yyyy hh:mm a", Locale.ENGLISH).format(Date(comment.date))
             tvTime.text = date
 
             CIVProfilePic.setOnClickListener {
@@ -63,7 +62,7 @@ class CommentAdapter @Inject constructor(private val glide: RequestManager) :
                 }
             }
 
-            if(comment.commentedBy == Firebase.auth.uid!!){
+            if (comment.commentedBy == Firebase.auth.uid!!) {
                 btnDelete.isVisible = true
                 btnDelete.setOnClickListener {
                     onCommentDeleteClickListener?.let {
@@ -75,7 +74,7 @@ class CommentAdapter @Inject constructor(private val glide: RequestManager) :
     }
 
     private var onCommentDeleteClickListener: ((Comment) -> Unit)? = null
-    fun setOnCommentDeleteClickListener(listener: (Comment) -> Unit ){
+    fun setOnCommentDeleteClickListener(listener: (Comment) -> Unit) {
         onCommentDeleteClickListener = listener
     }
 

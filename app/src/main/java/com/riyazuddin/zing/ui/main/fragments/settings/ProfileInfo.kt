@@ -23,7 +23,6 @@ import com.riyazuddin.zing.data.entities.UpdateProfile
 import com.riyazuddin.zing.data.entities.User
 import com.riyazuddin.zing.databinding.FragmentProfileInfoBinding
 import com.riyazuddin.zing.other.Constants
-import com.riyazuddin.zing.other.Constants.MIN_USERNAME
 import com.riyazuddin.zing.other.Constants.SEARCH_TIME_DELAY
 import com.riyazuddin.zing.other.EventObserver
 import com.riyazuddin.zing.other.Validator
@@ -45,6 +44,7 @@ class ProfileInfo : Fragment(R.layout.fragment_profile_info) {
     lateinit var glide: RequestManager
 
     private lateinit var user: User
+    private lateinit var validator: Validator
 
     private lateinit var binding: FragmentProfileInfoBinding
     private val viewModel: SettingsViewModel by viewModels()
@@ -56,6 +56,8 @@ class ProfileInfo : Fragment(R.layout.fragment_profile_info) {
         override fun createIntent(context: Context, input: String?): Intent {
             return CropImage.activity()
                 .setAspectRatio(1, 1)
+                .setOutputCompressQuality(60)
+                .setActivityTitle("Crop Image")
                 .setGuidelines(CropImageView.Guidelines.ON)
                 .getIntent(requireContext())
         }
@@ -67,6 +69,7 @@ class ProfileInfo : Fragment(R.layout.fragment_profile_info) {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        validator = Validator(requireContext())
         cropContent = registerForActivityResult(cropImageActivityResultContract) {
             it?.let {
                 viewModel.setImage(it)
@@ -90,8 +93,58 @@ class ProfileInfo : Fragment(R.layout.fragment_profile_info) {
             cropContent.launch("image/*")
         }
 
+        var job: Job? = null
+        binding.TIEUsername.addTextChangedListener { editable ->
+            binding.TILUsername.endIconMode = TextInputLayout.END_ICON_NONE
+            binding.TILUsername.error = null
+            job?.cancel()
+            job = lifecycleScope.launch {
+                delay(SEARCH_TIME_DELAY)
+                editable?.let {
+                    if (it.toString() != user.username) {
+                        validator.validateUsername(it.toString()).apply {
+                            if (this != Constants.VALID) {
+                                binding.TILUsername.error = this
+                            } else {
+                                authViewModel.checkUserNameAvailability(it.toString())
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        binding.TIEName.addTextChangedListener {
+            validator.validateName(it.toString()).apply {
+                if (this != Constants.VALID)
+                    binding.TILName.error = this
+                else
+                    binding.TILName.error = null
+            }
+        }
+
         binding.btnUpdate.setOnClickListener {
-            it.isEnabled = false
+
+            val name = binding.TIEName.text.toString().trim()
+            val username = binding.TIEUsername.text.toString().trim()
+
+            validator.validateName(name).apply {
+                if (this != Constants.VALID) {
+                    binding.TILName.error = this
+                    return@setOnClickListener
+                }
+            }
+
+            if (username != user.username) {
+                validator.validateUsername(username).apply {
+                    if (this != Constants.VALID) {
+                        binding.TILUsername.error = this
+                        return@setOnClickListener
+                    }
+                }
+            }
+
+            it.isVisible = false
             val updateProfile = UpdateProfile(
                 uidToUpdate = Firebase.auth.uid!!,
                 name = binding.TIEName.text.toString(),
@@ -99,28 +152,6 @@ class ProfileInfo : Fragment(R.layout.fragment_profile_info) {
                 bio = binding.TIEBio.text.toString()
             )
             viewModel.updateProfile(updateProfile, imageUri)
-        }
-
-        var job: Job? = null
-
-        binding.TIEUsername.addTextChangedListener { editable ->
-            job?.cancel()
-            job = lifecycleScope.launch {
-                delay(SEARCH_TIME_DELAY)
-                editable?.let {
-                    binding.TILUsername.endIconMode = TextInputLayout.END_ICON_NONE
-                    when {
-                        it.length < MIN_USERNAME -> binding.TILUsername.error =
-                            getString(R.string.error_username_too_short, MIN_USERNAME)
-                        it.length > Constants.MAX_USERNAME -> binding.TILUsername.error =
-                            getString(R.string.error_username_too_long, Constants.MAX_USERNAME)
-                        it.contains(" ") -> binding.TILUsername.error = "No space allowed"
-
-//                        Validator.validateUsername(it.toString()) -> authViewModel.checkUserNameAvailability(it.toString())
-                        else -> binding.TILUsername.error = Constants.VALID_USERNAME_MESSAGE
-                    }
-                }
-            }
         }
 
     }
@@ -150,12 +181,12 @@ class ProfileInfo : Fragment(R.layout.fragment_profile_info) {
             onError = {
                 snackBar(it)
                 binding.progressBar.isVisible = false
-                binding.btnUpdate.isEnabled = true
+                binding.btnUpdate.isVisible = true
             },
             onLoading = { binding.progressBar.isVisible = true }
         ) {
             binding.progressBar.isVisible = false
-            binding.btnUpdate.isEnabled = true
+            binding.btnUpdate.isVisible = true
             snackBar("Profile successfully updated")
         })
 

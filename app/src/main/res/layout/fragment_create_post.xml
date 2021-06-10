@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:tools="http://schemas.android.com/tools"
-    android:background="@color/whiteAndBlack">
+    android:background="@color/white">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/appBarLayout"
@@ -26,7 +26,7 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 app:title="Select an Image"
-                app:titleTextColor="@color/blackAndWhite" />
+                app:titleTextColor="@color/black" />
 
             <ImageButton
                 android:id="@+id/btnClose"
@@ -35,7 +35,7 @@
                 android:background="@android:color/transparent"
                 android:contentDescription="@string/post"
                 android:src="@drawable/ic_close"
-                android:tint="@color/blackAndWhite"
+                android:tint="@color/black"
                 app:layout_constraintBottom_toBottomOf="@+id/materialToolbar"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="@+id/materialToolbar" />
@@ -85,7 +85,7 @@
             android:id="@+id/TIECaption"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textColor="@color/blackAndWhite" />
+            android:textColor="@color/black" />
 
     </com.google.android.material.textfield.TextInputLayout>
 

@@ -33,23 +33,20 @@
             android:id="@+id/CIVProfilePic"
             android:layout_width="50dp"
             android:layout_height="?attr/actionBarSize"
-            android:layout_marginStart="3dp"
             android:padding="3dp"
             app:layout_constraintBottom_toBottomOf="@+id/ivBack"
-            app:layout_constraintEnd_toStartOf="@+id/tvUsername"
+            app:layout_constraintEnd_toStartOf="@+id/toolbar"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toEndOf="@+id/ivBack"
             app:layout_constraintTop_toTopOf="@+id/ivBack"
             tools:src="@drawable/default_profile_pic" />
 
-        <com.google.android.material.textview.MaterialTextView
-            android:id="@+id/tvUsername"
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/toolbar"
             android:layout_width="0dp"
             android:layout_height="?attr/actionBarSize"
-            android:layout_marginStart="5dp"
             android:gravity="center_vertical"
-            android:textColor="@color/blackAndWhite"
-            android:textSize="20sp"
+            android:textColor="@color/black"
             android:textStyle="bold"
             app:layout_constraintBottom_toBottomOf="@+id/CIVProfilePic"
             app:layout_constraintEnd_toEndOf="parent"
@@ -57,7 +54,7 @@
             app:layout_constraintStart_toEndOf="@+id/CIVProfilePic"
             app:layout_constraintTop_toTopOf="@+id/CIVProfilePic"
             app:layout_goneMarginStart="5dp"
-            tools:text="@string/username" />
+            tools:title="@string/username" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -116,8 +113,8 @@
                 android:layout_height="wrap_content"
                 android:hint="@string/enter_your_message"
                 android:scrollbars="vertical"
-                android:textColor="@color/blackAndWhite"
-                android:textColorHint="@color/blackAndWhite"
+                android:textColor="@color/black"
+                android:textColorHint="@color/black"
                 android:maxLines="5"
                 tools:text="A paragraph is a series of related sentences developing a central idea, called the topic. Try to think about paragraphs in terms of thematic unity: a paragraph is a sentence or a group of sentences that supports one central, unified idea. Paragraphs add one idea at a time to your broader argument. A paragraph is a series of related sentences developing a central idea, called the topic. Try to think about paragraphs in terms of thematic unity: a paragraph is a sentence or a group of sentences that supports one central, unified idea. Paragraphs add one idea at a time to your broader argument."/>
 

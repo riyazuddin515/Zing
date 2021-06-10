@@ -1,5 +1,7 @@
 package com.riyazuddin.zing.di
 
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import com.riyazuddin.zing.repositories.abstraction.MainRepository
 import com.riyazuddin.zing.repositories.implementation.DefaultMainRepository
 import dagger.Module
@@ -14,5 +16,6 @@ object MainModule {
 
     @ActivityScoped
     @Provides
-    fun provideMainRepository() = DefaultMainRepository() as MainRepository
+    fun provideMainRepository(auth: FirebaseAuth, firestore: FirebaseFirestore) =
+        DefaultMainRepository(auth, firestore) as MainRepository
 }

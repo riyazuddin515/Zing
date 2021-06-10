@@ -27,21 +27,36 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:title="@string/app_name"
-            app:titleTextColor="@color/blackAndWhite" />
+            app:titleTextColor="@color/black" />
 
         <ImageButton
             android:id="@+id/ibRecentChat"
             android:layout_width="50dp"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:background="@android:color/transparent"
             android:contentDescription="@string/log_out"
             android:src="@drawable/ic_chat"
-            android:tint="@color/blackAndWhite"
-            android:visibility="gone"
-            tools:visibility="visible"
+            android:tint="@color/black"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@id/btnLogout"
             app:layout_constraintTop_toTopOf="parent" />
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/tvUnseenMessageCounter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/ic_circle_primary_color"
+            android:padding="3dp"
+            android:textAlignment="center"
+            android:textColor="@color/white"
+            android:textStyle="bold"
+            android:visibility="gone"
+            app:layout_constraintBottom_toTopOf="@id/ibRecentChat"
+            app:layout_constraintEnd_toEndOf="@id/ibRecentChat"
+            app:layout_constraintTop_toTopOf="@id/ibRecentChat"
+            app:layout_constraintVertical_bias="1.0"
+            tools:text="99"
+            tools:visibility="visible" />
 
         <ImageButton
             android:id="@+id/btnLogout"
@@ -50,7 +65,7 @@
             android:background="@android:color/transparent"
             android:contentDescription="@string/log_out"
             android:src="@drawable/ic_outline_logout"
-            android:tint="@color/blackAndWhite"
+            android:tint="@color/black"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -64,16 +79,16 @@
         android:layout_height="0dp"
         app:layout_constraintBottom_toTopOf="@id/progressBar"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/appBarLayout">
+        app:layout_constraintTop_toBottomOf="@+id/appBarLayout"
+        app:layout_constraintVertical_bias="0.0">
 
         <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rvPost"
+            android:id="@+id/rvPostList"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            tools:listitem="@layout/item_post"
-            tools:itemCount="1"/>
+            tools:itemCount="3"
+            tools:listitem="@layout/item_post" />
 
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
@@ -83,11 +98,11 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:indeterminate="true"
-        app:indicatorColor="@color/white"
         android:visibility="gone"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:indicatorColor="@color/white"
         app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         tools:visibility="visible" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

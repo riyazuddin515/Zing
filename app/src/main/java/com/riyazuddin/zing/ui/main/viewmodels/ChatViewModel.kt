@@ -11,6 +11,7 @@ import androidx.paging.cachedIn
 import com.riyazuddin.zing.data.entities.LastMessage
 import com.riyazuddin.zing.data.entities.Message
 import com.riyazuddin.zing.data.entities.User
+import com.riyazuddin.zing.data.entities.UserStat
 import com.riyazuddin.zing.other.Event
 import com.riyazuddin.zing.other.Resource
 import com.riyazuddin.zing.repositories.abstraction.ChatRepository
@@ -38,12 +39,13 @@ class ChatViewModel @ViewModelInject constructor(
         (repository as DefaultChatRepository).lastMessageList
     val recentMessagesList: LiveData<Event<Resource<List<LastMessage>>>> = _recentMessagesList
 
+    val isUserOnline: LiveData<Event<Resource<UserStat>>> = (repository as DefaultChatRepository).isUserOnline
+
     fun getChatLoadFirstQuery(currentUid: String, otherEndUserUid: String) {
         _chatList.postValue(Event(Resource.Loading()))
         viewModelScope.launch {
             repository.getChatLoadFirstQuery(currentUid, otherEndUserUid)
         }
-
     }
 
     fun getChatLoadMore(currentUid: String, otherEndUserUid: String) {
@@ -103,10 +105,10 @@ class ChatViewModel @ViewModelInject constructor(
         }
     }
 
-    fun getLastMessageFirstQuery() {
+    fun getLastMessageFirstQuery(currentUser: User) {
         _recentMessagesList.postValue(Event(Resource.Loading()))
         viewModelScope.launch {
-            repository.getLastMessageFirstQuery()
+            repository.getLastMessageFirstQuery(currentUser)
         }
     }
 
@@ -130,8 +132,13 @@ class ChatViewModel @ViewModelInject constructor(
     }
 
     fun clearRecentMessagesList() {
-//        _recentMessagesList.postValue(Event(Resource.Success(listOf())))
+        _recentMessagesList.postValue(Event(Resource.Success(listOf())))
         repository.clearRecentMessagesList()
     }
 
+    fun checkUserIsOnline(uid: String) {
+        viewModelScope.launch {
+            repository.checkUserIsOnline(uid)
+        }
+    }
 }

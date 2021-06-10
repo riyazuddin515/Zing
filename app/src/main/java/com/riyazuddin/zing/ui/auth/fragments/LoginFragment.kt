@@ -2,6 +2,7 @@ package com.riyazuddin.zing.ui.auth.fragments
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import androidx.core.view.isVisible
 import androidx.core.widget.addTextChangedListener
@@ -20,7 +21,6 @@ import com.riyazuddin.zing.other.snackBar
 import com.riyazuddin.zing.ui.auth.viewmodels.AuthViewModel
 import com.riyazuddin.zing.ui.main.MainActivity
 import dagger.hilt.android.AndroidEntryPoint
-import javax.inject.Inject
 
 @AndroidEntryPoint
 class LoginFragment : Fragment(R.layout.fragment_login) {
@@ -89,6 +89,7 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
                 binding.progressBar.isVisible = false
                 binding.btnLogin.isVisible = true
                 snackBar(it)
+                Log.e(TAG, "subscribeToObservers: $it")
             },
             onLoading = {
                 binding.progressBar.isVisible = true
@@ -104,13 +105,19 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
                         requireActivity().finish()
                     }
                 } else {
+                    Firebase.auth.signOut()
                     Snackbar.make(requireView(), "Verify Email", Snackbar.LENGTH_LONG)
                         .setAction("Send Email") {
                             user.sendEmailVerification()
                         }.show()
+                    binding.btnLogin.isVisible = true
                 }
 
             }
         })
+    }
+
+    companion object{
+        const val TAG = "LoginFragment"
     }
 }

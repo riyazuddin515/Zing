@@ -57,18 +57,17 @@ class LastMessageAdapter @Inject constructor(private val glide: RequestManager) 
             val isCurrentUserIsSender =
                 Firebase.auth.uid == lastMessage.message.senderAndReceiverUid[0]
 
-            if (isCurrentUserIsSender) {
-                glide.load(lastMessage.receiverProfilePicUrl).into(CIVProfilePic)
-                tvName.text = lastMessage.receiverName
-            } else {
-                glide.load(lastMessage.senderProfilePicUrl).into(CIVProfilePic)
-                tvName.text = lastMessage.senderName
+            glide.load(lastMessage.sender.profilePicUrl).into(CIVProfilePic)
+            tvName.text = lastMessage.sender.name
 
-                if (lastMessage.message.status != SEEN) {
-                    tvLastMessage.typeface = Typeface.DEFAULT_BOLD
-                    ivUnSeen.isVisible = true
-                }
+            if (!isCurrentUserIsSender && lastMessage.message.status != SEEN) {
+                tvLastMessage.typeface = Typeface.DEFAULT_BOLD
+                ivUnSeen.isVisible = true
+            }else{
+                tvLastMessage.typeface = Typeface.DEFAULT
+                ivUnSeen.isVisible = false
             }
+
             val date =
                 SimpleDateFormat("hh:mm a", Locale.US).format(Date(lastMessage.message.date))
                     .replace("AM", "am").replace("PM", "pm")
@@ -82,21 +81,9 @@ class LastMessageAdapter @Inject constructor(private val glide: RequestManager) 
             root.setOnClickListener {
                 onItemClickListener?.let {
                     if (lastMessage.message.senderAndReceiverUid[0] == Firebase.auth.uid) {
-                        val user = User(
-                            name = lastMessage.receiverName,
-                            uid = lastMessage.message.senderAndReceiverUid[1],
-                            username = lastMessage.receiverUsername,
-                            profilePicUrl = lastMessage.receiverProfilePicUrl
-                        )
-                        it(lastMessage, user)
+                        it(lastMessage)
                     } else {
-                        val user = User(
-                            name = lastMessage.senderName,
-                            uid = lastMessage.message.senderAndReceiverUid[0],
-                            username = lastMessage.senderUserName,
-                            profilePicUrl = lastMessage.senderProfilePicUrl
-                        )
-                        it(lastMessage, user)
+                        it(lastMessage)
                     }
                 }
             }
@@ -105,8 +92,8 @@ class LastMessageAdapter @Inject constructor(private val glide: RequestManager) 
 
     override fun getItemCount(): Int = lastMessages.size
 
-    private var onItemClickListener: ((LastMessage, User) -> Unit)? = null
-    fun setOnItemClickListener(listener: (LastMessage, User) -> Unit) {
+    private var onItemClickListener: ((LastMessage) -> Unit)? = null
+    fun setOnItemClickListener(listener: (LastMessage) -> Unit) {
         onItemClickListener = listener
     }
 }

@@ -2,26 +2,23 @@ package com.riyazuddin.zing.ui.main
 
 import android.app.NotificationManager
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.View
-import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.ui.setupWithNavController
-import com.google.firebase.auth.ktx.auth
-import com.google.firebase.ktx.Firebase
+import com.google.firebase.auth.FirebaseAuth
 import com.riyazuddin.zing.R
 import com.riyazuddin.zing.databinding.ActivityMainBinding
-import com.riyazuddin.zing.ui.main.viewmodels.HomeViewModel
+import com.riyazuddin.zing.ui.auth.AuthActivity
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
-    private val viewModel: HomeViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -46,19 +43,9 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        Log.i(TAG, "onCreated: onlineOfflineToggle calling")
-//        viewModel.onlineOfflineToggle(Firebase.auth.uid!!)
-        Log.i(TAG, "onCreated: onlineOfflineToggle called")
-
-
-    }
-
-    override fun onStart() {
-        super.onStart()
-
-        //Removing all existing notification as soon as activity starts
+        //Removing all existing notification
         val notificationManager: NotificationManager =
-        getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.cancelAll()
     }
 

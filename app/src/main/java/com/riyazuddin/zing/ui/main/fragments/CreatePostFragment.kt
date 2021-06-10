@@ -2,8 +2,14 @@ package com.riyazuddin.zing.ui.main.fragments
 
 import android.content.Context
 import android.content.Intent
+import android.database.Cursor
+import android.graphics.*
+import android.media.ExifInterface
 import android.net.Uri
 import android.os.Bundle
+import android.os.Environment
+import android.provider.MediaStore
+import android.util.Log
 import android.view.View
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContract
@@ -21,7 +27,12 @@ import com.riyazuddin.zing.ui.main.viewmodels.CreatePostViewModel
 import com.theartofdev.edmodo.cropper.CropImage
 import com.theartofdev.edmodo.cropper.CropImageView
 import dagger.hilt.android.AndroidEntryPoint
+import java.io.File
+import java.io.FileNotFoundException
+import java.io.FileOutputStream
+import java.io.IOException
 import javax.inject.Inject
+
 
 @AndroidEntryPoint
 class CreatePostFragment : Fragment(R.layout.fragment_create_post) {
@@ -38,6 +49,8 @@ class CreatePostFragment : Fragment(R.layout.fragment_create_post) {
         override fun createIntent(context: Context, input: String?): Intent {
             return CropImage.activity()
                 .setGuidelines(CropImageView.Guidelines.ON)
+                .setOutputCompressQuality(60)
+                .setActivityTitle("Crop Image")
                 .getIntent(requireContext())
         }
 
@@ -73,6 +86,8 @@ class CreatePostFragment : Fragment(R.layout.fragment_create_post) {
 
         binding.btnPost.setOnClickListener {
             currentImageUri?.let { uri ->
+                binding.btnPost.isEnabled = false
+                binding.btnPost.isClickable = false
                 viewModel.createPost(uri, binding.TIECaption.text.toString())
             } ?: snackBar(resources.getString(R.string.error_select_an_image))
         }

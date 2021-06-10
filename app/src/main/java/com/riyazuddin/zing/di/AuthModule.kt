@@ -1,5 +1,7 @@
 package com.riyazuddin.zing.di
 
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import com.riyazuddin.zing.repositories.abstraction.AuthRepository
 import com.riyazuddin.zing.repositories.implementation.DefaultAuthRepository
 import dagger.Module
@@ -14,5 +16,6 @@ object AuthModule {
 
     @ActivityScoped
     @Provides
-    fun provideAuthRepository() = DefaultAuthRepository() as AuthRepository
+    fun provideAuthRepository(auth: FirebaseAuth, firestore: FirebaseFirestore) =
+        DefaultAuthRepository(auth, firestore) as AuthRepository
 }

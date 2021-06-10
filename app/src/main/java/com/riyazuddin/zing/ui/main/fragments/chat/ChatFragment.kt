@@ -24,28 +24,34 @@ import com.riyazuddin.zing.adapters.ChatAdapter
 import com.riyazuddin.zing.databinding.FragmentChatBinding
 import com.riyazuddin.zing.other.Constants
 import com.riyazuddin.zing.other.Constants.CHATTING_WITH
+import com.riyazuddin.zing.other.Constants.LAST_SEEN
 import com.riyazuddin.zing.other.Constants.NOTIFICATION_ID
 import com.riyazuddin.zing.other.Constants.NO_MORE_MESSAGES
 import com.riyazuddin.zing.other.Constants.NO_ONE
+import com.riyazuddin.zing.other.Constants.ONLINE
 import com.riyazuddin.zing.other.EventObserver
 import com.riyazuddin.zing.other.snackBar
 import com.riyazuddin.zing.ui.dialogs.CustomDialog
+import com.riyazuddin.zing.ui.main.fragments.HomeFragmentDirections
+import com.riyazuddin.zing.ui.main.fragments.OthersProfileFragmentDirections
 import com.riyazuddin.zing.ui.main.viewmodels.ChatViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import java.text.SimpleDateFormat
+import java.util.*
 import javax.inject.Inject
 
 
 @AndroidEntryPoint
 class ChatFragment : Fragment(R.layout.fragment_chat) {
 
-    private var _binding: FragmentChatBinding? = null
-    private val binding get() = _binding!!
+    private lateinit var binding: FragmentChatBinding
 
     private val viewModel: ChatViewModel by viewModels()
 
     private val args: ChatFragmentArgs by navArgs()
 
     private lateinit var mediaPlayer: MediaPlayer
+    private lateinit var simpleDateFormat: SimpleDateFormat
 
     @Inject
     lateinit var glide: RequestManager
@@ -58,8 +64,17 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = FragmentChatBinding.inflate(inflater, container, false)
         return binding.root
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        binding = FragmentChatBinding.inflate(layoutInflater)
+
+        setUpRecyclerView()
+
+        viewModel.checkUserIsOnline(args.otherEndUser.uid)
+        viewModel.getChatLoadFirstQuery(args.currentUser.uid, args.otherEndUser.uid)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -76,6 +91,7 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
             requireActivity().getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.cancel(args.otherEndUser.uid, NOTIFICATION_ID)
 
+        simpleDateFormat = SimpleDateFormat("d MMM yyyy HH:mm a", Locale.ENGLISH)
         mediaPlayer = MediaPlayer.create(requireContext(), R.raw.received_chat)
 
         binding.ivBack.setOnClickListener {
@@ -83,12 +99,15 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
         }
 
         glide.load(args.otherEndUser.profilePicUrl).into(binding.CIVProfilePic)
-        binding.tvUsername.text = args.otherEndUser.username
+        binding.toolbar.title = args.otherEndUser.username
 
-        setUpRecyclerView()
+        binding.toolbar.setOnClickListener {
+            findNavController().navigate(
+                ChatFragmentDirections.globalActionToOthersProfileFragment(args.otherEndUser.uid)
+            )
+        }
+
         subscribe()
-
-        viewModel.getChatLoadFirstQuery(args.currentUser.uid, args.otherEndUser.uid)
 
         binding.btnSend.setOnClickListener {
             viewModel.sendMessage(
@@ -165,6 +184,13 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
                 mediaPlayer.start()
             }
         })
+        viewModel.isUserOnline.observe(viewLifecycleOwner, EventObserver {
+            if (it.state == ONLINE)
+                binding.toolbar.subtitle = ONLINE
+            else
+                binding.toolbar.subtitle =
+                    LAST_SEEN + " " + simpleDateFormat.format(Date(it.lastSeen))
+        })
     }
 
     private fun setUpRecyclerView() {
@@ -188,7 +214,6 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
                     if (pos + 1 == numItems) {
                         viewModel.getChatLoadMore(args.currentUser.uid, args.otherEndUser.uid)
                         Log.i(TAG, "onScrolled: calling getChatLoadMore")
-//                        isLoadingMore = true
                     }
                 }
             })
@@ -200,11 +225,10 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
         }
     }
 
-    override fun onDestroyView() {
+    override fun onDestroy() {
         viewModel.clearChatList()
-        viewModel.chatList.removeObservers(viewLifecycleOwner)
-        _binding = null
-        super.onDestroyView()
+//        viewModel.chatList.removeObservers(viewLifecycleOwner)
+        super.onDestroy()
 
         val sp = requireActivity().getSharedPreferences(CHATTING_WITH, Application.MODE_PRIVATE)
         sp.edit().let {

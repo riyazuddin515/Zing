@@ -12,11 +12,11 @@ import com.google.firebase.storage.FirebaseStorage
 import com.riyazuddin.zing.data.entities.LastMessage
 import com.riyazuddin.zing.data.entities.Message
 import com.riyazuddin.zing.data.entities.User
+import com.riyazuddin.zing.data.entities.UserStat
 import com.riyazuddin.zing.other.Constants
 import com.riyazuddin.zing.other.Constants.DATE
 import com.riyazuddin.zing.other.Constants.MESSAGE
 import com.riyazuddin.zing.other.Constants.MESSAGES_COLLECTION
-import com.riyazuddin.zing.other.Constants.MESSAGE_ID
 import com.riyazuddin.zing.other.Constants.NO_MORE_MESSAGES
 import com.riyazuddin.zing.other.Constants.RECEIVER_NAME
 import com.riyazuddin.zing.other.Constants.RECEIVER_PROFILE_PIC_URL
@@ -39,16 +39,20 @@ import com.riyazuddin.zing.repositories.abstraction.ChatRepository
 import com.riyazuddin.zing.repositories.pagingsource.FollowingAndFollowersPagingSource
 import kotlinx.coroutines.*
 import kotlinx.coroutines.tasks.await
+import okhttp3.internal.wait
 import java.util.*
+import javax.inject.Inject
 import javax.inject.Singleton
 
 
 @Singleton
-class DefaultChatRepository : ChatRepository {
+class DefaultChatRepository @Inject constructor(
+    private val firestore: FirebaseFirestore
+) : ChatRepository {
 
-    private val firestore = FirebaseFirestore.getInstance()
+    private val usersCollection = firestore.collection(Constants.USERS_COLLECTION)
     private val chatsCollection = firestore.collection(Constants.CHATS_COLLECTION)
-
+    private val usersStatCollection = firestore.collection(Constants.USERS_STAT_COLLECTION)
     var playTone = MutableLiveData<Event<Resource<Boolean>>>()
 
     private var chatListLocalToRepo = mutableListOf<Message>()
@@ -65,6 +69,9 @@ class DefaultChatRepository : ChatRepository {
     private var lastMessageLocalRepo = mutableListOf<LastMessage>()
     val lastMessageList = MutableLiveData<Event<Resource<List<LastMessage>>>>()
     private var lastMessageLastVisible: DocumentSnapshot? = null
+
+    var unSeenLastMessagesCount = MutableLiveData<Event<Resource<Int>>>()
+    var isUserOnline = MutableLiveData<Event<Resource<UserStat>>>()
 
     override suspend fun getFollowersAndFollowingForNewChat(uid: String): Resource<Pager<QuerySnapshot, User>> {
         return Resource.Success(
@@ -122,17 +129,7 @@ class DefaultChatRepository : ChatRepository {
 
             Log.e("TAG", "sendMessage: message posted")
 
-            val lastMessage = LastMessage(
-                message = messageOb,
-
-                senderName = senderName,
-                senderUserName = senderUsername,
-                senderProfilePicUrl = senderProfilePicUrl,
-
-                receiverName = receiverName,
-                receiverUsername = receiverUsername,
-                receiverProfilePicUrl = receiveProfileUrl
-            )
+            val lastMessage = LastMessage(message = messageOb, chatThread = chatThread)
 
 
             val ex = chatsCollection.document(chatThread).get().await()
@@ -227,9 +224,9 @@ class DefaultChatRepository : ChatRepository {
                         }
 
                         for (doc in querySnapshot.documentChanges) {
+                            val message = doc.document.toObject(Message::class.java)
                             when (doc.type) {
                                 DocumentChange.Type.ADDED -> {
-                                    val message = doc.document.toObject(Message::class.java)
                                     val bool = doc.document.metadata.hasPendingWrites()
                                     if (bool) {
                                         message.status = SENDING
@@ -244,7 +241,6 @@ class DefaultChatRepository : ChatRepository {
                                     }
                                 }
                                 DocumentChange.Type.MODIFIED -> {
-                                    val message = doc.document.toObject(Message::class.java)
                                     chatListLocalToRepo[doc.newIndex] = message
                                     Log.i(TAG, "getChatLoadFirstQuery: Modified")
                                 }
@@ -339,7 +335,7 @@ class DefaultChatRepository : ChatRepository {
         lastMessageList.postValue(Event((Resource.Success(lastMessageLocalRepo))))
     }
 
-    override suspend fun getLastMessageFirstQuery() {
+    override suspend fun getLastMessageFirstQuery(currentUser: User) {
         withContext(Dispatchers.IO) {
             val query =
                 chatsCollection.whereArrayContains(
@@ -367,50 +363,72 @@ class DefaultChatRepository : ChatRepository {
                     for (doc in querySnapshot.documentChanges) {
                         val lastMessage = doc.document.toObject(LastMessage::class.java)
 
-                        Log.i(TAG, "getLastMessageFirstQuery: $lastMessage")
+                        if (lastMessage.message.senderAndReceiverUid[0] == currentUser.uid) {
+                            lastMessage.sender = currentUser
+                        } else {
+                            lastMessage.receiver = currentUser
+                        }
 
-                        when (doc.type) {
-                            DocumentChange.Type.ADDED -> {
-                                Log.i(TAG, "getLastMessageFirstQuery: <-----ADDED INVOKED------>")
-                                val bool = doc.document.metadata.hasPendingWrites()
-                                if (bool) {
-                                    Log.i(TAG, "getLastMessageFirstQuery: hasPending")
-                                    lastMessage.message.status = SENDING
-                                }
-                                if (isLastMessageFirstLoad) {
-                                    lastMessageLocalRepo.add(lastMessage)
-                                } else {
-                                    lastMessageLocalRepo.add(0, lastMessage)
-                                }
+                        usersCollection.document(
+                            if (lastMessage.message.senderAndReceiverUid[0] == currentUser.uid)
+                                lastMessage.message.senderAndReceiverUid[1]
+                            else
+                                lastMessage.message.senderAndReceiverUid[0]
+
+                        ).get().addOnSuccessListener {
+
+                            if (lastMessage.message.senderAndReceiverUid[0] == currentUser.uid) {
+                                lastMessage.receiver = it.toObject(User::class.java)!!
+                            } else {
+                                lastMessage.sender = currentUser
                             }
-                            DocumentChange.Type.MODIFIED -> {
-                                Log.i(TAG, "getLastMessageFirstQuery: LastMessageModified")
 
-                                val list = lastMessageLocalRepo.filter {
-                                    if (it.message.senderAndReceiverUid[0] == Firebase.auth.uid) {
-                                        it.receiverUsername == lastMessage.receiverUsername
+                            lastMessage.sender = it.toObject(User::class.java)!!
+
+                            Log.i(TAG, "getLastMessageFirstQuery: $lastMessage")
+
+                            when (doc.type) {
+                                DocumentChange.Type.ADDED -> {
+
+                                    Log.i(TAG, "getLastMessageFirstQuery: <-----ADDED INVOKED------>")
+                                    val bool = doc.document.metadata.hasPendingWrites()
+                                    if (bool) {
+                                        Log.i(TAG, "getLastMessageFirstQuery: hasPending")
+                                        lastMessage.message.status = SENDING
+                                    }
+                                    if (isLastMessageFirstLoad) {
+                                        lastMessageLocalRepo.add(lastMessage)
                                     } else {
-                                        it.senderUserName == lastMessage.senderUserName
+                                        lastMessageLocalRepo.add(0, lastMessage)
                                     }
                                 }
-                                if (list.isNotEmpty()) {
-                                    val index = lastMessageLocalRepo.indexOf(list[0])
-                                    lastMessageLocalRepo.removeAt(index)
-                                    lastMessageLocalRepo.add(0, lastMessage)
+                                DocumentChange.Type.MODIFIED -> {
+                                    Log.i(TAG, "getLastMessageFirstQuery: LastMessageModified")
+                                    val list = lastMessageLocalRepo.filter { lastMessagePara ->
+                                        lastMessagePara.chatThread == lastMessage.chatThread
+                                    }
+                                    if (list.isNotEmpty()) {
+                                        val index = lastMessageLocalRepo.indexOf(list[0])
+                                        lastMessageLocalRepo.removeAt(index)
+                                        lastMessageLocalRepo.add(0, lastMessage)
+                                    }
+                                }
+                                else -> {
                                 }
                             }
-                            else -> {
+
+                            for (e in lastMessageLocalRepo) {
+                                Log.w(
+                                    TAG,
+                                    "getLastMessageFirstQuery: ${e.message.messageId} ----- ${e.message.message}"
+                                )
                             }
+                            lastMessageList.postValue(Event(Resource.Success(lastMessageLocalRepo)))
+                            isLastMessageFirstLoad = false
                         }
+
                     }
-                    for (e in lastMessageLocalRepo) {
-                        Log.w(
-                            TAG,
-                            "getLastMessageFirstQuery: ${e.message.messageId} ----- ${e.message.message}"
-                        )
-                    }
-                    lastMessageList.postValue(Event(Resource.Success(lastMessageLocalRepo)))
-                    isLastMessageFirstLoad = false
+
                 }
             }
         }
@@ -418,7 +436,7 @@ class DefaultChatRepository : ChatRepository {
 
     override suspend fun getLastMessageLoadMore() {
         withContext(Dispatchers.IO) {
-            
+
             val nextQuery = chatsCollection
                 .whereArrayContains("$MESSAGE.$SENDER_AND_RECEIVER_UID", Firebase.auth.uid!!)
                 .orderBy("$MESSAGE.$DATE", Query.Direction.DESCENDING)
@@ -434,12 +452,16 @@ class DefaultChatRepository : ChatRepository {
                 }
 
                 value?.let { querySnapshot ->
-                    Log.i(TAG, "getLastMessageLoadMore: Last Visible = ${lastMessageLastVisible?.get(
-                        RECEIVER_NAME)}")
+                    Log.i(
+                        TAG, "getLastMessageLoadMore: Last Visible = ${
+                            lastMessageLastVisible?.get(
+                                RECEIVER_NAME
+                            )
+                        }"
+                    )
                     Log.i(TAG, "getLastMessageLoadMore: size = ${querySnapshot.size()}")
                     for (doc in querySnapshot.documents) {
                         val lastMessage = doc.toObject(LastMessage::class.java)
-                        Log.i(TAG, "getLastMessageLoadMore: ${lastMessage?.message?.message} --- ${lastMessage?.receiverName}")
                     }
                     when {
                         querySnapshot.size() - 1 < 0 -> {
@@ -493,16 +515,6 @@ class DefaultChatRepository : ChatRepository {
         Log.i(TAG, "deleteChatMessage: MessageDeleted")
     }
 
-    private fun getChatThread(currentUid: String, otherEndUserUid: String) =
-        if (currentUid < otherEndUserUid)
-            currentUid + otherEndUserUid
-        else
-            otherEndUserUid + currentUid
-
-    companion object {
-        const val TAG = "DefaultChatRepo"
-    }
-
     override suspend fun getUser(uid: String): Resource<User> = withContext(Dispatchers.IO) {
         safeCall {
             val user = firestore.collection(USERS_COLLECTION).document(uid)
@@ -511,4 +523,56 @@ class DefaultChatRepository : ChatRepository {
         }
 
     }
+
+    override suspend fun getUnSeenLastMessagesCount(uid: String) {
+        try {
+            val query1 =
+                chatsCollection.whereArrayContains(
+                    "$MESSAGE.$SENDER_AND_RECEIVER_UID",
+                    uid
+                ).whereNotEqualTo("$MESSAGE.$STATUS", SEEN)
+                    .limit(100)
+
+            query1.addSnapshotListener { value, error ->
+                error?.let {
+                    return@addSnapshotListener
+                }
+
+                value?.let { querySnapshot ->
+                    Log.i(TAG, "getUnSeenLastMessagesCount: invoked")
+                    querySnapshot.toObjects(LastMessage::class.java).filter {
+                        it.message.senderAndReceiverUid[1] == uid
+                    }.let {
+                        unSeenLastMessagesCount.postValue(Event(Resource.Success(it.size)))
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            print(e.localizedMessage)
+        }
+
+    }
+
+    override suspend fun checkUserIsOnline(uid: String) {
+        val query = usersStatCollection.document(uid)
+        query.addSnapshotListener { value, error ->
+            error?.let {
+                return@addSnapshotListener
+            }
+            value?.let {
+                val userStat = it.toObject(UserStat::class.java) ?: return@let
+                isUserOnline.postValue(Event(Resource.Success(userStat)))
+            }
+        }
+    }
+
+    companion object {
+        const val TAG = "DefaultChatRepo"
+    }
+
+    private fun getChatThread(currentUid: String, otherEndUserUid: String) =
+        if (currentUid < otherEndUserUid)
+            currentUid + otherEndUserUid
+        else
+            otherEndUserUid + currentUid
 }

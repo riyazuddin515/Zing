@@ -16,6 +16,8 @@ interface MainRepository {
      */
     suspend fun createPost(imageUri: Uri, caption: String): Resource<Any>
 
+    suspend fun getPost(postId: String): Resource<Post>
+
     /**
      * gets the list of users, with the uid's provided in parameter
      */

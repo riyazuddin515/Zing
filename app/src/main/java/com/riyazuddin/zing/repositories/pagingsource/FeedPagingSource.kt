@@ -17,7 +17,6 @@ import com.riyazuddin.zing.other.Constants.POST_LIKES_COLLECTION
 import com.riyazuddin.zing.other.Constants.POST_PAGE_SIZE
 import com.riyazuddin.zing.other.Constants.USERS_COLLECTION
 import kotlinx.coroutines.tasks.await
-import kotlin.math.log
 
 /**
  * This class is use for paginating the feed
@@ -90,7 +89,8 @@ class FeedPagingSource(
             LoadResult.Error(e)
         }
     }
-    companion object{
+
+    companion object {
         const val TAG = "FeedPagingSource"
     }
 }

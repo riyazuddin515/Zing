@@ -24,7 +24,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:title="Settings"
-            app:titleTextColor="@color/blackAndWhite" />
+            app:titleTextColor="@color/black" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -52,17 +52,6 @@
         app:layout_constraintEnd_toEndOf="@+id/guideline2"
         app:layout_constraintStart_toStartOf="@+id/guideline1"
         app:layout_constraintTop_toBottomOf="@+id/btnProfileInfo" />
-
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/btnSwitch"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="32dp"
-        android:text="@string/day_or_night"
-        android:visibility="gone"
-        app:layout_constraintEnd_toStartOf="@+id/guideline2"
-        app:layout_constraintStart_toStartOf="@+id/guideline1"
-        app:layout_constraintTop_toBottomOf="@+id/btnChangePassword" />
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/guideline1"

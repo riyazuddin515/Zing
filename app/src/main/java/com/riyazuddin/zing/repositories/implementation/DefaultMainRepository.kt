@@ -1,6 +1,8 @@
 package com.riyazuddin.zing.repositories.implementation
 
+import android.graphics.Bitmap
 import android.net.Uri
+import android.provider.MediaStore
 import android.util.Log
 import com.algolia.search.client.ClientSearch
 import com.algolia.search.model.APIKey
@@ -10,10 +12,8 @@ import com.algolia.search.model.response.ResponseSearch
 import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
-import com.google.firebase.firestore.FieldValue
-import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.*
 import com.google.firebase.firestore.Query
-import com.google.firebase.firestore.SetOptions
 import com.google.firebase.messaging.FirebaseMessaging
 import com.google.firebase.storage.FirebaseStorage
 import com.riyazuddin.zing.BuildConfig
@@ -23,6 +23,8 @@ import com.riyazuddin.zing.other.Constants.DEFAULT_PROFILE_PICTURE_URL
 import com.riyazuddin.zing.other.Constants.FOLLOWERS_COLLECTION
 import com.riyazuddin.zing.other.Constants.FOLLOWING_COLLECTION
 import com.riyazuddin.zing.other.Constants.LAST_SEEN
+import com.riyazuddin.zing.other.Constants.OFFLINE
+import com.riyazuddin.zing.other.Constants.ONLINE
 import com.riyazuddin.zing.other.Constants.POSTS_COLLECTION
 import com.riyazuddin.zing.other.Constants.POST_COUNT
 import com.riyazuddin.zing.other.Constants.POST_LIKES_COLLECTION
@@ -40,13 +42,16 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 import java.util.*
+import javax.inject.Inject
 import javax.inject.Singleton
 
-@Singleton
-class DefaultMainRepository : MainRepository {
 
-    private val auth = FirebaseAuth.getInstance()
-    private val firestore = FirebaseFirestore.getInstance()
+@Singleton
+class DefaultMainRepository @Inject constructor(
+    private val auth: FirebaseAuth,
+    private val firestore: FirebaseFirestore
+) : MainRepository {
+
     private val usersCollection = firestore.collection(USERS_COLLECTION)
     private val usersStatCollection = firestore.collection(USERS_STAT_COLLECTION)
     private val postsCollection = firestore.collection(POSTS_COLLECTION)
@@ -65,23 +70,23 @@ class DefaultMainRepository : MainRepository {
                 val token = FirebaseMessaging.getInstance().token.await()
 
                 val isOfflineForDatabase = mapOf(
-                    STATE to "offline",
+                    STATE to OFFLINE,
                     LAST_SEEN to ServerValue.TIMESTAMP
                 )
 
                 val isOnlineForDatabase = mapOf(
-                    STATE to "online",
+                    STATE to ONLINE,
                     LAST_SEEN to ServerValue.TIMESTAMP
                 )
 
                 val isOfflineForFirestore = mapOf(
-                    STATE to  "offline",
+                    STATE to OFFLINE,
                     LAST_SEEN to System.currentTimeMillis(),
-                    TOKEN to  token
+                    TOKEN to token
                 )
 
                 val isOnlineForFirestore = mapOf(
-                    STATE to "online",
+                    STATE to ONLINE,
                     LAST_SEEN to System.currentTimeMillis(),
                     TOKEN to token
                 )
@@ -118,7 +123,7 @@ class DefaultMainRepository : MainRepository {
         }
     }
 
-    override suspend fun removeDeviceToken(uid: String) = withContext(Dispatchers.IO){
+    override suspend fun removeDeviceToken(uid: String) = withContext(Dispatchers.IO) {
         safeCall {
             usersStatCollection.document(uid).update(TOKEN, "").await()
             Resource.Success(true)
@@ -135,9 +140,21 @@ class DefaultMainRepository : MainRepository {
                 val post = Post(postID, uid, System.currentTimeMillis(), postDownloadUrl, caption)
                 batch.set(postsCollection.document(postID), post)
                 batch.update(usersCollection.document(uid), POST_COUNT, FieldValue.increment(1))
-                batch.set(postLikesCollection.document(postID), PostLikes())
+                batch.set(postLikesCollection.document(postID), PostLikes(uid = uid))
             }.await()
             Resource.Success(Any())
+        }
+    }
+
+    override suspend fun getPost(postId: String): Resource<Post> = withContext(Dispatchers.IO){
+        safeCall {
+            val post = postsCollection.document(postId).get().await().toObject(Post::class.java)
+                ?: return@withContext Resource.Error("Post not Found")
+            val user = usersCollection.document(post.postedBy).get().await().toObject(User::class.java)!!
+            post.userProfilePic = user.profilePicUrl
+            post.username = user.username
+            post.isLiked = user.uid in getPostLikes(postId).data?.likedBy!!
+            Resource.Success(post)
         }
     }
 
@@ -271,6 +288,8 @@ class DefaultMainRepository : MainRepository {
             storage.getReferenceFromUrl(post.imageUrl).delete().await()
             usersCollection.document(post.postedBy).update("postCount", FieldValue.increment(-1))
                 .await()
+            postLikesCollection.document(post.postId).delete().await()
+            commentsCollection.document(post.postId).delete().await()
             Resource.Success(post)
         }
     }
@@ -364,8 +383,11 @@ class DefaultMainRepository : MainRepository {
         withContext(Dispatchers.IO) {
             safeCall {
                 val commentId = UUID.randomUUID().toString()
-                val comment = Comment(commentId, commentText, postId, System.currentTimeMillis(), auth.uid!!)
-                commentsCollection.document(postId).collection(COMMENTS_COLLECTION).document(commentId).set(comment).await()
+                val comment =
+                    Comment(commentId, commentText, postId, System.currentTimeMillis(), auth.uid!!)
+
+                commentsCollection.document(postId).collection(COMMENTS_COLLECTION)
+                    .document(commentId).set(comment).await()
                 Resource.Success(comment)
             }
         }
@@ -480,18 +502,19 @@ class DefaultMainRepository : MainRepository {
             }
         }
 
-    override suspend fun deleteComment(comment: Comment): Resource<Comment> = withContext(Dispatchers.IO){
-        safeCall {
-            commentsCollection
-                .document(comment.postId)
-                .collection(COMMENTS_COLLECTION)
-                .document(comment.commentId)
-                .delete()
-                .await()
+    override suspend fun deleteComment(comment: Comment): Resource<Comment> =
+        withContext(Dispatchers.IO) {
+            safeCall {
+                commentsCollection
+                    .document(comment.postId)
+                    .collection(COMMENTS_COLLECTION)
+                    .document(comment.commentId)
+                    .delete()
+                    .await()
 
-            Resource.Success(comment)
+                Resource.Success(comment)
+            }
         }
-    }
 
     companion object {
         const val TAG = "MainRepository"

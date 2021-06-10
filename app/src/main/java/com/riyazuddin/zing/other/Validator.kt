@@ -1,7 +1,6 @@
 package com.riyazuddin.zing.other
 
 import android.content.Context
-import android.content.res.Resources
 import android.util.Patterns
 import com.riyazuddin.zing.R
 import com.riyazuddin.zing.other.Constants.INVALID
@@ -11,10 +10,7 @@ import com.riyazuddin.zing.other.Constants.MAX_USERNAME
 import com.riyazuddin.zing.other.Constants.MIN_PASSWORD
 import com.riyazuddin.zing.other.Constants.MIN_USERNAME
 import com.riyazuddin.zing.other.Constants.VALID
-import dagger.hilt.android.qualifiers.ApplicationContext
-import org.jetbrains.annotations.TestOnly
 import java.util.regex.Pattern
-import javax.inject.Inject
 
 class Validator constructor(private val context: Context) {
 

@@ -7,19 +7,10 @@
 
     <color name="blue">#1565c0</color>
 
-    <color name="mainTextColor">#000000</color>
-    <color name="altTextColor">#808F97</color>
-
-    <color name="blackAndWhite">#000000</color>
-    <color name="whiteAndBlack">#FFFFFF</color>
-
-    <color name="white">#FFFFFF</color>
     <color name="black">#000000</color>
+    <color name="white">#FFFFFF</color>
 
     <color name="background">#ECEEF3</color>
-
-    <color name="PrimaryToBlack">#ff0036</color>
-
 
     <color name="mtrl_textinput_default_box_stroke_color" tools:override="true">#000000</color>
 

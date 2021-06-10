@@ -37,11 +37,15 @@ interface ChatRepository {
 
     fun clearRecentMessagesList()
 
-    suspend fun getLastMessageFirstQuery()
+    suspend fun getLastMessageFirstQuery(currentUser: User)
 
     suspend fun getLastMessageLoadMore()
 
     suspend fun deleteChatMessage(currentUid: String, otherEndUserUid: String, message: Message)
 
     suspend fun getUser(uid: String): Resource<User>
+
+    suspend fun getUnSeenLastMessagesCount(uid: String)
+
+    suspend fun checkUserIsOnline(uid: String)
 }

@@ -1,6 +1,5 @@
 package com.riyazuddin.zing.ui.main.viewmodels
 
-import androidx.core.content.contentValuesOf
 import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.*
 import androidx.paging.*
@@ -18,8 +17,6 @@ import com.riyazuddin.zing.repositories.abstraction.MainRepository
 import com.riyazuddin.zing.repositories.pagingsource.PostCommentsPagingSource
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
 class CommentViewModel @ViewModelInject constructor(
@@ -39,15 +36,17 @@ class CommentViewModel @ViewModelInject constructor(
 
     private lateinit var postId: String
 
-    private var _postComments: MutableLiveData<PagingData<Comment>> = Pager(PagingConfig(COMMENT_PAGE_SIZE)){
-        PostCommentsPagingSource(
-            Firebase.firestore.collection(COMMENTS_COLLECTION).document(postId).collection(
-                COMMENTS_COLLECTION),
-            Firebase.firestore.collection(USERS_COLLECTION)
-        )
-    }.flow.cachedIn(viewModelScope).asLiveData().let {
-        it as MutableLiveData<PagingData<Comment>>
-    }
+    private var _postComments: MutableLiveData<PagingData<Comment>> =
+        Pager(PagingConfig(COMMENT_PAGE_SIZE)) {
+            PostCommentsPagingSource(
+                Firebase.firestore.collection(COMMENTS_COLLECTION).document(postId).collection(
+                    COMMENTS_COLLECTION
+                ),
+                Firebase.firestore.collection(USERS_COLLECTION)
+            )
+        }.flow.cachedIn(viewModelScope).asLiveData().let {
+            it as MutableLiveData<PagingData<Comment>>
+        }
     val postComments: LiveData<PagingData<Comment>> = _postComments
 
     fun createComment(commentText: String, postId: String) {
@@ -85,6 +84,7 @@ class CommentViewModel @ViewModelInject constructor(
             _postComments.postValue(it)
         }
     }
+
     fun getUserProfile() {
         _userProfileStatus.postValue(Event(Resource.Loading()))
         viewModelScope.launch(dispatcher) {

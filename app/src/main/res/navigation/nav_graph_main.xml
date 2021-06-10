@@ -147,6 +147,13 @@
         android:id="@+id/globalActionToOthersProfileFragment"
         app:destination="@id/othersProfileFragment"/>
 
+    <action
+        android:id="@+id/globalActionToChatFragment"
+        app:destination="@id/chatFragment"/>
+
+    <action
+        android:id="@+id/globalActionToPostFragment"
+        app:destination="@id/postFragment"/>
 
     <fragment
         android:id="@+id/commentsFragment"
@@ -281,6 +288,21 @@
         <argument
             android:name="currentUser"
             app:argType="com.riyazuddin.zing.data.entities.User" />
+    </fragment>
+    <fragment
+        android:id="@+id/postFragment"
+        android:name="com.riyazuddin.zing.ui.main.fragments.PostFragment"
+        android:label="fragment_post"
+        tools:layout="@layout/fragment_post" >
+        <argument
+            android:name="postId"
+            app:argType="string" />
+        <action
+            android:id="@+id/action_postFragment_to_commentsFragment"
+            app:destination="@id/commentsFragment" />
+        <action
+            android:id="@+id/action_postFragment_to_likedByFragment"
+            app:destination="@id/likedByFragment" />
     </fragment>
 
 </navigation>

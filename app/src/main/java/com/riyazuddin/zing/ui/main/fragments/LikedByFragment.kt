@@ -1,12 +1,16 @@
 package com.riyazuddin.zing.ui.main.fragments
 
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
 import com.riyazuddin.zing.R
 import com.riyazuddin.zing.adapters.UserAdapter
 import com.riyazuddin.zing.databinding.FragmentLikedByBinding
@@ -27,15 +31,40 @@ class LikedByFragment : Fragment(R.layout.fragment_liked_by) {
     @Inject
     lateinit var userAdapter: UserAdapter
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        binding = FragmentLikedByBinding.inflate(layoutInflater)
+
+        setUpRecyclerView()
+        viewModel.getPostLikedUsers(args.postId)
+    }
+
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        return binding.root
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        binding = FragmentLikedByBinding.bind(view)
 
         subscribeToObservers()
-        viewModel.getPostLikedUsers(args.postId)
 
         binding.toolbar.setNavigationOnClickListener {
             findNavController().navigateUp()
+        }
+
+        userAdapter.setOnUserClickListener {
+            if (Firebase.auth.uid == it.uid)
+                findNavController().navigate(R.id.profileFragment)
+            else
+                findNavController().navigate(
+                    CommentsFragmentDirections.globalActionToOthersProfileFragment(
+                        it.uid
+                    )
+                )
         }
     }
 
@@ -45,7 +74,6 @@ class LikedByFragment : Fragment(R.layout.fragment_liked_by) {
             onError = { snackBar(it) },
         ) {
             userAdapter.users = it
-            setUpRecyclerView()
         })
     }
 

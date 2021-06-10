@@ -4,6 +4,10 @@ import android.content.Context
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.request.RequestOptions
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.FirebaseFirestoreSettings
+import com.google.firebase.storage.FirebaseStorage
 import com.riyazuddin.zing.R
 import dagger.Module
 import dagger.Provides
@@ -37,4 +41,27 @@ object AppModule {
             .error(R.drawable.ic_outline_error)
             .diskCacheStrategy(DiskCacheStrategy.DATA)
     )
+
+    @Singleton
+    @Provides
+    fun provideFirestore() = run {
+        val instance = FirebaseFirestore.getInstance()
+        val settings = FirebaseFirestoreSettings.Builder()
+            .setHost("192.168.0.6:8085")
+            .setSslEnabled(false)
+            .setPersistenceEnabled(false)
+            .build()
+
+        instance.firestoreSettings = settings
+        instance
+    }
+
+    @Singleton
+    @Provides
+    fun provideFirebaseAuth() = run {
+        val auth = FirebaseAuth.getInstance()
+        auth.useEmulator("192.168.0.6", 9099)
+        auth
+    }
+
 }

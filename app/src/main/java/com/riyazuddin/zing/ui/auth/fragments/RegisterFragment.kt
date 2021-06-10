@@ -24,7 +24,6 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 @AndroidEntryPoint
 class RegisterFragment : Fragment(R.layout.fragment_register) {
@@ -47,24 +46,24 @@ class RegisterFragment : Fragment(R.layout.fragment_register) {
                 findNavController().navigate(R.id.action_registerFragment_to_loginFragment)
         }
 
-        var job: Job? = null
-        binding.TIEUsername.addTextChangedListener { editable ->
-            binding.TILUsername.endIconMode = TextInputLayout.END_ICON_NONE
-            binding.TILUsername.error = null
-            job?.cancel()
-            job = lifecycleScope.launch {
-                delay(SEARCH_TIME_DELAY)
-                editable?.let {
-                    validator.validateUsername(binding.TIEUsername.text.toString()).apply {
-                        if (this != VALID) {
-                            binding.TILUsername.error = this
-                        } else {
-                            viewModel.checkUserNameAvailability(it.toString())
-                        }
-                    }
-                }
-            }
-        }
+//        var job: Job? = null
+//        binding.TIEUsername.addTextChangedListener { editable ->
+//            binding.TILUsername.endIconMode = TextInputLayout.END_ICON_NONE
+//            binding.TILUsername.error = null
+//            job?.cancel()
+//            job = lifecycleScope.launch {
+//                delay(SEARCH_TIME_DELAY)
+//                editable?.let {
+//                    validator.validateUsername(it.toString()).apply {
+//                        if (this != VALID) {
+//                            binding.TILUsername.error = this
+//                        } else {
+//                            viewModel.checkUserNameAvailability(it.toString())
+//                        }
+//                    }
+//                }
+//            }
+//        }
 
         binding.TIEName.addTextChangedListener {
             validator.validateName(it.toString()).apply {
@@ -96,7 +95,7 @@ class RegisterFragment : Fragment(R.layout.fragment_register) {
         binding.TIERepeatPassword.addTextChangedListener {
             if (it.toString() != binding.TIEPassword.text.toString()) {
                 binding.TILRepeatPassword.error = this.getString(R.string.error_password_not_match)
-            }else
+            } else
                 binding.TILRepeatPassword.error = null
         }
 
@@ -116,12 +115,12 @@ class RegisterFragment : Fragment(R.layout.fragment_register) {
                 }
             }
 
-            validator.validateUsername(username).apply {
-                if (this != VALID) {
-                    binding.TILUsername.error = this
-                    return@setOnClickListener
-                }
-            }
+//            validator.validateUsername(username).apply {
+//                if (this != VALID) {
+//                    binding.TILUsername.error = this
+//                    return@setOnClickListener
+//                }
+//            }
 
             validator.validateEmail(email).apply {
                 if (this != VALID) {
@@ -172,13 +171,13 @@ class RegisterFragment : Fragment(R.layout.fragment_register) {
             onLoading = {
                 binding.TILUsername.error = null
                 binding.TILUsername.endIconMode = TextInputLayout.END_ICON_NONE
-                binding.btnRegister.isEnabled = false
             }
         ) {
-            binding.btnRegister.isEnabled = true
             binding.TILUsername.endIconMode = TextInputLayout.END_ICON_CUSTOM
             binding.TILUsername.endIconDrawable =
                 ResourcesCompat.getDrawable(resources, R.drawable.ic_outline_check_circle, null)
         })
     }
+
+
 }

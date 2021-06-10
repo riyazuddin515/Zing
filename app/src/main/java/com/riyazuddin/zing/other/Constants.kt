@@ -5,7 +5,8 @@ object Constants {
     const val CHATTING_WITH = "chatting_with"
     const val NO_ONE = "NO_ONE"
     const val NOTIFICATION_ID = 1
-    const val CHANNEL_ID = "chat_channel_id"
+    const val CHAT_CHANNEL_ID = "chat_channel_id"
+    const val NORMAL_NOTIFICATION_CHANNEL_ID = "normal_notification_channel_id"
 
     const val DEFAULT_PROFILE_PICTURE_URL =
         "https://firebasestorage.googleapis.com/v0/b/zing515.appspot.com/o/img_avatar.png?alt=media&token=b40984fc-155d-4acc-b031-a38076a98628"
@@ -86,5 +87,8 @@ object Constants {
 
     const val SUCCESS = "SUCCESS"
     const val FAILURE = "FAILURE"
+
+    const val ONLINE = "Online"
+    const val OFFLINE = "Offline"
 
 }

@@ -21,7 +21,7 @@ class PostAdapter @Inject constructor(
     val glide: RequestManager
 ) : PagingDataAdapter<Post, PostAdapter.PostViewHolder>(Companion) {
 
-    class PostViewHolder(val binding: ItemPostBinding) : RecyclerView.ViewHolder(binding.root)
+    class PostViewHolder(val binding: ItemPostBinding): RecyclerView.ViewHolder(binding.root)
 
     companion object : DiffUtil.ItemCallback<Post>() {
         override fun areItemsTheSame(oldItem: Post, newItem: Post): Boolean {
@@ -50,10 +50,10 @@ class PostAdapter @Inject constructor(
             glide.load(post.imageUrl).into(ivPostImage)
             tvUsername.text = post.username
             val likeCount = post.likeCount
-            tvLikedBy.isVisible = likeCount != 0
+            tvLikeCount.isVisible = likeCount != 0
             val likesText =
                 if (likeCount == 1) "1 like" else "${String.format("%,d", likeCount)} likes"
-            tvLikedBy.text = likesText
+            tvLikeCount.text = likesText
             tvPostedOn.text = getTimeAgo(post.date)
             if (post.caption.isEmpty())
                 tvCaption.isVisible = false
@@ -84,7 +84,7 @@ class PostAdapter @Inject constructor(
                     click(post)
                 }
             }
-            tvLikedBy.setOnClickListener {
+            tvLikeCount.setOnClickListener {
                 onLikedByClickListener?.let { click ->
                     click(post)
                 }

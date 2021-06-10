@@ -11,7 +11,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_weight="2"
-        android:background="@color/whiteAndBlack"
+        android:background="@color/white"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
@@ -31,13 +31,13 @@
                 app:layout_constraintTop_toTopOf="parent"
                 app:navigationIcon="@drawable/ic_arrow_back"
                 app:title="Chat"
-                app:titleTextColor="@color/blackAndWhite" />
+                app:titleTextColor="@color/black" />
 
             <ImageButton
                 android:id="@+id/ibNewChat"
                 android:layout_width="56dp"
                 android:layout_height="0dp"
-                android:background="@color/whiteAndBlack"
+                android:background="@color/white"
                 android:contentDescription="@string/image"
                 android:src="@drawable/ic_new_chat"
                 app:layout_constraintBottom_toBottomOf="parent"

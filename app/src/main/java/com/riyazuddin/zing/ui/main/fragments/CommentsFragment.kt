@@ -1,7 +1,9 @@
 package com.riyazuddin.zing.ui.main.fragments
 
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -11,6 +13,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.paging.LoadState
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.RequestManager
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
@@ -41,15 +44,26 @@ class CommentsFragment : Fragment(R.layout.fragment_comments) {
     private val viewModel: CommentViewModel by viewModels()
     private lateinit var binding: FragmentCommentsBinding
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        binding = FragmentCommentsBinding.bind(view)
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        binding = FragmentCommentsBinding.inflate(layoutInflater)
 
         setUpRecyclerView()
-        subscribeToObservers()
-
         viewModel.getUserProfile()
         viewModel.getComments(args.postId)
+    }
+
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        return binding.root
+    }
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        subscribeToObservers()
 
         binding.toolbar.setNavigationOnClickListener {
             findNavController().navigateUp()
@@ -117,7 +131,6 @@ class CommentsFragment : Fragment(R.layout.fragment_comments) {
         ) { comment ->
             binding.TIEComment.text?.clear()
             binding.btnSend.isEnabled = true
-            snackBar("Comment Posted")
             comment.username = currentUser.username
             comment.userProfilePic = currentUser.profilePicUrl
 
@@ -142,6 +155,14 @@ class CommentsFragment : Fragment(R.layout.fragment_comments) {
             adapter = commentAdapter
             layoutManager = LinearLayoutManager(requireContext())
             itemAnimator = null
+
+            commentAdapter.registerAdapterDataObserver(object : RecyclerView.AdapterDataObserver() {
+                override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
+                    if (positionStart == 0) {
+                        (binding.rvComments.layoutManager as LinearLayoutManager).scrollToPosition(0)
+                    }
+                }
+            })
         }
     }
 

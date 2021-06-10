@@ -17,20 +17,20 @@
 
         <com.google.android.material.textfield.TextInputLayout
             style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox"
-            app:boxBackgroundColor="@color/whiteAndBlack"
-            android:textColorHint="@color/blackAndWhite"
+            app:boxBackgroundColor="@color/white"
+            android:textColorHint="@color/black"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="@string/search_user"
             app:startIconDrawable="@drawable/ic_outline_search"
-            app:startIconTint="@color/blackAndWhite">
+            app:startIconTint="@color/black">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/TIESearch"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="text"
-                android:textColor="@color/blackAndWhite"
+                android:textColor="@color/black"
                 android:textSize="20sp" />
 
         </com.google.android.material.textfield.TextInputLayout>

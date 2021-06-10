@@ -1,7 +1,6 @@
 package com.riyazuddin.zing.repositories.pagingsource
 
 import android.util.Log
-import androidx.paging.LoadState
 import androidx.paging.PagingSource
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.Query
@@ -38,7 +37,8 @@ class PostCommentsPagingSource(
 
             LoadResult.Page(
                 currentPage.toObjects(Comment::class.java).onEach {
-                    val user = usersCollectionReference.document(it.commentedBy).get().await().toObject(User::class.java)!!
+                    val user = usersCollectionReference.document(it.commentedBy).get().await()
+                        .toObject(User::class.java)!!
                     it.username = user.username
                     it.userProfilePic = user.profilePicUrl
                 },
@@ -51,7 +51,7 @@ class PostCommentsPagingSource(
         }
     }
 
-    companion object{
+    companion object {
         const val TAG = "PostCommentSource"
     }
 }

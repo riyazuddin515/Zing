@@ -26,9 +26,6 @@ class AuthViewModel @ViewModelInject constructor(
     private val _passwordResetStatus = MutableLiveData<Event<Resource<String>>>()
     val passwordResetStatus: LiveData<Event<Resource<String>>> = _passwordResetStatus
 
-//    private val _isUsernameAvailable = MutableLiveData<Event<Resource<Boolean>>>()
-//    val isUsernameAvailable: LiveData<Event<Resource<Boolean>>> = _isUsernameAvailable
-
     private val _isUsernameAvailable = MutableLiveData<Event<Resource<Boolean>>>()
     val isUsernameAvailable: LiveData<Event<Resource<Boolean>>> = _isUsernameAvailable
 

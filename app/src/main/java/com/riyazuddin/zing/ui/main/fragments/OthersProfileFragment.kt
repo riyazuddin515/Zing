@@ -44,18 +44,30 @@ class OthersProfileFragment : ProfileFragment() {
         }
 
         binding.tvFollowersCount.setOnClickListener {
-            findNavController().navigate(R.id.action_othersProfileFragment_to_followersFragment, bundle)
+            findNavController().navigate(
+                R.id.action_othersProfileFragment_to_followersFragment,
+                bundle
+            )
         }
 
         binding.tvFollowingCount.setOnClickListener {
-            findNavController().navigate(R.id.action_othersProfileFragment_to_followingFragment, bundle)
+            findNavController().navigate(
+                R.id.action_othersProfileFragment_to_followingFragment,
+                bundle
+            )
         }
         binding.tvFollowers.setOnClickListener {
-            findNavController().navigate(R.id.action_othersProfileFragment_to_followersFragment, bundle)
+            findNavController().navigate(
+                R.id.action_othersProfileFragment_to_followersFragment,
+                bundle
+            )
         }
 
         binding.tvFollowing.setOnClickListener {
-            findNavController().navigate(R.id.action_othersProfileFragment_to_followingFragment, bundle)
+            findNavController().navigate(
+                R.id.action_othersProfileFragment_to_followingFragment,
+                bundle
+            )
         }
     }
 

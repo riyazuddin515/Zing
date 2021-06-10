@@ -27,8 +27,7 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class RecentChatListFragment : Fragment(R.layout.fragment_recent_chat_list) {
 
-    private var _binding: FragmentRecentChatListBinding? = null
-    private val binding get() = _binding!!
+    private lateinit var binding: FragmentRecentChatListBinding
     private val args: RecentChatListFragmentArgs by navArgs()
 
     private val viewModel: ChatViewModel by viewModels()
@@ -41,14 +40,19 @@ class RecentChatListFragment : Fragment(R.layout.fragment_recent_chat_list) {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = FragmentRecentChatListBinding.inflate(inflater, container, false)
         return binding.root
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        binding = FragmentRecentChatListBinding.inflate(layoutInflater)
+
+        setupRecyclerView()
+        viewModel.getLastMessageFirstQuery(args.currentUser)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-//        binding = FragmentRecentChatListBinding.bind(view)
 
         binding.toolbar.setNavigationOnClickListener {
             findNavController().popBackStack()
@@ -65,12 +69,10 @@ class RecentChatListFragment : Fragment(R.layout.fragment_recent_chat_list) {
         }
 
         subscribeToObservers()
-        setupRecyclerView()
-        viewModel.getLastMessageFirstQuery()
 
-        lastMessageAdapter.setOnItemClickListener { _, user ->
+        lastMessageAdapter.setOnItemClickListener { lastMessage ->
             val bundle = Bundle().apply {
-                putSerializable("otherEndUser", user)
+                putSerializable("otherEndUser", lastMessage.sender)
                 putSerializable("currentUser", args.currentUser)
             }
             findNavController().navigate(R.id.action_recentChatListFragment_to_chatFragment, bundle)
@@ -115,18 +117,16 @@ class RecentChatListFragment : Fragment(R.layout.fragment_recent_chat_list) {
                     if (pos + 1 == numItems) {
                         viewModel.getLastMessageLoadMore()
                         Log.i(TAG, "onScrolled: calling getChatLoadMore")
-//                        isLoadingMore = true
                     }
                 }
             })
         }
     }
 
-    override fun onDestroyView() {
+    override fun onDestroy() {
         Log.i(TAG, "onDestroyView: ")
         viewModel.clearRecentMessagesList()
-        _binding = null
-        super.onDestroyView()
+        super.onDestroy()
     }
 
     override fun onStart() {

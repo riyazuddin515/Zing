@@ -10,6 +10,7 @@ import com.algolia.search.model.response.ResponseSearch
 import com.algolia.search.model.search.Query
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.FirebaseFirestoreSettings
 import com.riyazuddin.zing.BuildConfig
 import com.riyazuddin.zing.data.entities.Followers
 import com.riyazuddin.zing.data.entities.Following
@@ -24,13 +25,14 @@ import io.ktor.client.features.logging.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
+import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class DefaultAuthRepository : AuthRepository {
-
-    private val auth = FirebaseAuth.getInstance()
-    private val firestore = FirebaseFirestore.getInstance()
+class DefaultAuthRepository @Inject constructor(
+    private val auth: FirebaseAuth,
+    private val firestore: FirebaseFirestore
+) : AuthRepository {
 
     override suspend fun register(
         name: String,
@@ -45,8 +47,8 @@ class DefaultAuthRepository : AuthRepository {
                 val uid = result.user!!.uid
                 val user = User(name, uid, username)
                 firestore.collection(USERS_COLLECTION).document(uid).set(user).await()
-                firestore.collection(FOLLOWING_COLLECTION).document(uid).set(Following()).await()
-                firestore.collection(FOLLOWERS_COLLECTION).document(uid).set(Followers()).await()
+                firestore.collection(FOLLOWING_COLLECTION).document(uid).set(Following(uid = uid)).await()
+                firestore.collection(FOLLOWERS_COLLECTION).document(uid).set(Followers(uid = uid)).await()
 
                 Resource.Success(true)
             }

@@ -6,7 +6,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     app:cardElevation="20dp"
     app:cardCornerRadius="15dp"
-    app:cardBackgroundColor="@color/whiteAndBlack"
+    app:cardBackgroundColor="@color/white"
     android:layout_margin="5dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -30,7 +30,7 @@
             android:layout_marginStart="4dp"
             android:layout_marginTop="5dp"
             android:fontFamily="sans-serif-medium"
-            android:textColor="@color/blackAndWhite"
+            android:textColor="@color/black"
             android:textSize="20sp"
             android:maxLines="1"
             android:ellipsize="end"
@@ -60,7 +60,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="5dp"
             android:fontFamily="sans-serif"
-            android:textColor="@color/blackAndWhite"
+            android:textColor="@color/black"
             android:layout_marginEnd="8dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="@+id/tvUsername"
@@ -74,7 +74,7 @@
             android:layout_marginTop="3dp"
             android:layout_marginBottom="5dp"
             android:fontFamily="sans-serif-light"
-            android:textColor="@color/blackAndWhite"
+            android:textColor="@color/black"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="@+id/tvCommentText"
             app:layout_constraintTop_toBottomOf="@+id/tvCommentText"

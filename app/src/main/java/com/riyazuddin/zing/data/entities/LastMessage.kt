@@ -4,16 +4,11 @@ import com.google.firebase.firestore.Exclude
 
 data class LastMessage(
     val message: Message = Message(),
-
-    var senderName: String = "",
-    var senderUserName: String = "",
-    var senderProfilePicUrl: String = "",
-
-    var receiverName: String = "",
-    var receiverUsername: String = "",
-    var receiverProfilePicUrl: String = "",
+    val chatThread: String = "",
 
     @get:Exclude
-    var user: User = User()
+    var sender: User = User(),
+    @get:Exclude
+    var receiver: User = User()
 
 )
