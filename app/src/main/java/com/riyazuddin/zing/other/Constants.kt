@@ -8,8 +8,18 @@ object Constants {
     const val CHAT_CHANNEL_ID = "chat_channel_id"
     const val NORMAL_NOTIFICATION_CHANNEL_ID = "normal_notification_channel_id"
 
+    /**
+     * Notification Type
+     */
+    const val CHAT_TYPE = "CHAT_TYPE"
+    const val FOLLOW_TYPE = "FOLLOW_TYPE"
+    const val POST_LIKE_TYPE = "POST_LIKE_TYPE"
+    const val COMMENT_TYPE = "COMMENT_TYPE"
+
     const val DEFAULT_PROFILE_PICTURE_URL =
         "https://firebasestorage.googleapis.com/v0/b/zing515.appspot.com/o/img_avatar.png?alt=media&token=b40984fc-155d-4acc-b031-a38076a98628"
+
+    const val ALGOLIA_USER_SEARCH_INDEX = "user_search"
 
     const val USERS_COLLECTION = "users"
     const val USERS_STAT_COLLECTION = "usersStat"
@@ -25,8 +35,9 @@ object Constants {
      * For User Stat
      */
     const val STATE = "state"
-    const val  LAST_SEEN = "lastSeen"
+    const val LAST_SEEN = "lastSeen"
     const val TOKEN = "token"
+
     /**
      * For User class
      */
@@ -39,6 +50,14 @@ object Constants {
     const val FOLLOWERS_COUNT = "followersCount"
     const val POST_COUNT = "postCount"
 
+    const val POST_ID = "postId"
+    const val POSTED_BY = "postedBy"
+    const val LIKED_BY = "likedBy"
+    const val LIKE_COUNT = "likeCount"
+
+    const val FOLLOWING = "following"
+    const val FOLLOWERS = "followers"
+
     /**
      * For Message Class
      */
@@ -50,18 +69,10 @@ object Constants {
     const val SENDER_AND_RECEIVER_UID = "senderAndReceiverUid"
     const val STATUS = "status"
 
-    /**
-     * For Last Message
-     */
-    const val SENDER_NAME = "senderName"
-    const val SENDER_USERNAME = "senderUserName"
-    const val SENDER_PROFILE_PIC_URL = "senderProfilePicUrl"
-    const val RECEIVER_NAME = "receiverName"
-    const val RECEIVER_USERNAME = "receiverUsername"
-    const val RECEIVER_PROFILE_PIC_URL = "receiverProfilePicUrl"
-
+    const val CHAT_MESSAGE_PAGE_LIMIT = 10L
+    const val LAST_MESSAGE_PAGE_LIMIT = 10L
     const val POST_PAGE_SIZE = 1
-    const val COMMENT_PAGE_SIZE = 15
+    const val COMMENT_PAGE_SIZE = 10
     const val NEW_CHAT_LIST_SIZE = 10
 
     const val VALID = "VALID"

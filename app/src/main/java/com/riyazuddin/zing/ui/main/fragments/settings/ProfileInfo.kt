@@ -23,6 +23,7 @@ import com.riyazuddin.zing.data.entities.UpdateProfile
 import com.riyazuddin.zing.data.entities.User
 import com.riyazuddin.zing.databinding.FragmentProfileInfoBinding
 import com.riyazuddin.zing.other.Constants
+import com.riyazuddin.zing.other.Constants.DEFAULT_PROFILE_PICTURE_URL
 import com.riyazuddin.zing.other.Constants.SEARCH_TIME_DELAY
 import com.riyazuddin.zing.other.EventObserver
 import com.riyazuddin.zing.other.Validator
@@ -56,7 +57,7 @@ class ProfileInfo : Fragment(R.layout.fragment_profile_info) {
         override fun createIntent(context: Context, input: String?): Intent {
             return CropImage.activity()
                 .setAspectRatio(1, 1)
-                .setOutputCompressQuality(60)
+                .setOutputCompressQuality(50)
                 .setActivityTitle("Crop Image")
                 .setGuidelines(CropImageView.Guidelines.ON)
                 .getIntent(requireContext())
@@ -149,7 +150,8 @@ class ProfileInfo : Fragment(R.layout.fragment_profile_info) {
                 uidToUpdate = Firebase.auth.uid!!,
                 name = binding.TIEName.text.toString(),
                 username = binding.TIEUsername.text.toString(),
-                bio = binding.TIEBio.text.toString()
+                bio = binding.TIEBio.text.toString(),
+                profilePicUrl = user.profilePicUrl
             )
             viewModel.updateProfile(updateProfile, imageUri)
         }

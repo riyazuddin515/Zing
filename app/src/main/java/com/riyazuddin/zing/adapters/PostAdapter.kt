@@ -21,7 +21,7 @@ class PostAdapter @Inject constructor(
     val glide: RequestManager
 ) : PagingDataAdapter<Post, PostAdapter.PostViewHolder>(Companion) {
 
-    class PostViewHolder(val binding: ItemPostBinding): RecyclerView.ViewHolder(binding.root)
+    class PostViewHolder(val binding: ItemPostBinding) : RecyclerView.ViewHolder(binding.root)
 
     companion object : DiffUtil.ItemCallback<Post>() {
         override fun areItemsTheSame(oldItem: Post, newItem: Post): Boolean {
@@ -134,7 +134,7 @@ class PostAdapter @Inject constructor(
 
 
     abstract class DoubleClickListener : View.OnClickListener {
-        var lastClickTime: Long = 0
+        private var lastClickTime: Long = 0
         override fun onClick(v: View?) {
             val clickTime = System.currentTimeMillis()
             if (clickTime - lastClickTime < DOUBLE_CLICK_TIME_DELTA) {

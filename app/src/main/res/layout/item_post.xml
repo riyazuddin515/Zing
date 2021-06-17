@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/cardView"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="5dp"
-    app:cardCornerRadius="15dp"
-    android:id="@+id/cardView"
     app:cardBackgroundColor="@color/white"
-    xmlns:tools="http://schemas.android.com/tools">
+    app:cardCornerRadius="15dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/rootLayout"
@@ -18,11 +18,11 @@
             android:id="@+id/CIVProfilePic"
             android:layout_width="40dp"
             android:layout_height="40dp"
-            tools:src="@drawable/default_profile_pic"
             android:layout_marginStart="8dp"
             android:layout_marginTop="8dp"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            tools:src="@drawable/default_profile_pic" />
 
         <com.google.android.material.textview.MaterialTextView
             android:id="@+id/tvUsername"
@@ -32,12 +32,12 @@
             android:padding="2dp"
             android:textColor="@color/black"
             android:textSize="20sp"
-            tools:text = "@string/username"
             android:textStyle="bold"
             app:layout_constraintBottom_toBottomOf="@+id/CIVProfilePic"
             app:layout_constraintEnd_toStartOf="@+id/ibDelete"
             app:layout_constraintStart_toEndOf="@+id/CIVProfilePic"
-            app:layout_constraintTop_toTopOf="@+id/CIVProfilePic" />
+            app:layout_constraintTop_toTopOf="@+id/CIVProfilePic"
+            tools:text="@string/username" />
 
         <ImageButton
             android:id="@+id/ibDelete"
@@ -66,10 +66,10 @@
             <ImageView
                 android:id="@+id/ivPostImage"
                 android:layout_width="match_parent"
-                android:adjustViewBounds="true"
-                tools:src="@drawable/default_profile_pic"
                 android:layout_height="wrap_content"
-                android:contentDescription="@string/postimage" />
+                android:adjustViewBounds="true"
+                android:contentDescription="@string/postimage"
+                tools:src="@drawable/default_profile_pic" />
 
         </androidx.cardview.widget.CardView>
 
@@ -105,24 +105,24 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="5dp"
-            android:textColor="@color/black"
             android:layout_marginBottom="5dp"
-            tools:text="23k likes"
+            android:textColor="@color/black"
             android:textStyle="bold"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="@+id/ibLike"
             app:layout_constraintTop_toBottomOf="@+id/ibLike"
-            app:layout_constraintVertical_bias="0.0" />
+            app:layout_constraintVertical_bias="0.0"
+            tools:text="23k likes" />
 
         <com.google.android.material.textview.MaterialTextView
             android:id="@+id/tvPostedOn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="8dp"
-            tools:text="23 Nov 2000"
             android:textColor="@color/black"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/ibComment" />
+            app:layout_constraintTop_toTopOf="@+id/ibComment"
+            tools:text="23 Nov 2000" />
 
         <com.google.android.material.textview.MaterialTextView
             android:id="@+id/tvCaption"
@@ -136,7 +136,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="@+id/tvLikeCount"
             app:layout_constraintTop_toBottomOf="@+id/tvLikeCount"
-            tools:text="@string/caption"/>
+            tools:text="@string/caption" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

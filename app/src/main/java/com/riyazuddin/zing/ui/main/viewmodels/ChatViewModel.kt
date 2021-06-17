@@ -6,16 +6,21 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
+import com.google.firebase.firestore.FirebaseFirestore
 import com.riyazuddin.zing.data.entities.LastMessage
 import com.riyazuddin.zing.data.entities.Message
 import com.riyazuddin.zing.data.entities.User
 import com.riyazuddin.zing.data.entities.UserStat
+import com.riyazuddin.zing.other.Constants
 import com.riyazuddin.zing.other.Event
 import com.riyazuddin.zing.other.Resource
 import com.riyazuddin.zing.repositories.abstraction.ChatRepository
 import com.riyazuddin.zing.repositories.implementation.DefaultChatRepository
+import com.riyazuddin.zing.repositories.pagingsource.FollowingAndFollowersPagingSource
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import javax.inject.Singleton
@@ -55,11 +60,13 @@ class ChatViewModel @ViewModelInject constructor(
         }
     }
 
-    suspend fun getFollowingAndFollowersUsers(uid: String): Flow<PagingData<User>> {
-        return repository.getFollowersAndFollowingForNewChat(uid).data!!.flow.cachedIn(
-            viewModelScope
-        )
+    private var uid = ""
+    fun setUid(uid: String){
+        this.uid = uid
     }
+    val flow = Pager(PagingConfig(Constants.NEW_CHAT_LIST_SIZE)) {
+        FollowingAndFollowersPagingSource(uid, FirebaseFirestore.getInstance())
+    }.flow.cachedIn(viewModelScope)
 
     fun sendMessage(
         currentUid: String,
@@ -67,12 +74,6 @@ class ChatViewModel @ViewModelInject constructor(
         message: String,
         type: String,
         uri: Uri?,
-        senderName: String,
-        senderUsername: String,
-        senderProfilePicUrl: String,
-        receiverName: String,
-        receiverUsername: String,
-        receiveProfileUrl: String
     ) {
         if (message.isEmpty() && uri == null)
             return
@@ -83,13 +84,7 @@ class ChatViewModel @ViewModelInject constructor(
                 receiverUid,
                 message,
                 type,
-                uri,
-                senderName,
-                senderUsername,
-                senderProfilePicUrl,
-                receiverName,
-                receiverUsername,
-                receiveProfileUrl
+                uri
             )
             _sendMessageStatus.postValue(Event(result))
         }
@@ -112,10 +107,10 @@ class ChatViewModel @ViewModelInject constructor(
         }
     }
 
-    fun getLastMessageLoadMore() {
+    fun getLastMessageLoadMore(currentUser: User) {
         _recentMessagesList.postValue(Event(Resource.Loading()))
         viewModelScope.launch {
-            repository.getLastMessageLoadMore()
+            repository.getLastMessageLoadMore(currentUser)
         }
     }
 

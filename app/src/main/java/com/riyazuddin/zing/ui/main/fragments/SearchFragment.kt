@@ -47,7 +47,6 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
             job = lifecycleScope.launch {
                 delay(SEARCH_TIME_DELAY)
                 eiditable?.let {
-//                    viewModel.searchUser(it.toString())
                     viewModel.search(it.toString())
                 }
             }

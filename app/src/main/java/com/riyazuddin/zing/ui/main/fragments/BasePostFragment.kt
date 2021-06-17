@@ -18,7 +18,6 @@ abstract class BasePostFragment(layoutId: Int) : Fragment(layoutId) {
 
     protected abstract val basePostViewModel: BasePostViewModel
 
-    protected abstract val source: String
     private var sourceToDestinationLayoutId by Delegates.notNull<Int>()
 
     @Inject
@@ -49,37 +48,6 @@ abstract class BasePostFragment(layoutId: Int) : Fragment(layoutId) {
                     basePostViewModel.deletePost(post)
                 }
             }.show(childFragmentManager, null)
-        }
-
-        postAdapter.setOnLikedByClickListener {
-            basePostViewModel.getPostLikedUsers(it.postId)
-            when (source) {
-                (R.id.homeFragment).toString() -> sourceToDestinationLayoutId =
-                    R.id.action_homeFragment_to_likedByFragment
-                (R.id.profileFragment).toString() -> sourceToDestinationLayoutId =
-                    R.id.action_profileFragment_to_likedByFragment
-                (R.id.othersProfileFragment).toString() -> sourceToDestinationLayoutId =
-                    R.id.action_othersProfileFragment_to_likedByFragment
-            }
-            val bundle = Bundle().apply {
-                putString("postId", it.postId)
-            }
-            findNavController().navigate(sourceToDestinationLayoutId, bundle)
-        }
-
-        postAdapter.setOnCommentClickListener {
-            when (source) {
-                (R.id.homeFragment).toString() -> sourceToDestinationLayoutId =
-                    R.id.action_homeFragment_to_commentsFragment
-                (R.id.profileFragment).toString() -> sourceToDestinationLayoutId =
-                    R.id.action_profileFragment_to_commentsFragment
-                (R.id.othersProfileFragment).toString() -> sourceToDestinationLayoutId =
-                    R.id.action_othersProfileFragment_to_commentsFragment
-            }
-            val bundle = Bundle().apply {
-                putString("postId", it.postId)
-            }
-            findNavController().navigate(sourceToDestinationLayoutId, bundle)
         }
     }
 

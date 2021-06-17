@@ -19,9 +19,10 @@ import com.riyazuddin.zing.repositories.abstraction.ChatRepository
 import com.riyazuddin.zing.repositories.abstraction.MainRepository
 import com.riyazuddin.zing.repositories.implementation.DefaultChatRepository
 import com.riyazuddin.zing.repositories.pagingsource.FeedPagingSource
-import com.riyazuddin.zing.repositories.pagingsource.ProfilePostPagingSource
 import kotlinx.coroutines.launch
+import javax.inject.Singleton
 
+@Singleton
 class HomeViewModel @ViewModelInject constructor(
     private val repository: MainRepository,
     private val chatRepository: ChatRepository
@@ -33,7 +34,7 @@ class HomeViewModel @ViewModelInject constructor(
     private val _removeDeviceTokeStatus = MutableLiveData<Event<Resource<Boolean>>>()
     val removeDeviceTokeStatus: LiveData<Event<Resource<Boolean>>> = _removeDeviceTokeStatus
 
-    private val _feed : MutableLiveData<PagingData<Post>> =
+    private val _feed: MutableLiveData<PagingData<Post>> =
         Pager(PagingConfig(POST_PAGE_SIZE)) {
             FeedPagingSource(FirebaseFirestore.getInstance())
         }.flow.cachedIn(viewModelScope).asLiveData().let {
@@ -58,7 +59,7 @@ class HomeViewModel @ViewModelInject constructor(
         }
     }
 
-    fun loadCurrentUser(uid: String) {
+    fun getCurrentUser(uid: String) {
         _loadCurrentUserStatus.postValue(Event(Resource.Loading()))
         viewModelScope.launch {
             val result = repository.getUserProfile(uid)

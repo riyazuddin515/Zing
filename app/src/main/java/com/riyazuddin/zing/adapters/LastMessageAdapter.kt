@@ -1,6 +1,7 @@
 package com.riyazuddin.zing.adapters
 
 import android.graphics.Typeface
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.core.view.isVisible
@@ -11,7 +12,6 @@ import com.bumptech.glide.RequestManager
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import com.riyazuddin.zing.data.entities.LastMessage
-import com.riyazuddin.zing.data.entities.User
 import com.riyazuddin.zing.databinding.ItemRecentChatBinding
 import com.riyazuddin.zing.other.Constants.IMAGE
 import com.riyazuddin.zing.other.Constants.SEEN
@@ -57,20 +57,27 @@ class LastMessageAdapter @Inject constructor(private val glide: RequestManager) 
             val isCurrentUserIsSender =
                 Firebase.auth.uid == lastMessage.message.senderAndReceiverUid[0]
 
-            glide.load(lastMessage.sender.profilePicUrl).into(CIVProfilePic)
-            tvName.text = lastMessage.sender.name
+            if (isCurrentUserIsSender) {
+                Log.i(TAG, "onBindViewHolder: if")
+                glide.load(lastMessage.receiver.profilePicUrl).into(CIVProfilePic)
+                tvName.text = lastMessage.receiver.name
+            } else {
+                Log.i(TAG, "onBindViewHolder: else")
+                glide.load(lastMessage.sender.profilePicUrl).into(CIVProfilePic)
+                tvName.text = lastMessage.sender.name
+            }
+
 
             if (!isCurrentUserIsSender && lastMessage.message.status != SEEN) {
                 tvLastMessage.typeface = Typeface.DEFAULT_BOLD
                 ivUnSeen.isVisible = true
-            }else{
+            } else {
                 tvLastMessage.typeface = Typeface.DEFAULT
                 ivUnSeen.isVisible = false
             }
 
             val date =
                 SimpleDateFormat("hh:mm a", Locale.US).format(Date(lastMessage.message.date))
-                    .replace("AM", "am").replace("PM", "pm")
             tvDate.text = date
             if (lastMessage.message.type == IMAGE) {
                 val s = "🖼 Photo"
@@ -80,11 +87,7 @@ class LastMessageAdapter @Inject constructor(private val glide: RequestManager) 
             }
             root.setOnClickListener {
                 onItemClickListener?.let {
-                    if (lastMessage.message.senderAndReceiverUid[0] == Firebase.auth.uid) {
-                        it(lastMessage)
-                    } else {
-                        it(lastMessage)
-                    }
+                    it(lastMessage)
                 }
             }
         }
@@ -95,5 +98,9 @@ class LastMessageAdapter @Inject constructor(private val glide: RequestManager) 
     private var onItemClickListener: ((LastMessage) -> Unit)? = null
     fun setOnItemClickListener(listener: (LastMessage) -> Unit) {
         onItemClickListener = listener
+    }
+
+    companion object {
+        const val TAG = "LastMessageAdapter"
     }
 }

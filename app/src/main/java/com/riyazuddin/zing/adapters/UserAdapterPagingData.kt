@@ -10,9 +10,6 @@ import com.riyazuddin.zing.data.entities.User
 import com.riyazuddin.zing.databinding.ItemUserBinding
 import javax.inject.Inject
 
-/**
- * This adapter is used to display users for new chat
- */
 class UserAdapterPagingData @Inject constructor(val glide: RequestManager) :
     PagingDataAdapter<User, UserAdapterPagingData.UserViewHolder>(Companion) {
 

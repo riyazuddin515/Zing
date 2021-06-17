@@ -7,7 +7,6 @@ import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
@@ -33,37 +32,49 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class CommentsFragment : Fragment(R.layout.fragment_comments) {
 
-    private lateinit var currentUser: User
+
+    companion object {
+        const val TAG = "CommentsFragment"
+    }
+
+    private var currentUser: User? = null
+    private val args: CommentsFragmentArgs by navArgs()
+    private val viewModel: CommentViewModel by viewModels()
+    private lateinit var binding: FragmentCommentsBinding
 
     @Inject
     lateinit var glide: RequestManager
 
     @Inject
     lateinit var commentAdapter: CommentAdapter
-    private val args: CommentsFragmentArgs by navArgs()
-    private val viewModel: CommentViewModel by viewModels()
-    private lateinit var binding: FragmentCommentsBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = FragmentCommentsBinding.inflate(layoutInflater)
 
         setUpRecyclerView()
-        viewModel.getUserProfile()
         viewModel.getComments(args.postId)
+        args.currentUser?.let {
+            currentUser = it
+        } ?: viewModel.getUserProfile()
     }
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         return binding.root
     }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         subscribeToObservers()
+
+        args.currentUser?.let {
+            glide.load(it.profilePicUrl).into(binding.CIVProfilePic)
+        }
 
         binding.toolbar.setNavigationOnClickListener {
             findNavController().navigateUp()
@@ -87,9 +98,8 @@ class CommentsFragment : Fragment(R.layout.fragment_comments) {
 
         viewLifecycleOwner.lifecycleScope.launch {
             commentAdapter.loadStateFlow.collectLatest {
-                binding.progressBar.isVisible =
-                    it.refresh is LoadState.Loading ||
-                            it.append is LoadState.Loading
+                binding.linearProgressIndicatorFirstLoad.isVisible = it.refresh is LoadState.Loading
+                binding.linearProgressIndicatorLoadMore.isVisible = it.append is LoadState.Loading
             }
         }
 
@@ -105,7 +115,9 @@ class CommentsFragment : Fragment(R.layout.fragment_comments) {
         }
 
         binding.btnSend.setOnClickListener {
-            viewModel.createComment(binding.TIEComment.text.toString(), args.postId)
+            currentUser?.let {
+                viewModel.createComment(binding.TIEComment.text.toString(), args.postId)
+            } ?: snackBar("Please wait...")
         }
     }
 
@@ -131,8 +143,8 @@ class CommentsFragment : Fragment(R.layout.fragment_comments) {
         ) { comment ->
             binding.TIEComment.text?.clear()
             binding.btnSend.isEnabled = true
-            comment.username = currentUser.username
-            comment.userProfilePic = currentUser.profilePicUrl
+            comment.username = currentUser!!.username
+            comment.userProfilePic = currentUser!!.profilePicUrl
 
             viewModel.insertCommentInLiveData(comment)
         })
@@ -144,7 +156,7 @@ class CommentsFragment : Fragment(R.layout.fragment_comments) {
             onLoading = {
                 snackBar("Deleting...")
             }
-        ){
+        ) {
             snackBar("Comment Deleted!")
             viewModel.deleteCommentInLiveData(it)
         })
@@ -164,9 +176,5 @@ class CommentsFragment : Fragment(R.layout.fragment_comments) {
                 }
             })
         }
-    }
-
-    companion object {
-        const val TAG = "CommentsFrag"
     }
 }

@@ -1,8 +1,6 @@
 package com.riyazuddin.zing.repositories.implementation
 
-import android.graphics.Bitmap
 import android.net.Uri
-import android.provider.MediaStore
 import android.util.Log
 import com.algolia.search.client.ClientSearch
 import com.algolia.search.model.APIKey
@@ -13,23 +11,34 @@ import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
 import com.google.firebase.firestore.*
-import com.google.firebase.firestore.Query
 import com.google.firebase.messaging.FirebaseMessaging
 import com.google.firebase.storage.FirebaseStorage
 import com.riyazuddin.zing.BuildConfig
 import com.riyazuddin.zing.data.entities.*
+import com.riyazuddin.zing.other.Constants.ALGOLIA_USER_SEARCH_INDEX
+import com.riyazuddin.zing.other.Constants.BIO
 import com.riyazuddin.zing.other.Constants.COMMENTS_COLLECTION
 import com.riyazuddin.zing.other.Constants.DEFAULT_PROFILE_PICTURE_URL
+import com.riyazuddin.zing.other.Constants.FOLLOWERS
 import com.riyazuddin.zing.other.Constants.FOLLOWERS_COLLECTION
+import com.riyazuddin.zing.other.Constants.FOLLOWERS_COUNT
+import com.riyazuddin.zing.other.Constants.FOLLOWING
 import com.riyazuddin.zing.other.Constants.FOLLOWING_COLLECTION
+import com.riyazuddin.zing.other.Constants.FOLLOWING_COUNT
 import com.riyazuddin.zing.other.Constants.LAST_SEEN
+import com.riyazuddin.zing.other.Constants.LIKED_BY
+import com.riyazuddin.zing.other.Constants.LIKE_COUNT
+import com.riyazuddin.zing.other.Constants.NAME
 import com.riyazuddin.zing.other.Constants.OFFLINE
 import com.riyazuddin.zing.other.Constants.ONLINE
 import com.riyazuddin.zing.other.Constants.POSTS_COLLECTION
 import com.riyazuddin.zing.other.Constants.POST_COUNT
 import com.riyazuddin.zing.other.Constants.POST_LIKES_COLLECTION
+import com.riyazuddin.zing.other.Constants.PROFILE_PIC_URL
 import com.riyazuddin.zing.other.Constants.STATE
 import com.riyazuddin.zing.other.Constants.TOKEN
+import com.riyazuddin.zing.other.Constants.UID
+import com.riyazuddin.zing.other.Constants.USERNAME
 import com.riyazuddin.zing.other.Constants.USERS_COLLECTION
 import com.riyazuddin.zing.other.Constants.USERS_STAT_COLLECTION
 import com.riyazuddin.zing.other.Resource
@@ -51,6 +60,10 @@ class DefaultMainRepository @Inject constructor(
     private val auth: FirebaseAuth,
     private val firestore: FirebaseFirestore
 ) : MainRepository {
+
+    companion object {
+        const val TAG = "MainRepository"
+    }
 
     private val usersCollection = firestore.collection(USERS_COLLECTION)
     private val usersStatCollection = firestore.collection(USERS_STAT_COLLECTION)
@@ -146,11 +159,12 @@ class DefaultMainRepository @Inject constructor(
         }
     }
 
-    override suspend fun getPost(postId: String): Resource<Post> = withContext(Dispatchers.IO){
+    override suspend fun getPost(postId: String): Resource<Post> = withContext(Dispatchers.IO) {
         safeCall {
             val post = postsCollection.document(postId).get().await().toObject(Post::class.java)
                 ?: return@withContext Resource.Error("Post not Found")
-            val user = usersCollection.document(post.postedBy).get().await().toObject(User::class.java)!!
+            val user =
+                usersCollection.document(post.postedBy).get().await().toObject(User::class.java)!!
             post.userProfilePic = user.profilePicUrl
             post.username = user.username
             post.isLiked = user.uid in getPostLikes(postId).data?.likedBy!!
@@ -160,38 +174,18 @@ class DefaultMainRepository @Inject constructor(
 
     override suspend fun getUserProfile(uid: String) = withContext(Dispatchers.IO) {
         safeCall {
-            val user = usersCollection.document(uid).get().await().toObject(User::class.java)
-                ?: throw IllegalStateException()
-
+            val user = usersCollection.document(uid).get().await().toObject(User::class.java)!!
             val currentUid = auth.uid!!
+            if (uid != currentUid) {
+                val currentUserFollowing =
+                    followingCollection.document(currentUid).get().await()
+                        .toObject(Following::class.java)
+                        ?: Following()
 
-            val currentUserFollowing =
-                followingCollection.document(currentUid).get().await()
-                    .toObject(Following::class.java)
-                    ?: throw IllegalStateException()
-
-            user.isFollowing = uid in currentUserFollowing.following
+                user.isFollowing = uid in currentUserFollowing.following
+            }
             Resource.Success(user)
-        }
-    }
 
-    override suspend fun getFollowing(uid: String) = withContext(Dispatchers.IO) {
-        safeCall {
-            val following =
-                followingCollection.document(uid).get().await().toObject(Following::class.java)
-                    ?: throw IllegalStateException()
-            val result = getUsers(following.following)
-            result
-        }
-    }
-
-    override suspend fun getFollowers(uid: String) = withContext(Dispatchers.IO) {
-        safeCall {
-            val followers =
-                followersCollection.document(uid).get().await().toObject(Followers::class.java)
-                    ?: throw IllegalStateException()
-            val result = getUsers(followers.followers)
-            result
         }
     }
 
@@ -204,46 +198,18 @@ class DefaultMainRepository @Inject constructor(
         }
     }
 
-    override suspend fun getPostLikedUsers(postId: String): Resource<List<User>> =
-        withContext(Dispatchers.IO) {
-            safeCall {
-                val postLikes = getPostLikes(postId).data!!
-                val usersList = getUsers(postLikes.likedBy).data!!
-                Resource.Success(usersList)
-            }
-        }
-
-
     override suspend fun getUsers(uids: List<String>) = withContext(Dispatchers.IO) {
         safeCall {
             val chunks = uids.chunked(10)
             val resultList = mutableListOf<User>()
             chunks.forEach { chunk ->
                 val usersList =
-                    usersCollection.whereIn("uid", chunk).orderBy("username").get().await()
+                    usersCollection.whereIn(UID, chunk).orderBy(USERNAME).get().await()
                         .toObjects(User::class.java)
                 resultList.addAll(usersList)
             }
 
             Resource.Success(resultList.toList())
-        }
-    }
-
-    override suspend fun getPostForProfile(uid: String) = withContext(Dispatchers.IO) {
-        safeCall {
-            val posts = postsCollection
-                .whereEqualTo("postedBy", uid)
-                .orderBy("date", Query.Direction.DESCENDING)
-                .get()
-                .await()
-                .toObjects(Post::class.java)
-                .onEach { post ->
-                    val user = getUserProfile(uid).data!!
-                    post.username = user.username
-                    post.userProfilePic = user.profilePicUrl
-                    post.isLiked = uid in getPostLikes(post.postId).data!!.likedBy
-                }
-            Resource.Success(posts)
         }
     }
 
@@ -258,23 +224,23 @@ class DefaultMainRepository @Inject constructor(
                 if (uid in currentLikes) {
                     transition.update(
                         postLikesCollection.document(post.postId),
-                        "likedBy",
+                        LIKED_BY,
                         currentLikes - uid
                     )
                     transition.update(
                         postsCollection.document(post.postId),
-                        "likeCount", FieldValue.increment(-1)
+                        LIKE_COUNT, FieldValue.increment(-1)
                     )
                 } else {
                     isLiked = true
                     transition.update(
                         postLikesCollection.document(post.postId),
-                        "likedBy",
+                        LIKED_BY,
                         currentLikes + uid
                     )
                     transition.update(
                         postsCollection.document(post.postId),
-                        "likeCount", FieldValue.increment(1)
+                        LIKE_COUNT, FieldValue.increment(1)
                     )
                 }
             }.await()
@@ -284,12 +250,17 @@ class DefaultMainRepository @Inject constructor(
 
     override suspend fun deletePost(post: Post) = withContext(Dispatchers.IO) {
         safeCall {
-            postsCollection.document(post.postId).delete().await()
+            firestore.runTransaction { transition ->
+                transition.delete(postsCollection.document(post.postId))
+                transition.update(
+                    usersCollection.document(post.postedBy),
+                    POST_COUNT,
+                    FieldValue.increment(-1)
+                )
+                transition.delete(postLikesCollection.document(post.postId))
+                transition.delete(commentsCollection.document(post.postId))
+            }.await()
             storage.getReferenceFromUrl(post.imageUrl).delete().await()
-            usersCollection.document(post.postedBy).update("postCount", FieldValue.increment(-1))
-                .await()
-            postLikesCollection.document(post.postId).delete().await()
-            commentsCollection.document(post.postId).delete().await()
             Resource.Success(post)
         }
     }
@@ -301,81 +272,72 @@ class DefaultMainRepository @Inject constructor(
 
             firestore.runTransaction { transition ->
 
-                val otherUserFollowersList = transition
-                    .get(followersCollection.document(uid))
-                    .toObject(Followers::class.java)!!
+                val otherUserFollowersDocumentSnapshot =
+                    transition.get(followersCollection.document(uid))
+                val currentUserFollowingDocumentSnapshot =
+                    transition.get(followingCollection.document(currentUserUid))
 
+                if (!otherUserFollowersDocumentSnapshot.exists()) {
+                    transition.set(followersCollection.document(uid), Followers(uid = uid))
+                }
+                val otherUserFollowersList = otherUserFollowersDocumentSnapshot
+                    .toObject(Followers::class.java) ?: Followers(uid = uid)
+
+                if (!currentUserFollowingDocumentSnapshot.exists())
+                    transition.set(
+                        followingCollection.document(currentUserUid),
+                        Following(uid = currentUserUid)
+                    )
 
                 isFollowing = currentUserUid in otherUserFollowersList.followers
-
 
                 if (isFollowing) {
                     //unfollow
                     transition.update(
                         followingCollection.document(currentUserUid),
-                        "following",
+                        FOLLOWING,
                         FieldValue.arrayRemove(uid)
                     )
                     transition.update(
                         followersCollection.document(uid),
-                        "followers",
+                        FOLLOWERS,
                         FieldValue.arrayRemove(currentUserUid)
                     )
                     transition.update(
                         usersCollection.document(currentUserUid),
-                        "followingCount",
+                        FOLLOWING_COUNT,
                         FieldValue.increment(-1)
                     )
                     transition.update(
                         usersCollection.document(uid),
-                        "followersCount",
+                        FOLLOWERS_COUNT,
                         FieldValue.increment(-1)
                     )
-
                 } else {
                     //follow
                     transition.update(
                         followingCollection.document(currentUserUid),
-                        "following",
+                        FOLLOWING,
                         FieldValue.arrayUnion(uid)
                     )
                     transition.update(
                         followersCollection.document(uid),
-                        "followers",
+                        FOLLOWERS,
                         FieldValue.arrayUnion(currentUserUid)
                     )
                     transition.update(
                         usersCollection.document(currentUserUid),
-                        "followingCount",
+                        FOLLOWING_COUNT,
                         FieldValue.increment(1)
                     )
                     transition.update(
                         usersCollection.document(uid),
-                        "followersCount",
+                        FOLLOWERS_COUNT,
                         FieldValue.increment(1)
                     )
                 }
             }.await()
             Resource.Success(!isFollowing)
-        }
-    }
-
-    override suspend fun getPostForFollows() = withContext(Dispatchers.IO) {
-        safeCall {
-            val uid = auth.uid!!
-            val followsList = getFollowingList(uid).data!!.following
-            val allPosts = postsCollection.whereIn("postedBy", followsList)
-                .orderBy("date", Query.Direction.DESCENDING)
-                .get()
-                .await()
-                .toObjects(Post::class.java)
-                .onEach { post ->
-                    val user = getUserProfile(post.postedBy).data!!
-                    post.username = user.username
-                    post.userProfilePic = user.profilePicUrl
-                    post.isLiked = uid in getPostLikes(post.postId).data!!.likedBy
-                }
-            Resource.Success(allPosts)
         }
     }
 
@@ -392,47 +354,26 @@ class DefaultMainRepository @Inject constructor(
             }
         }
 
-    override suspend fun getPostComments(postId: String) = withContext(Dispatchers.IO) {
-        safeCall {
-            val comments = commentsCollection.whereEqualTo("postId", postId)
-                .orderBy("date", Query.Direction.DESCENDING)
-                .get()
-                .await()
-                .toObjects(Comment::class.java)
-                .onEach { comment ->
-                    val user = getUserProfile(comment.commentedBy).data!!
-                    comment.username = user.username
-                    comment.userProfilePic = user.profilePicUrl
-                }
-            Resource.Success(comments)
-        }
-    }
-
-    override suspend fun updateProfilePic(uid: String, imageUri: Uri) =
-        withContext(Dispatchers.IO) {
-            val storageRef = storage.reference.child("profilePics/$uid")
-            val user = getUserProfile(uid).data!!
-            if (user.profilePicUrl != DEFAULT_PROFILE_PICTURE_URL) {
-                storage.getReferenceFromUrl(user.profilePicUrl).delete().await()
-            }
-            storageRef.putFile(imageUri).await().metadata?.reference?.downloadUrl?.await()
-                .toString()
-        }
-
     override suspend fun updateProfile(updateProfile: UpdateProfile, imageUri: Uri?) =
         withContext(Dispatchers.IO) {
             safeCall {
                 val imageDownloadUrl = imageUri?.let {
-                    updateProfilePic(updateProfile.uidToUpdate, it)
+                    val storageRef =
+                        storage.reference.child("profilePics/${updateProfile.uidToUpdate}")
+                    if (updateProfile.profilePicUrl != DEFAULT_PROFILE_PICTURE_URL) {
+                        storage.getReferenceFromUrl(updateProfile.profilePicUrl).delete().await()
+                    }
+                    storageRef.putFile(imageUri).await().metadata?.reference?.downloadUrl?.await()
+                        .toString()
                 }
 
                 val map = mutableMapOf(
-                    "name" to updateProfile.name,
-                    "username" to updateProfile.username,
-                    "bio" to updateProfile.bio
+                    NAME to updateProfile.name,
+                    USERNAME to updateProfile.username,
+                    BIO to updateProfile.bio
                 )
                 imageDownloadUrl?.let {
-                    map["profilePicUrl"] = it
+                    map[PROFILE_PIC_URL] = it
                 }
 
                 usersCollection.document(updateProfile.uidToUpdate).update(map.toMap()).await()
@@ -462,30 +403,6 @@ class DefaultMainRepository @Inject constructor(
         }
     }
 
-    override suspend fun getFollowersList(uid: String): Resource<Followers> =
-        withContext(Dispatchers.IO) {
-            safeCall {
-                val followersList = followersCollection.document(uid)
-                    .get()
-                    .await()
-                    .toObject(Followers::class.java)!!
-
-                Resource.Success(followersList)
-            }
-        }
-
-    override suspend fun getFollowingList(uid: String): Resource<Following> =
-        withContext(Dispatchers.IO) {
-            safeCall {
-                val followingList = followingCollection.document(uid)
-                    .get()
-                    .await()
-                    .toObject(Following::class.java)!!
-
-                Resource.Success(followingList)
-            }
-        }
-
     override suspend fun algoliaSearch(searchQuery: String): Resource<ResponseSearch> =
         withContext(Dispatchers.IO) {
             safeCall {
@@ -494,7 +411,7 @@ class DefaultMainRepository @Inject constructor(
                     APIKey(BuildConfig.ALGOLIA_SEARCH_KEY),
                     LogLevel.ALL
                 )
-                val index = client.initIndex(IndexName("user_search"))
+                val index = client.initIndex(IndexName(ALGOLIA_USER_SEARCH_INDEX))
 
                 val queryObj = com.algolia.search.model.search.Query(searchQuery)
                 val result = index.search(queryObj)
@@ -516,7 +433,30 @@ class DefaultMainRepository @Inject constructor(
             }
         }
 
-    companion object {
-        const val TAG = "MainRepository"
-    }
+    override suspend fun getListOfPostLikes(postId: String): Resource<List<String>> =
+        withContext(Dispatchers.IO) {
+            safeCall {
+                val list = postLikesCollection.document(postId)
+                    .get().await().toObject(PostLikes::class.java)?.likedBy ?: listOf()
+                Resource.Success(list)
+            }
+        }
+
+    override suspend fun getListOfFollowingUsersUid(uid: String): Resource<List<String>> =
+        withContext(Dispatchers.IO) {
+            safeCall {
+                val list = followingCollection.document(uid).get()
+                    .await().toObject(Following::class.java)?.following ?: listOf()
+                Resource.Success(list)
+            }
+        }
+
+    override suspend fun getListOfFollowersUsersUid(uid: String): Resource<List<String>> =
+        withContext(Dispatchers.IO) {
+            safeCall {
+                val list = followersCollection.document(uid).get()
+                    .await().toObject(Followers::class.java)?.followers ?: listOf()
+                Resource.Success(list)
+            }
+        }
 }

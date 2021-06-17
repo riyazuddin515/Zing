@@ -9,6 +9,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.InputMethodManager
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -32,8 +33,6 @@ import com.riyazuddin.zing.other.Constants.ONLINE
 import com.riyazuddin.zing.other.EventObserver
 import com.riyazuddin.zing.other.snackBar
 import com.riyazuddin.zing.ui.dialogs.CustomDialog
-import com.riyazuddin.zing.ui.main.fragments.HomeFragmentDirections
-import com.riyazuddin.zing.ui.main.fragments.OthersProfileFragmentDirections
 import com.riyazuddin.zing.ui.main.viewmodels.ChatViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import java.text.SimpleDateFormat
@@ -47,11 +46,12 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
     private lateinit var binding: FragmentChatBinding
 
     private val viewModel: ChatViewModel by viewModels()
-
     private val args: ChatFragmentArgs by navArgs()
 
     private lateinit var mediaPlayer: MediaPlayer
     private lateinit var simpleDateFormat: SimpleDateFormat
+
+    private val currentUid = Firebase.auth.uid!!
 
     @Inject
     lateinit var glide: RequestManager
@@ -74,57 +74,53 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
         setUpRecyclerView()
 
         viewModel.checkUserIsOnline(args.otherEndUser.uid)
-        viewModel.getChatLoadFirstQuery(args.currentUser.uid, args.otherEndUser.uid)
+        viewModel.getChatLoadFirstQuery(currentUid, args.otherEndUser.uid)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        subscribeToObservers()
+
+        glide.load(args.otherEndUser.profilePicUrl).into(binding.CIVProfilePic)
+        binding.toolbar.title = args.otherEndUser.username
 
         val sp = requireActivity().getSharedPreferences(CHATTING_WITH, Application.MODE_PRIVATE)
         sp.edit().let {
             it.putString(Constants.UID, args.otherEndUser.uid)
             it.apply()
         }
-
         //Removing all existing notification as soon as activity starts
         val notificationManager: NotificationManager =
             requireActivity().getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.cancel(args.otherEndUser.uid, NOTIFICATION_ID)
 
-        simpleDateFormat = SimpleDateFormat("d MMM yyyy HH:mm a", Locale.ENGLISH)
+
+        simpleDateFormat = SimpleDateFormat("d MMM yy HH:mm a", Locale.ENGLISH)
         mediaPlayer = MediaPlayer.create(requireContext(), R.raw.received_chat)
 
         binding.ivBack.setOnClickListener {
+            hideKeyboard(view)
             findNavController().popBackStack(R.id.recentChatListFragment, false)
         }
 
-        glide.load(args.otherEndUser.profilePicUrl).into(binding.CIVProfilePic)
-        binding.toolbar.title = args.otherEndUser.username
-
         binding.toolbar.setOnClickListener {
+            hideKeyboard(view)
             findNavController().navigate(
-                ChatFragmentDirections.globalActionToOthersProfileFragment(args.otherEndUser.uid)
+                ChatFragmentDirections.globalActionToOthersProfileFragment(
+                    args.otherEndUser.uid
+                )
             )
         }
 
-        subscribe()
 
         binding.btnSend.setOnClickListener {
             viewModel.sendMessage(
-
-                currentUid = Firebase.auth.uid!!,
+                currentUid = currentUid,
                 receiverUid = args.otherEndUser.uid,
                 message = binding.TIEMessage.text.toString(),
                 type = Constants.TEXT,
                 uri = null,
-
-                senderName = args.currentUser.name,
-                senderUsername = args.currentUser.username,
-                senderProfilePicUrl = args.currentUser.profilePicUrl,
-
-                receiverName = args.otherEndUser.name,
-                receiverUsername = args.otherEndUser.username,
-                receiveProfileUrl = args.otherEndUser.profilePicUrl,
             )
         }
 
@@ -134,7 +130,7 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
                 "Are you sure you want to delete this message?"
             ).apply {
                 setPositiveListener {
-                    viewModel.deleteMessage(args.currentUser.uid, args.otherEndUser.uid, message)
+                    viewModel.deleteMessage(currentUid, args.otherEndUser.uid, message)
                     chatAdapter.messages[position].message = "Deleting...."
                     chatAdapter.notifyItemChanged(position)
                 }
@@ -142,7 +138,7 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
         }
     }
 
-    private fun subscribe() {
+    private fun subscribeToObservers() {
         viewModel.sendMessageStatus.observe(viewLifecycleOwner, EventObserver(
             onError = {
                 Log.e(TAG, "subscribe: $it")
@@ -208,11 +204,8 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
                     val pos = layoutManager.findLastCompletelyVisibleItemPosition()
                     val numItems: Int = recyclerView.adapter!!.itemCount
 
-                    Log.i(TAG, "onScrolled: pos = $pos ----- numItem = $numItems")
-
-
                     if (pos + 1 == numItems) {
-                        viewModel.getChatLoadMore(args.currentUser.uid, args.otherEndUser.uid)
+                        viewModel.getChatLoadMore(currentUid, args.otherEndUser.uid)
                         Log.i(TAG, "onScrolled: calling getChatLoadMore")
                     }
                 }
@@ -227,7 +220,6 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
 
     override fun onDestroy() {
         viewModel.clearChatList()
-//        viewModel.chatList.removeObservers(viewLifecycleOwner)
         super.onDestroy()
 
         val sp = requireActivity().getSharedPreferences(CHATTING_WITH, Application.MODE_PRIVATE)
@@ -241,4 +233,9 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
         const val TAG = "ChatFragment"
     }
 
+    private fun hideKeyboard(view: View) {
+        val manager =
+            requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager?
+        manager?.hideSoftInputFromWindow(view.windowToken, 0)
+    }
 }

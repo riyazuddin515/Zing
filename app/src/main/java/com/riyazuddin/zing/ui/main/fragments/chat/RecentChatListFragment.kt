@@ -72,8 +72,11 @@ class RecentChatListFragment : Fragment(R.layout.fragment_recent_chat_list) {
 
         lastMessageAdapter.setOnItemClickListener { lastMessage ->
             val bundle = Bundle().apply {
-                putSerializable("otherEndUser", lastMessage.sender)
                 putSerializable("currentUser", args.currentUser)
+                if (lastMessage.sender.uid == args.currentUser.uid)
+                    putSerializable("otherEndUser", lastMessage.receiver)
+                else
+                    putSerializable("otherEndUser", lastMessage.sender)
             }
             findNavController().navigate(R.id.action_recentChatListFragment_to_chatFragment, bundle)
         }
@@ -115,7 +118,7 @@ class RecentChatListFragment : Fragment(R.layout.fragment_recent_chat_list) {
                     Log.i(TAG, "onScrolled: pos = $pos ----- numItem = $numItems")
 
                     if (pos + 1 == numItems) {
-                        viewModel.getLastMessageLoadMore()
+                        viewModel.getLastMessageLoadMore(args.currentUser)
                         Log.i(TAG, "onScrolled: calling getChatLoadMore")
                     }
                 }

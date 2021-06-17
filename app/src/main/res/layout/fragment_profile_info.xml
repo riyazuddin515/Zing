@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:tools="http://schemas.android.com/tools"
     android:background="@color/white">
 
     <com.google.android.material.appbar.AppBarLayout
@@ -21,7 +21,7 @@
             android:layout_height="wrap_content"
             app:navigationIcon="@drawable/ic_arrow_back"
             app:title="Edit Profile"
-            app:titleTextColor="@color/black"/>
+            app:titleTextColor="@color/black" />
 
     </com.google.android.material.appbar.AppBarLayout>
 
@@ -30,11 +30,11 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginTop="20dp"
-        tools:src="@drawable/default_profile_pic"
         app:layout_constraintDimensionRatio="1:1"
         app:layout_constraintEnd_toStartOf="@+id/guideline2"
         app:layout_constraintStart_toEndOf="@+id/guideline1"
-        app:layout_constraintTop_toBottomOf="@+id/appBarLayout" />
+        app:layout_constraintTop_toBottomOf="@+id/appBarLayout"
+        tools:src="@drawable/default_profile_pic" />
 
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/tvChangeProfileImage"
@@ -68,9 +68,9 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="textPersonName"
-            android:maxLength="20"
             android:lines="1"
-            android:textColor="@color/black"/>
+            android:maxLength="20"
+            android:textColor="@color/black" />
 
     </com.google.android.material.textfield.TextInputLayout>
 
@@ -90,10 +90,10 @@
             android:id="@+id/TIEUsername"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:maxLength="15"
-            android:lines="1"
             android:inputType="text|textNoSuggestions"
-            android:textColor="@color/black"/>
+            android:lines="1"
+            android:maxLength="15"
+            android:textColor="@color/black" />
 
     </com.google.android.material.textfield.TextInputLayout>
 

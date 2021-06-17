@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.motion.widget.MotionLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.motion.widget.MotionLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/profileLayout"
@@ -35,7 +34,7 @@
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/constraintLayout6"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="wrap_content">
 
             <androidx.constraintlayout.widget.Guideline
                 android:id="@+id/guideline1"
@@ -191,6 +190,21 @@
                 app:layout_constraintTop_toBottomOf="@+id/tvBio"
                 tools:visibility="visible" />
 
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnEditProfile"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="@string/edit_profile"
+                android:textAllCaps="false"
+                android:textColor="@color/black"
+                android:textSize="20sp"
+                app:layout_constraintEnd_toEndOf="@id/btnToggleFollow"
+                app:layout_constraintStart_toStartOf="@id/btnToggleFollow"
+                app:layout_constraintTop_toBottomOf="@id/btnToggleFollow"
+                app:strokeColor="@color/black"
+                app:strokeWidth="1dp" />
+
             <com.google.android.material.progressindicator.CircularProgressIndicator
                 android:id="@+id/progressBarProfileMetadata"
                 android:layout_width="wrap_content"
@@ -208,30 +222,37 @@
 
     </androidx.cardview.widget.CardView>
 
+    <com.google.android.material.progressindicator.LinearProgressIndicator
+        android:id="@+id/linearProgressIndicatorFirstLoad"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:indeterminate="true"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/profileDataCardView"
+        tools:visibility="visible" />
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvPostList"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/linearProgressIndicatorLoadMore"
         app:layout_constraintEnd_toEndOf="@+id/profileDataCardView"
         app:layout_constraintStart_toStartOf="@+id/profileDataCardView"
-        app:layout_constraintTop_toBottomOf="@+id/profileDataCardView"
+        app:layout_constraintTop_toBottomOf="@+id/linearProgressIndicatorFirstLoad"
         app:layout_constraintVertical_bias="0.0"
         tools:itemCount="3"
         tools:listitem="@layout/item_post" />
 
-    <!--    </androidx.constraintlayout.motion.widget.MotionLayout>-->
-
-    <com.google.android.material.progressindicator.CircularProgressIndicator
-        android:id="@+id/progressBar"
-        android:layout_width="wrap_content"
+    <com.google.android.material.progressindicator.LinearProgressIndicator
+        android:id="@+id/linearProgressIndicatorLoadMore"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:indeterminate="true"
         android:visibility="gone"
-        app:indicatorColor="@color/white"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
         tools:visibility="visible" />
 

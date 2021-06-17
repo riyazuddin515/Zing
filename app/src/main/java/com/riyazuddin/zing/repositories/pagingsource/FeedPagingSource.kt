@@ -11,7 +11,9 @@ import com.riyazuddin.zing.data.entities.Following
 import com.riyazuddin.zing.data.entities.Post
 import com.riyazuddin.zing.data.entities.PostLikes
 import com.riyazuddin.zing.data.entities.User
+import com.riyazuddin.zing.other.Constants.DATE
 import com.riyazuddin.zing.other.Constants.FOLLOWING_COLLECTION
+import com.riyazuddin.zing.other.Constants.POSTED_BY
 import com.riyazuddin.zing.other.Constants.POSTS_COLLECTION
 import com.riyazuddin.zing.other.Constants.POST_LIKES_COLLECTION
 import com.riyazuddin.zing.other.Constants.POST_PAGE_SIZE
@@ -26,19 +28,19 @@ class FeedPagingSource(
     private val db: FirebaseFirestore,
 ) : PagingSource<QuerySnapshot, Post>() {
 
-    var firstLoad = true
-    lateinit var followingList: List<String>
+    private var isFirstLoad = true
+    private lateinit var followingList: List<String>
 
     override suspend fun load(params: LoadParams<QuerySnapshot>): LoadResult<QuerySnapshot, Post> {
         return try {
             val uid = Firebase.auth.uid!!
 
-            if (firstLoad) {
+            if (isFirstLoad) {
                 followingList = db.collection(FOLLOWING_COLLECTION)
                     .document(uid).get().await().toObject(Following::class.java)
                     ?.following ?: listOf()
                 followingList = followingList + uid
-                firstLoad = false
+                isFirstLoad = false
             }
 
             val chunks = followingList.chunked(10)
@@ -46,8 +48,8 @@ class FeedPagingSource(
             var currentPage = params.key
             chunks.forEach { chunk ->
                 currentPage = params.key ?: db.collection(POSTS_COLLECTION)
-                    .whereIn("postedBy", chunk)
-                    .orderBy("date", Query.Direction.DESCENDING)
+                    .whereIn(POSTED_BY, chunk)
+                    .orderBy(DATE, Query.Direction.DESCENDING)
                     .limit(POST_PAGE_SIZE.toLong())
                     .get()
                     .await()
@@ -72,8 +74,8 @@ class FeedPagingSource(
             val lastDocumentSnapshot = currentPage!!.documents[currentPage!!.size() - 1]
 
             val nextPage = db.collection(POSTS_COLLECTION)
-                .whereIn("postedBy", if (chunks.isNotEmpty()) chunks[0] else listOf())
-                .orderBy("date", Query.Direction.DESCENDING)
+                .whereIn(POSTED_BY, if (chunks.isNotEmpty()) chunks[0] else listOf())
+                .orderBy(DATE, Query.Direction.DESCENDING)
                 .limit(POST_PAGE_SIZE.toLong())
                 .startAfter(lastDocumentSnapshot)
                 .get()

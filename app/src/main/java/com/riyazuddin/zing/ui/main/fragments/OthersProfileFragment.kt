@@ -18,9 +18,6 @@ import com.riyazuddin.zing.other.EventObserver
 
 class OthersProfileFragment : ProfileFragment() {
 
-    override val source: String
-        get() = (R.id.othersProfileFragment).toString()
-
     private val args: OthersProfileFragmentArgs by navArgs()
     override val uid: String
         get() = args.uid
@@ -33,42 +30,13 @@ class OthersProfileFragment : ProfileFragment() {
         super.onViewCreated(view, savedInstanceState)
         binding = FragmentProfileBinding.bind(view)
 
-        subscribeToObservers()
-
         binding.btnToggleFollow.setOnClickListener {
             viewModel.toggleFollowForUser(uid)
         }
 
-        val bundle = Bundle().apply {
-            putString("uid", uid)
-        }
+        subscribeToObservers()
+        setupClickListeners()
 
-        binding.tvFollowersCount.setOnClickListener {
-            findNavController().navigate(
-                R.id.action_othersProfileFragment_to_followersFragment,
-                bundle
-            )
-        }
-
-        binding.tvFollowingCount.setOnClickListener {
-            findNavController().navigate(
-                R.id.action_othersProfileFragment_to_followingFragment,
-                bundle
-            )
-        }
-        binding.tvFollowers.setOnClickListener {
-            findNavController().navigate(
-                R.id.action_othersProfileFragment_to_followersFragment,
-                bundle
-            )
-        }
-
-        binding.tvFollowing.setOnClickListener {
-            findNavController().navigate(
-                R.id.action_othersProfileFragment_to_followingFragment,
-                bundle
-            )
-        }
     }
 
     private fun subscribeToObservers() {
@@ -81,6 +49,42 @@ class OthersProfileFragment : ProfileFragment() {
             curUser?.isFollowing = it
             setUpToggleFollowButton(curUser ?: return@EventObserver)
         })
+    }
+
+    private fun setupClickListeners() {
+        binding.tvFollowersCount.setOnClickListener {
+            findNavController().navigate(
+                OthersProfileFragmentDirections.globalActionToUserListFragment(uid, "Followers")
+            )
+        }
+        binding.tvFollowingCount.setOnClickListener {
+            findNavController().navigate(
+                OthersProfileFragmentDirections.globalActionToUserListFragment(uid, "Following")
+            )
+        }
+        binding.tvFollowers.setOnClickListener {
+            findNavController().navigate(
+                OthersProfileFragmentDirections.globalActionToUserListFragment(uid, "Followers")
+            )
+        }
+        binding.tvFollowing.setOnClickListener {
+            findNavController().navigate(
+                OthersProfileFragmentDirections.globalActionToUserListFragment(uid, "Following")
+            )
+        }
+        binding.btnEditProfile.setOnClickListener {
+            findNavController().navigate(R.id.action_profileFragment_to_profileInfo)
+        }
+        postAdapter.setOnLikedByClickListener {
+            findNavController().navigate(
+                OthersProfileFragmentDirections.globalActionToUserListFragment(it.postId, "LikedBy")
+            )
+        }
+        postAdapter.setOnCommentClickListener {
+            findNavController().navigate(
+                OthersProfileFragmentDirections.globalActionToCommentsFragment(it.postId, null)
+            )
+        }
     }
 
     private fun setUpToggleFollowButton(user: User) {

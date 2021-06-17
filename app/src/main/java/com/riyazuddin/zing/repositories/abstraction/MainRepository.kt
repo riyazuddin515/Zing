@@ -7,86 +7,134 @@ import com.riyazuddin.zing.other.Resource
 
 interface MainRepository {
 
+    /**
+     * @param uid is user's id whom status
+     * toggles online, offline, upload device token
+     */
     suspend fun onlineOfflineToggleWithDeviceToken(uid: String)
 
+    /**
+     * @param uid
+     * remove device taken from firestore
+     */
     suspend fun removeDeviceToken(uid: String): Resource<Boolean>
 
     /**
+     * @param imageUri
+     * @param caption
      * create a post
      */
     suspend fun createPost(imageUri: Uri, caption: String): Resource<Any>
 
+
+    /**
+     * retrieve the post associated with
+     * @param postId
+     */
     suspend fun getPost(postId: String): Resource<Post>
 
     /**
-     * gets the list of users, with the uid's provided in parameter
+     * @param uids
+     * gets the list of users
+     * @return Resource<List<User>>
      */
     suspend fun getUsers(uids: List<String>): Resource<List<User>>
 
     /**
-     * gets the user document of particular user
+     * retrieves the user document associated with uid
+     * @param uid
+     * @return Resource<User>
      */
     suspend fun getUserProfile(uid: String): Resource<User>
 
     /**
-     * gets post of a profile associated with
-     * provides uid
-     */
-    suspend fun getPostForProfile(uid: String): Resource<List<Post>>
-
-    /**
      * toggle Like for post
+     * @param post
+     * @return Boolean
      */
     suspend fun toggleLikeForPost(post: Post): Resource<Boolean>
 
     /**
      * delete post
+     * @param post
+     * @return Post
      */
     suspend fun deletePost(post: Post): Resource<Post>
 
     /**
-     * method used to follow and unFollow the user of uid
-     * provide in parameter
+     * Toggle follow and unFollow for uid
+     * @param uid for which currentUser is following/unfollowing
      */
     suspend fun toggleFollowForUser(uid: String): Resource<Boolean>
 
     /**
-     * Feed
-     */
-    suspend fun getPostForFollows(): Resource<List<Post>>
-
-    /**
      * create comment
+     * @param commentText --> text of the new comment
+     * @param postId --> postId for which new comment belongs
      */
     suspend fun createComment(commentText: String, postId: String): Resource<Comment>
 
-    suspend fun getPostComments(postId: String): Resource<List<Comment>>
-
+    /**
+     * update the user Profile
+     * @param updateProfile
+     * @param imageUri
+     */
     suspend fun updateProfile(updateProfile: UpdateProfile, imageUri: Uri? = null): Resource<Any>
 
-    suspend fun updateProfilePic(uid: String, imageUri: Uri): String
-
     /**
-     * method used to check username availability
+     * Check username availability
+     * @param searchQuery
+     * @return Resource<ResponseSearch>
      */
     suspend fun algoliaSearch(searchQuery: String): Resource<ResponseSearch>
 
+    /**
+     * Verify current logged in account
+     */
     suspend fun verifyAccount(currentPassword: String): Resource<Any>
 
+    /**
+     * Change Password
+     * @param newPassword
+     */
     suspend fun changePassword(newPassword: String): Resource<Any>
 
-    suspend fun getFollowersList(uid: String): Resource<Followers>
-
-    suspend fun getFollowingList(uid: String): Resource<Following>
-
-    suspend fun getFollowing(uid: String): Resource<List<User>>
-
-    suspend fun getFollowers(uid: String): Resource<List<User>>
-
+    /**
+     * @param postId
+     * get the PostLikes associate with postId
+     * @return PostLikes
+     */
     suspend fun getPostLikes(postId: String): Resource<PostLikes>
 
-    suspend fun getPostLikedUsers(postId: String): Resource<List<User>>
-
+    /**
+     * @param comment
+     * Deletes the comment
+     * @return Deleted comment
+     */
     suspend fun deleteComment(comment: Comment): Resource<Comment>
+
+    /**
+     * @since 17-Jun-21
+     * @param postId uses to get the list of
+     * uid who likes the post associated with this postId
+     * @author Resource<List<String>>
+     */
+    suspend fun getListOfPostLikes(postId: String): Resource<List<String>>
+
+    /**
+     * @since 17-Jun-21
+     * @param uid uses to get the list of
+     * uid of users whom this uid user is following
+     * @author Resource<List<String>>
+     */
+    suspend fun getListOfFollowingUsersUid(uid: String): Resource<List<String>>
+
+    /**
+     * @since 17-Jun-21
+     * @param uid uses to get the list of
+     * uid of users who are the followers ot this uid
+     * @author Resource<List<String>>
+     */
+    suspend fun getListOfFollowersUsersUid(uid: String): Resource<List<String>>
 
 }

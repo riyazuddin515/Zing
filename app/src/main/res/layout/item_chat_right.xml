@@ -65,7 +65,7 @@
             android:layout_margin="2dp"
             android:textColor="@color/white"
             android:textSize="14sp"
-            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintBottom_toBottomOf="@id/tvMessage"
             app:layout_constraintEnd_toStartOf="@+id/ivStatus"
             app:layout_constraintHorizontal_bias="1.0"
             app:layout_constraintStart_toEndOf="@+id/tvMessage"
@@ -88,8 +88,6 @@
             tools:visibility="visible" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
-
-
 
 
     <androidx.constraintlayout.widget.Guideline

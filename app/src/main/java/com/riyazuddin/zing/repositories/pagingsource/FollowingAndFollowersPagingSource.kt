@@ -10,69 +10,69 @@ import com.riyazuddin.zing.data.entities.Following
 import com.riyazuddin.zing.data.entities.User
 import com.riyazuddin.zing.other.Constants.FOLLOWERS_COLLECTION
 import com.riyazuddin.zing.other.Constants.FOLLOWING_COLLECTION
+import com.riyazuddin.zing.other.Constants.NAME
+import com.riyazuddin.zing.other.Constants.UID
 import com.riyazuddin.zing.other.Constants.USERS_COLLECTION
 import kotlinx.coroutines.tasks.await
 
-class FollowingAndFollowersPagingSource(private val uid: String) :
-    PagingSource<QuerySnapshot, User>() {
+class FollowingAndFollowersPagingSource(
+    private val uid: String,
+    private val firestore: FirebaseFirestore
+) : PagingSource<QuerySnapshot, User>() {
+
+    companion object {
+        const val TAG = "FAFPS"
+    }
 
     private var isFirst = true
-    private var list = setOf<String>()
+    private lateinit var list: List<String>
 
     override suspend fun load(params: LoadParams<QuerySnapshot>): LoadResult<QuerySnapshot, User> {
         try {
             if (isFirst) {
-                val following = FirebaseFirestore.getInstance()
+                val following = firestore
                     .collection(FOLLOWING_COLLECTION)
                     .document(uid)
                     .get()
                     .await()
-                    .toObject(Following::class.java)!!
+                    .toObject(Following::class.java)?.following ?: listOf()
 
-                following.following.forEach {
-                    Log.i(TAG, "load following --> : $it")
-                }
-
-                val followers = FirebaseFirestore.getInstance()
+                val followers = firestore
                     .collection(FOLLOWERS_COLLECTION)
                     .document(uid)
                     .get()
                     .await()
-                    .toObject(Followers::class.java)!!
+                    .toObject(Followers::class.java)?.followers ?: listOf()
 
-                list = following.following.union(followers.followers)
+                list = following + followers
+
+                Log.i(TAG, "load: $list")
                 isFirst = false
             }
 
             val chunks = list.chunked(10)
-            val resultList = mutableListOf<User>()
             var currentPage = params.key
             chunks.forEach { chunk ->
-                Log.i(TAG, "load: chunk --> $chunk")
-                currentPage = params.key ?: FirebaseFirestore
-                    .getInstance()
+                currentPage = params.key ?: firestore
                     .collection(USERS_COLLECTION)
-                    .whereIn("uid", chunk)
-                    .orderBy("name", Query.Direction.ASCENDING)
+                    .whereIn(UID, chunk)
+                    .orderBy(NAME, Query.Direction.ASCENDING)
                     .get()
                     .await()
-
-                resultList.addAll(currentPage!!.toObjects(User::class.java))
             }
-
 
             val lastDocumentSnapshot = currentPage!!.documents[currentPage!!.size() - 1]
 
-            val nextQuery = FirebaseFirestore.getInstance()
+            val nextQuery = firestore
                 .collection(USERS_COLLECTION)
-                .whereIn("uid", if (chunks.isNotEmpty()) chunks[0] else listOf())
-                .orderBy("name", Query.Direction.ASCENDING)
+                .whereIn(UID, if (chunks.isNotEmpty()) chunks[0] else listOf())
+                .orderBy(NAME, Query.Direction.ASCENDING)
                 .startAfter(lastDocumentSnapshot)
                 .get()
                 .await()
 
             return LoadResult.Page(
-                resultList,
+                currentPage!!.toObjects(User::class.java),
                 null,
                 nextQuery
             )
@@ -80,9 +80,5 @@ class FollowingAndFollowersPagingSource(private val uid: String) :
         } catch (e: Exception) {
             return LoadResult.Error(e)
         }
-    }
-
-    companion object {
-        const val TAG = "FAFPS"
     }
 }

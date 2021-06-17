@@ -36,10 +36,10 @@
                 android:layout_marginStart="16dp"
                 android:layout_marginTop="10dp"
                 android:layout_marginEnd="16dp"
+                android:layout_marginBottom="20dp"
                 app:cardBackgroundColor="@color/white"
                 app:cardCornerRadius="20dp"
                 app:cardElevation="25dp"
-                android:layout_marginBottom="20dp"
                 app:layout_constraintBottom_toTopOf="@+id/materialTextView4"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -185,11 +185,11 @@
                         android:id="@+id/btnRegister"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
                         android:text="@string/register"
                         android:textAllCaps="false"
                         android:textColor="@color/white"
                         android:textSize="24sp"
-                        android:layout_marginBottom="8dp"
                         app:backgroundTint="@color/colorPrimary"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="@+id/TILRepeatPassword"
@@ -246,8 +246,6 @@
         </androidx.constraintlayout.widget.ConstraintLayout>
 
     </ScrollView>
-
-
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

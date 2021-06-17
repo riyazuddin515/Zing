@@ -22,7 +22,6 @@ import com.riyazuddin.zing.ui.dialogs.CustomDialog
 import com.riyazuddin.zing.ui.main.viewmodels.HomeViewModel
 import com.riyazuddin.zing.ui.main.viewmodels.PostViewModel
 import dagger.hilt.android.AndroidEntryPoint
-import java.util.*
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -50,7 +49,8 @@ class PostFragment : Fragment(R.layout.fragment_post) {
                 homeViewModel.toggleLikeForPost(it)
             }
         }
-        binding.postLayout.ivPostImage.setOnClickListener(object : PostAdapter.DoubleClickListener() {
+        binding.postLayout.ivPostImage.setOnClickListener(object :
+            PostAdapter.DoubleClickListener() {
             override fun onDoubleClick(v: View?) {
                 post?.let {
                     homeViewModel.toggleLikeForPost(it)
@@ -60,16 +60,14 @@ class PostFragment : Fragment(R.layout.fragment_post) {
         binding.postLayout.ibComment.setOnClickListener {
             post?.let {
                 findNavController().navigate(
-                    R.id.action_postFragment_to_commentsFragment,
-                    Bundle().apply { putString("postId", it.postId) }
+                    PostFragmentDirections.globalActionToCommentsFragment(it.postId, null)
                 )
             }
         }
         binding.postLayout.tvLikeCount.setOnClickListener {
             post?.let {
                 findNavController().navigate(
-                    R.id.action_postFragment_to_likedByFragment,
-                    Bundle().apply { putString("postId", it.postId) }
+                    PostFragmentDirections.globalActionToUserListFragment(it.postId, "LikedBy")
                 )
             }
         }
@@ -92,7 +90,7 @@ class PostFragment : Fragment(R.layout.fragment_post) {
             onError = {
                 binding.progressBar.isVisible = true
                 snackBar(it)
-                Log.e(TAG, "subscribeToObservers: $it", )
+                Log.e(TAG, "subscribeToObservers: $it")
             },
             onLoading = {
                 binding.progressBar.isVisible = true
@@ -123,12 +121,12 @@ class PostFragment : Fragment(R.layout.fragment_post) {
         homeViewModel.deletePostStatus.observe(viewLifecycleOwner, EventObserver(
             onError = {
                 snackBar(it)
-                Log.e(TAG, "subscribeToObservers: $it", )
+                Log.e(TAG, "subscribeToObservers: $it")
             },
             onLoading = {
                 snackBar("Deleting...")
             }
-        ){
+        ) {
             snackBar("Post Deleted.")
             findNavController().popBackStack()
         })
@@ -170,7 +168,7 @@ class PostFragment : Fragment(R.layout.fragment_post) {
         binding.postLayout.tvLikeCount.text = likesText
     }
 
-    companion object{
+    companion object {
         const val TAG = "PostFragment"
     }
 }

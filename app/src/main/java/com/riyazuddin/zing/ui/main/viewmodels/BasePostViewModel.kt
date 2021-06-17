@@ -21,19 +21,6 @@ abstract class BasePostViewModel(
     private val _deletePostStatus = MutableLiveData<Event<Resource<Post>>>()
     val deletePostStatus: LiveData<Event<Resource<Post>>> = _deletePostStatus
 
-    private val _postLikedUsersStatus = MutableLiveData<Event<Resource<List<User>>>>()
-    val postLikedUsersStatus: LiveData<Event<Resource<List<User>>>> = _postLikedUsersStatus
-
-    fun getPostLikedUsers(postId: String) {
-        if (postId.isEmpty())
-            return
-        _postLikedUsersStatus.postValue(Event(Resource.Loading()))
-        viewModelScope.launch {
-            val result = repository.getPostLikedUsers(postId)
-            _postLikedUsersStatus.postValue(Event(result))
-        }
-    }
-
     fun toggleLikeForPost(post: Post) {
         _likePostStatus.postValue(Event(Resource.Loading()))
         viewModelScope.launch {

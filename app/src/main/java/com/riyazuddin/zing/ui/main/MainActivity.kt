@@ -2,17 +2,14 @@ package com.riyazuddin.zing.ui.main
 
 import android.app.NotificationManager
 import android.content.Context
-import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.ui.setupWithNavController
-import com.google.firebase.auth.FirebaseAuth
 import com.riyazuddin.zing.R
 import com.riyazuddin.zing.databinding.ActivityMainBinding
-import com.riyazuddin.zing.ui.auth.AuthActivity
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -30,7 +27,7 @@ class MainActivity : AppCompatActivity() {
 
         binding.bottomNavigation.apply {
             setupWithNavController(navHostFragment.findNavController())
-            setOnNavigationItemReselectedListener { }
+            setOnNavigationItemReselectedListener {}
         }
 
         navHostFragment.findNavController().addOnDestinationChangedListener { _, destination, _ ->

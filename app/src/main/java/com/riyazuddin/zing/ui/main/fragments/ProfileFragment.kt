@@ -13,7 +13,10 @@ import androidx.paging.LoadState
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
 import com.riyazuddin.zing.R
+import com.riyazuddin.zing.data.entities.User
 import com.riyazuddin.zing.databinding.FragmentProfileBinding
 import com.riyazuddin.zing.other.EventObserver
 import com.riyazuddin.zing.other.snackBar
@@ -27,10 +30,9 @@ import kotlinx.coroutines.launch
 @AndroidEntryPoint
 open class ProfileFragment : BasePostFragment(R.layout.fragment_profile) {
 
-    override val source: String
-        get() = (R.id.profileFragment).toString()
-
     private lateinit var binding: FragmentProfileBinding
+
+     var currentUser: User? = null
 
     override val basePostViewModel: BasePostViewModel
         get() {
@@ -60,6 +62,7 @@ open class ProfileFragment : BasePostFragment(R.layout.fragment_profile) {
         setUpRecyclerView()
 
         binding.btnToggleFollow.isVisible = false
+        binding.btnEditProfile.isVisible = uid == Firebase.auth.uid
         viewModel.setUid(uid)
         viewModel.loadProfile(uid)
 
@@ -69,30 +72,13 @@ open class ProfileFragment : BasePostFragment(R.layout.fragment_profile) {
         super.onViewCreated(view, savedInstanceState)
 
         subscribeToObservers()
+        setupClickListeners()
 
         viewLifecycleOwner.lifecycleScope.launch {
             postAdapter.loadStateFlow.collectLatest {
-                binding.progressBar.isVisible =
-                    it.refresh is LoadState.Loading ||
-                            it.append is LoadState.Loading
+                binding.linearProgressIndicatorFirstLoad.isVisible = it.refresh is LoadState.Loading
+                binding.linearProgressIndicatorLoadMore.isVisible = it.append is LoadState.Loading
             }
-        }
-
-        val bundle = Bundle().apply {
-            putString("uid", uid)
-        }
-
-        binding.tvFollowersCount.setOnClickListener {
-            findNavController().navigate(R.id.action_profileFragment_to_followersFragment, bundle)
-        }
-        binding.tvFollowingCount.setOnClickListener {
-            findNavController().navigate(R.id.action_profileFragment_to_followingFragment, bundle)
-        }
-        binding.tvFollowers.setOnClickListener {
-            findNavController().navigate(R.id.action_profileFragment_to_followersFragment, bundle)
-        }
-        binding.tvFollowing.setOnClickListener {
-            findNavController().navigate(R.id.action_profileFragment_to_followingFragment, bundle)
         }
 
     }
@@ -111,6 +97,7 @@ open class ProfileFragment : BasePostFragment(R.layout.fragment_profile) {
                 binding.progressBarProfileMetadata.isVisible = true
             }
         ) { user ->
+            currentUser = user
             binding.progressBarProfileMetadata.isVisible = false
             binding.tvName.text = user.name
             binding.toolbar.title = user.username
@@ -133,6 +120,44 @@ open class ProfileFragment : BasePostFragment(R.layout.fragment_profile) {
             binding.tvPostCount.text = (binding.tvPostCount.text.toString().toInt() - 1).toString()
             viewModel.removeFromLiveData(deletedPost)
         })
+    }
+
+    private fun setupClickListeners() {
+        binding.tvFollowersCount.setOnClickListener {
+            findNavController().navigate(
+                ProfileFragmentDirections.globalActionToUserListFragment(uid, "Followers")
+            )
+        }
+        binding.tvFollowingCount.setOnClickListener {
+            findNavController().navigate(
+                ProfileFragmentDirections.globalActionToUserListFragment(uid, "Following")
+            )
+        }
+        binding.tvFollowers.setOnClickListener {
+            findNavController().navigate(
+                ProfileFragmentDirections.globalActionToUserListFragment(uid, "Followers")
+            )
+        }
+        binding.tvFollowing.setOnClickListener {
+            findNavController().navigate(
+                ProfileFragmentDirections.globalActionToUserListFragment(uid, "Following")
+            )
+        }
+        binding.btnEditProfile.setOnClickListener {
+            findNavController().navigate(R.id.action_profileFragment_to_profileInfo)
+        }
+        postAdapter.setOnLikedByClickListener {
+            findNavController().navigate(
+                ProfileFragmentDirections.globalActionToUserListFragment(it.postId, "LikedBy")
+            )
+        }
+        postAdapter.setOnCommentClickListener { post ->
+            currentUser?.let {
+                findNavController().navigate(
+                    ProfileFragmentDirections.globalActionToCommentsFragment(post.postId, it)
+                )
+            } ?: snackBar("Please wait")
+        }
     }
 
     private fun setUpRecyclerView() {

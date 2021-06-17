@@ -9,13 +9,10 @@ import com.algolia.search.model.response.ResponseSearch
 import com.riyazuddin.zing.other.Event
 import com.riyazuddin.zing.other.Resource
 import com.riyazuddin.zing.repositories.abstraction.MainRepository
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class SearchViewModel @ViewModelInject constructor(
-    private val repository: MainRepository,
-    private val dispatcher: CoroutineDispatcher = Dispatchers.Main
+    private val repository: MainRepository
 ) : ViewModel() {
 
     private val _algoliaSearchResult = MutableLiveData<Event<Resource<ResponseSearch>>>()

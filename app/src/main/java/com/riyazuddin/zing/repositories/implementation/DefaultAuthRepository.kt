@@ -10,7 +10,6 @@ import com.algolia.search.model.response.ResponseSearch
 import com.algolia.search.model.search.Query
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.FirebaseFirestoreSettings
 import com.riyazuddin.zing.BuildConfig
 import com.riyazuddin.zing.data.entities.Followers
 import com.riyazuddin.zing.data.entities.Following
@@ -47,8 +46,10 @@ class DefaultAuthRepository @Inject constructor(
                 val uid = result.user!!.uid
                 val user = User(name, uid, username)
                 firestore.collection(USERS_COLLECTION).document(uid).set(user).await()
-                firestore.collection(FOLLOWING_COLLECTION).document(uid).set(Following(uid = uid)).await()
-                firestore.collection(FOLLOWERS_COLLECTION).document(uid).set(Followers(uid = uid)).await()
+                firestore.collection(FOLLOWING_COLLECTION).document(uid).set(Following(uid = uid))
+                    .await()
+                firestore.collection(FOLLOWERS_COLLECTION).document(uid).set(Followers(uid = uid))
+                    .await()
 
                 Resource.Success(true)
             }
