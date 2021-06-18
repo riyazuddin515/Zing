@@ -68,6 +68,7 @@ object Constants {
     const val DATE = "date"
     const val SENDER_AND_RECEIVER_UID = "senderAndReceiverUid"
     const val STATUS = "status"
+    const val RECEIVER_UID = "receiverUid"
 
     const val CHAT_MESSAGE_PAGE_LIMIT = 10L
     const val LAST_MESSAGE_PAGE_LIMIT = 10L

@@ -5,6 +5,7 @@ import com.google.firebase.firestore.Exclude
 data class LastMessage(
     val message: Message = Message(),
     val chatThread: String = "",
+    val receiverUid: String = "",
 
     @get:Exclude
     var sender: User = User(),

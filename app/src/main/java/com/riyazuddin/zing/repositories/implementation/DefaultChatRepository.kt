@@ -14,10 +14,12 @@ import com.riyazuddin.zing.data.entities.UserStat
 import com.riyazuddin.zing.other.Constants.CHATS_COLLECTION
 import com.riyazuddin.zing.other.Constants.CHAT_MESSAGE_PAGE_LIMIT
 import com.riyazuddin.zing.other.Constants.DATE
+import com.riyazuddin.zing.other.Constants.FAILURE
 import com.riyazuddin.zing.other.Constants.LAST_MESSAGE_PAGE_LIMIT
 import com.riyazuddin.zing.other.Constants.MESSAGE
 import com.riyazuddin.zing.other.Constants.MESSAGES_COLLECTION
 import com.riyazuddin.zing.other.Constants.NO_MORE_MESSAGES
+import com.riyazuddin.zing.other.Constants.RECEIVER_UID
 import com.riyazuddin.zing.other.Constants.SEEN
 import com.riyazuddin.zing.other.Constants.SENDER_AND_RECEIVER_UID
 import com.riyazuddin.zing.other.Constants.SENDING
@@ -63,8 +65,21 @@ class DefaultChatRepository @Inject constructor(
     val lastMessageList = MutableLiveData<Event<Resource<List<LastMessage>>>>()
     private var lastMessageLastVisible: DocumentSnapshot? = null
 
-    var unSeenLastMessagesCount = MutableLiveData<Event<Resource<Int>>>()
+    val haveUnSeenMessages = MutableLiveData<Event<Resource<Boolean>>>()
+    var unSeenMessagesListener: ListenerRegistration? = null
     var isUserOnline = MutableLiveData<Event<Resource<UserStat>>>()
+
+    private val currentUserUid = Firebase.auth.uid!!
+
+    companion object {
+        const val TAG = "DefaultChatRepo"
+    }
+
+    private fun getChatThread(currentUid: String, otherEndUserUid: String) =
+        if (currentUid < otherEndUserUid)
+            currentUid + otherEndUserUid
+        else
+            otherEndUserUid + currentUid
 
     override suspend fun sendMessage(
         currentUid: String,
@@ -94,7 +109,8 @@ class DefaultChatRepository @Inject constructor(
             chatsCollection.document(chatThread).collection(MESSAGES_COLLECTION).document(messageId)
                 .set(messageOb).await()
 
-            val lastMessage = LastMessage(message = messageOb, chatThread = chatThread)
+            val lastMessage =
+                LastMessage(message = messageOb, chatThread = chatThread, receiverUid = receiverUid)
             chatsCollection.document(chatThread).set(lastMessage).await()
 
             Resource.Success(messageOb)
@@ -322,11 +338,6 @@ class DefaultChatRepository @Inject constructor(
                                         lastMessageLocalRepo.removeAll { existingLastMessage ->
                                             existingLastMessage.chatThread == lastMessage.chatThread
                                         }
-                                        val bool = doc.document.metadata.hasPendingWrites()
-                                        if (bool) {
-                                            Log.i(TAG, "getLastMessageFirstQuery: hasPending")
-                                            lastMessage.message.status = SENDING
-                                        }
                                         if (isLastMessageFirstLoad) {
                                             Log.d(TAG, "getLastMessageFirstQuery: isFirstLoadTrue")
                                             lastMessageLocalRepo.add(lastMessage)
@@ -375,7 +386,6 @@ class DefaultChatRepository @Inject constructor(
 
     override suspend fun getLastMessageLoadMore(currentUser: User) {
         withContext(Dispatchers.IO) {
-
             val nextQuery = chatsCollection
                 .whereArrayContains("$MESSAGE.$SENDER_AND_RECEIVER_UID", Firebase.auth.uid!!)
                 .orderBy("$MESSAGE.$DATE", Query.Direction.DESCENDING)
@@ -506,25 +516,6 @@ class DefaultChatRepository @Inject constructor(
 
     }
 
-    override suspend fun checkDoUserHaveUnseenMessages(uid: String) = withContext(Dispatchers.IO) {
-        safeCall {
-//            val query = chatsCollection
-//                .whereArrayContains("$MESSAGE.$SENDER_AND_RECEIVER_UID", Firebase.auth.uid!!)
-//                .whereNotEqualTo("$MESSAGE.$STATUS", SEEN)
-//                .orderBy("$MESSAGE.$DATE", Query.Direction.DESCENDING)
-//                .limit(1)
-//                .get()
-//                .await()
-//
-//            val count = query.documentChanges.count {
-//                it.document.toObject(LastMessage::class.java).message.senderAndReceiverUid[1] == Firebase.auth.uid
-//            }
-//
-//            Resource.Success(count)
-
-        }
-    }
-
     override suspend fun checkUserIsOnline(uid: String) {
         val query = usersStatCollection.document(uid)
         query.addSnapshotListener { value, error ->
@@ -538,13 +529,47 @@ class DefaultChatRepository @Inject constructor(
         }
     }
 
-    companion object {
-        const val TAG = "DefaultChatRepo"
-    }
+    override suspend fun checkForUnSeenMessage() {
+        withContext(Dispatchers.IO) {
+            try {
+                val query = chatsCollection
+                    .whereEqualTo(RECEIVER_UID, currentUserUid)
+                    .whereNotEqualTo("$MESSAGE.$STATUS", SEEN)
+                    .orderBy("$MESSAGE.$STATUS", Query.Direction.DESCENDING)
+                    .orderBy("$MESSAGE.$DATE", Query.Direction.DESCENDING)
+                    .limit(1)
 
-    private fun getChatThread(currentUid: String, otherEndUserUid: String) =
-        if (currentUid < otherEndUserUid)
-            currentUid + otherEndUserUid
-        else
-            otherEndUserUid + currentUid
+                unSeenMessagesListener = query.addSnapshotListener { value, error ->
+                    error?.let {
+                        Log.e(TAG, "checkForUnSeenMessage: ", it)
+                        haveUnSeenMessages.postValue(
+                            Event(
+                                Resource.Error(
+                                    it.localizedMessage ?: FAILURE
+                                )
+                            )
+                        )
+                        return@addSnapshotListener
+                    }
+                    value?.let { querySnapshot ->
+                        if (querySnapshot.isEmpty) {
+                            haveUnSeenMessages.postValue(Event(Resource.Success(false)))
+                        } else {
+                            haveUnSeenMessages.postValue(Event(Resource.Success(true)))
+                        }
+                    }
+                }
+
+            } catch (e: Exception) {
+                Log.e(TAG, "checkForUnSeenMessage: ", e)
+                haveUnSeenMessages.postValue(
+                    Event(
+                        Resource.Error(
+                            e.localizedMessage ?: "Can't able to check unSeenMessage"
+                        )
+                    )
+                )
+            }
+        }
+    }
 }

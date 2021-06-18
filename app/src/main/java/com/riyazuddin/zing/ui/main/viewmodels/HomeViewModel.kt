@@ -41,12 +41,11 @@ class HomeViewModel @ViewModelInject constructor(
         }
     val feed: LiveData<PagingData<Post>> = _feed
 
-    var unSeenLastMessagesCount: LiveData<Event<Resource<Int>>> =
-        (chatRepository as DefaultChatRepository).unSeenLastMessagesCount
-
-    fun getUnSeenLastMessagesCount() {
+    val haveUnSeenMessages = (chatRepository as DefaultChatRepository).haveUnSeenMessages
+    val unSeenMessagesListener = (chatRepository as DefaultChatRepository).unSeenMessagesListener
+    fun checkForUnSeenMessage() {
         viewModelScope.launch {
-            chatRepository.checkDoUserHaveUnseenMessages(Firebase.auth.uid!!)
+            chatRepository.checkForUnSeenMessage()
         }
     }
 

@@ -43,20 +43,16 @@
             tools:visibility="visible" />
 
         <com.google.android.material.textview.MaterialTextView
-            android:id="@+id/tvUnseenMessageCounter"
+            android:id="@+id/tvHaveUnseenMessages"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="@drawable/ic_circle_primary_color"
             android:padding="3dp"
-            android:textAlignment="center"
-            android:textColor="@color/white"
-            android:textStyle="bold"
             android:visibility="gone"
             app:layout_constraintBottom_toTopOf="@id/ibRecentChat"
             app:layout_constraintEnd_toEndOf="@id/ibRecentChat"
             app:layout_constraintTop_toTopOf="@id/ibRecentChat"
             app:layout_constraintVertical_bias="1.0"
-            tools:text="99"
             tools:visibility="visible" />
 
         <ImageButton

@@ -65,8 +65,8 @@ class HomeFragment : BasePostFragment(R.layout.fragment_home) {
         setUpRecyclerView()
         currentUserUid?.let {
             viewModel.onlineOfflineToggle(it)
-            viewModel.getUnSeenLastMessagesCount()
             viewModel.getCurrentUser(it)
+            viewModel.checkForUnSeenMessage()
         }
     }
 
@@ -95,19 +95,6 @@ class HomeFragment : BasePostFragment(R.layout.fragment_home) {
     }
 
     private fun subscribeToObservers() {
-        viewModel.unSeenLastMessagesCount.observe(viewLifecycleOwner, EventObserver {
-            if (it == 0)
-                binding.tvUnseenMessageCounter.isVisible = false
-            if (it in 1..99) {
-                binding.tvUnseenMessageCounter.text = it.toString()
-                binding.tvUnseenMessageCounter.isVisible = true
-                binding.tvUnseenMessageCounter.startAnimation(animation)
-            } else if (it > 99) {
-                binding.tvUnseenMessageCounter.text = getString(R.string.plus_99)
-                binding.tvUnseenMessageCounter.isVisible = true
-            }
-
-        })
         viewModel.feed.observe(viewLifecycleOwner, {
             postAdapter.submitData(viewLifecycleOwner.lifecycle, it)
         })
@@ -148,6 +135,17 @@ class HomeFragment : BasePostFragment(R.layout.fragment_home) {
             } else {
                 snackBar("can't logout. Try again")
             }
+        })
+        viewModel.haveUnSeenMessages.observe(viewLifecycleOwner, EventObserver(
+            onError = {
+                snackBar(it)
+            }
+        ) {
+            if (it) {
+                binding.tvHaveUnseenMessages.isVisible = true
+                binding.tvHaveUnseenMessages.startAnimation(animation)
+            }else
+                binding.tvHaveUnseenMessages.isVisible = false
         })
     }
 
@@ -211,6 +209,10 @@ class HomeFragment : BasePostFragment(R.layout.fragment_home) {
         })
     }
 
+    override fun onDestroy() {
+        viewModel.unSeenMessagesListener?.remove()
+        super.onDestroy()
+    }
     companion object {
         const val TAG = "HomeFragment"
     }
