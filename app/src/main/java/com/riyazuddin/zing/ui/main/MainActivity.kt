@@ -2,14 +2,18 @@ package com.riyazuddin.zing.ui.main
 
 import android.app.NotificationManager
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.ui.setupWithNavController
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
 import com.riyazuddin.zing.R
 import com.riyazuddin.zing.databinding.ActivityMainBinding
+import com.riyazuddin.zing.ui.auth.AuthActivity
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -44,6 +48,28 @@ class MainActivity : AppCompatActivity() {
         val notificationManager: NotificationManager =
             getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.cancelAll()
+    }
+
+    override fun onStart() {
+        super.onStart()
+        val auth = Firebase.auth
+        if (auth.currentUser == null) {
+            Intent(this, AuthActivity::class.java).apply {
+                startActivity(this)
+                finish()
+            }
+        } else {
+            auth.currentUser?.let {
+                it.reload()
+                if (!it.isEmailVerified) {
+                    auth.signOut()
+                    Intent(this, AuthActivity::class.java).apply {
+                        startActivity(this)
+                        finish()
+                    }
+                }
+            }
+        }
     }
 
     companion object {

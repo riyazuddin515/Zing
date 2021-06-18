@@ -6,6 +6,7 @@ import com.google.firebase.firestore.QuerySnapshot
 import com.riyazuddin.zing.data.entities.User
 import com.riyazuddin.zing.other.Constants.NAME
 import com.riyazuddin.zing.other.Constants.UID
+import com.riyazuddin.zing.other.Constants.USERS_LIST_SIZE
 import kotlinx.coroutines.tasks.await
 
 class UsersPagingSource(
@@ -21,7 +22,7 @@ class UsersPagingSource(
                 currentPage = params.key ?: collectionReference
                     .whereIn(UID, chunk)
                     .orderBy(NAME)
-                    .limit(10)
+                    .limit(USERS_LIST_SIZE.toLong())
                     .get()
                     .await()
             }
@@ -32,7 +33,7 @@ class UsersPagingSource(
                 .whereIn(UID, if (chunks.isNotEmpty()) chunks[0] else listOf())
                 .orderBy(NAME)
                 .startAfter(lastDocumentSnapshot)
-                .limit(10)
+                .limit(USERS_LIST_SIZE.toLong())
                 .get()
                 .await()
 

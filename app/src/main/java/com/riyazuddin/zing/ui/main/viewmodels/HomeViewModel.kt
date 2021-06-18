@@ -1,6 +1,5 @@
 package com.riyazuddin.zing.ui.main.viewmodels
 
-import android.util.Log
 import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -47,15 +46,13 @@ class HomeViewModel @ViewModelInject constructor(
 
     fun getUnSeenLastMessagesCount() {
         viewModelScope.launch {
-            chatRepository.getUnSeenLastMessagesCount(Firebase.auth.uid!!)
+            chatRepository.checkDoUserHaveUnseenMessages(Firebase.auth.uid!!)
         }
     }
 
     fun onlineOfflineToggle(uid: String) {
         viewModelScope.launch {
-            Log.i(TAG, "onlineOfflineToggle: calling")
             repository.onlineOfflineToggleWithDeviceToken(uid)
-            Log.i(TAG, "onlineOfflineToggle: called")
         }
     }
 

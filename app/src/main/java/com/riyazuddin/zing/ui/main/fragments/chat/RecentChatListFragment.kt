@@ -95,8 +95,6 @@ class RecentChatListFragment : Fragment(R.layout.fragment_recent_chat_list) {
                 binding.progressBar.isVisible = true
             }
         ) {
-            for (e in it)
-                Log.i(TAG, "subscribeToObservers: $e")
             lastMessageAdapter.lastMessages = it
             binding.progressBar.isVisible = false
             lastMessageAdapter.notifyDataSetChanged()
@@ -127,7 +125,8 @@ class RecentChatListFragment : Fragment(R.layout.fragment_recent_chat_list) {
     }
 
     override fun onDestroy() {
-        Log.i(TAG, "onDestroyView: ")
+        Log.i(TAG, "onDestroy")
+        lastMessageAdapter.lastMessages = listOf()
         viewModel.clearRecentMessagesList()
         super.onDestroy()
     }

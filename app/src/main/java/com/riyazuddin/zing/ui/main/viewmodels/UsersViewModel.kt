@@ -12,6 +12,7 @@ import androidx.paging.cachedIn
 import com.google.firebase.firestore.FirebaseFirestore
 import com.riyazuddin.zing.data.entities.User
 import com.riyazuddin.zing.other.Constants
+import com.riyazuddin.zing.other.Constants.USERS_LIST_SIZE
 import com.riyazuddin.zing.other.Event
 import com.riyazuddin.zing.other.Resource
 import com.riyazuddin.zing.repositories.abstraction.MainRepository
@@ -39,7 +40,7 @@ class UsersViewModel @ViewModelInject constructor(
     }
 
     fun getFlowOfUsers(list: List<String>): Flow<PagingData<User>> =
-        Pager(PagingConfig(10)) {
+        Pager(PagingConfig(USERS_LIST_SIZE)) {
             UsersPagingSource(
                 list,
                 FirebaseFirestore.getInstance().collection(Constants.USERS_COLLECTION)

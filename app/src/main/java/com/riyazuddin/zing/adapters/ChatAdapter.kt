@@ -98,8 +98,7 @@ class ChatAdapter @Inject constructor(
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         val message = messages[position]
         val date =
-            SimpleDateFormat("hh:mm a", Locale.US).format(Date(message.date)).replace("AM", "am")
-                .replace("PM", "pm")
+            SimpleDateFormat("hh:mm a", Locale.US).format(Date(message.date))
         if (message.senderAndReceiverUid.size == 2) {
             if (message.senderAndReceiverUid[0] == Firebase.auth.uid) {
                 val rightViewHolder = RightViewHolder(ItemChatRightBinding.bind(holder.itemView))

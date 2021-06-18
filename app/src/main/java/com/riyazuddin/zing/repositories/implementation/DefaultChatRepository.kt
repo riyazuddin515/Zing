@@ -156,16 +156,6 @@ class DefaultChatRepository @Inject constructor(
                                 lastVisible = querySnapshot.documents[querySnapshot.size() - 1]
                             }
                         }
-//                        if (isFirstPageFirstLoad) {
-//                            if (querySnapshot.size() - 1 < 0) {
-//                                chatList.postValue(Event(Resource.Success(listOf())))
-//                                return@addSnapshotListener
-//                            } else {
-//                                lastVisible = querySnapshot.documents[querySnapshot.size() - 1]
-//                                Log.i(TAG, "getChatLoadFirstQuery: last ${lastVisible.toString()}")
-//                            }
-//                        }
-
                         for (doc in querySnapshot.documentChanges) {
                             val message = doc.document.toObject(Message::class.java)
                             when (doc.type) {
@@ -303,57 +293,80 @@ class DefaultChatRepository @Inject constructor(
                         }
                     }
 
-                    for (doc in querySnapshot.documentChanges) {
-                        val lastMessage = doc.document.toObject(LastMessage::class.java)
+                    GlobalScope.launch {
+                        val job = launch {
+                            for (doc in querySnapshot.documentChanges) {
+                                val lastMessage = doc.document.toObject(LastMessage::class.java)
 
-                        usersCollection.document(
-                            if (lastMessage.message.senderAndReceiverUid[0] == currentUser.uid)
-                                lastMessage.message.senderAndReceiverUid[1]
-                            else
-                                lastMessage.message.senderAndReceiverUid[0]
+                                val it = usersCollection.document(
+                                    if (lastMessage.message.senderAndReceiverUid[0] == currentUser.uid)
+                                        lastMessage.message.senderAndReceiverUid[1]
+                                    else
+                                        lastMessage.message.senderAndReceiverUid[0]
+                                ).get().await()
 
-                        ).get().addOnSuccessListener {
+                                val user = it.toObject(User::class.java)!!
+                                if (lastMessage.message.senderAndReceiverUid[0] == currentUser.uid) {
+                                    lastMessage.receiver = user
+                                    lastMessage.sender = currentUser
+                                } else {
+                                    lastMessage.receiver = currentUser
+                                    lastMessage.sender = user
+                                }
 
-                            val user = it.toObject(User::class.java)!!
-                            if (lastMessage.message.senderAndReceiverUid[0] == currentUser.uid) {
-                                lastMessage.receiver = user
-                                lastMessage.sender = currentUser
-                            } else {
-                                lastMessage.receiver = currentUser
-                                lastMessage.sender = user
+                                Log.i(TAG, "getLastMessageFirstQuery: user -> ${user.name}")
+                                Log.i(TAG, "getLastMessageFirstQuery: $lastMessage")
+
+                                when (doc.type) {
+                                    DocumentChange.Type.ADDED -> {
+                                        lastMessageLocalRepo.removeAll { existingLastMessage ->
+                                            existingLastMessage.chatThread == lastMessage.chatThread
+                                        }
+                                        val bool = doc.document.metadata.hasPendingWrites()
+                                        if (bool) {
+                                            Log.i(TAG, "getLastMessageFirstQuery: hasPending")
+                                            lastMessage.message.status = SENDING
+                                        }
+                                        if (isLastMessageFirstLoad) {
+                                            Log.d(TAG, "getLastMessageFirstQuery: isFirstLoadTrue")
+                                            lastMessageLocalRepo.add(lastMessage)
+                                        } else {
+                                            Log.d(TAG, "getLastMessageFirstQuery: isFirstLoadFalse")
+                                            lastMessageLocalRepo.add(0, lastMessage)
+                                        }
+                                    }
+                                    DocumentChange.Type.MODIFIED -> {
+
+                                        val list = lastMessageLocalRepo.filter {
+                                            it.chatThread == lastMessage.chatThread
+                                        }
+
+                                        for (e in list) {
+                                            val index = lastMessageLocalRepo.indexOf(e)
+                                            if (e.message.message == lastMessage.message.message) {
+                                                lastMessageLocalRepo.removeAt(index)
+                                                lastMessageLocalRepo.add(index, lastMessage)
+
+                                            } else {
+                                                lastMessageLocalRepo.removeAt(index)
+                                                lastMessageLocalRepo.add(0, lastMessage)
+                                            }
+                                        }
+                                    }
+                                    else -> {
+                                    }
+                                }
                             }
-
-                            Log.i(TAG, "getLastMessageFirstQuery: user -> ${user.name}")
-                            Log.i(TAG, "getLastMessageFirstQuery: $lastMessage")
-
-                            when (doc.type) {
-                                DocumentChange.Type.ADDED -> {
-                                    lastMessageLocalRepo.removeAll { existingLastMessage ->
-                                        existingLastMessage.chatThread == lastMessage.chatThread
-                                    }
-                                    val bool = doc.document.metadata.hasPendingWrites()
-                                    if (bool) {
-                                        Log.i(TAG, "getLastMessageFirstQuery: hasPending")
-                                        lastMessage.message.status = SENDING
-                                    }
-                                    if (isLastMessageFirstLoad) {
-                                        lastMessageLocalRepo.add(lastMessage)
-                                    } else {
-                                        lastMessageLocalRepo.add(0, lastMessage)
-                                    }
-                                }
-                                DocumentChange.Type.MODIFIED -> {
-                                    lastMessageLocalRepo.removeAll { existingLastMessage ->
-                                        existingLastMessage.chatThread == lastMessage.chatThread
-                                    }
-                                    lastMessageLocalRepo.add(0, lastMessage)
-                                }
-                                else -> {
-                                }
-                            }
-                            lastMessageList.postValue(Event(Resource.Success(lastMessageLocalRepo)))
-                            isLastMessageFirstLoad = false
                         }
+                        job.join()
+                        isLastMessageFirstLoad = false
+                        lastMessageList.postValue(
+                            Event(
+                                Resource.Success(
+                                    lastMessageLocalRepo
+                                )
+                            )
+                        )
                     }
                 }
             }
@@ -396,46 +409,67 @@ class DefaultChatRepository @Inject constructor(
                         }
                     }
 
-                    for (doc in querySnapshot.documentChanges) {
-                        val lastMessage = doc.document.toObject(LastMessage::class.java)
-                        usersCollection.document(
-                            if (lastMessage.message.senderAndReceiverUid[0] == currentUser.uid)
-                                lastMessage.message.senderAndReceiverUid[1]
-                            else
-                                lastMessage.message.senderAndReceiverUid[0]
+                    GlobalScope.launch {
+                        val job = launch {
+                            for (doc in querySnapshot.documentChanges) {
+                                val lastMessage = doc.document.toObject(LastMessage::class.java)
+                                val it = usersCollection.document(
+                                    if (lastMessage.message.senderAndReceiverUid[0] == currentUser.uid)
+                                        lastMessage.message.senderAndReceiverUid[1]
+                                    else
+                                        lastMessage.message.senderAndReceiverUid[0]
 
-                        ).get().addOnSuccessListener {
-                            val user = it.toObject(User::class.java)!!
-                            if (lastMessage.message.senderAndReceiverUid[0] == currentUser.uid) {
-                                lastMessage.receiver = user
-                                lastMessage.sender = currentUser
-                            } else {
-                                lastMessage.receiver = currentUser
-                                lastMessage.sender = user
-                            }
+                                ).get().await()
 
-                            Log.i(TAG, "getLastMessageLoadMore: user -> ${user.name}")
-                            Log.i(TAG, "getLastMessageLoadMore: $lastMessage")
+                                val user = it.toObject(User::class.java)!!
+                                if (lastMessage.message.senderAndReceiverUid[0] == currentUser.uid) {
+                                    lastMessage.receiver = user
+                                    lastMessage.sender = currentUser
+                                } else {
+                                    lastMessage.receiver = currentUser
+                                    lastMessage.sender = user
+                                }
 
-                            when (doc.type) {
-                                DocumentChange.Type.ADDED -> {
-                                    lastMessageLocalRepo.removeAll { existingLastMessage ->
-                                        existingLastMessage.chatThread == lastMessage.chatThread
+                                Log.i(TAG, "getLastMessageLoadMore: user -> ${user.name}")
+                                Log.i(TAG, "getLastMessageLoadMore: $lastMessage")
+
+                                when (doc.type) {
+                                    DocumentChange.Type.ADDED -> {
+                                        lastMessageLocalRepo.removeAll { existingLastMessage ->
+                                            existingLastMessage.chatThread == lastMessage.chatThread
+                                        }
+                                        lastMessageLocalRepo.add(lastMessage)
                                     }
-                                    lastMessageLocalRepo.add(lastMessage)
-                                }
-                                DocumentChange.Type.MODIFIED -> {
-                                    lastMessageLocalRepo.removeAll { existingLastMessage ->
-                                        existingLastMessage.chatThread == lastMessage.chatThread
-                                    }
-                                    lastMessageLocalRepo.add(0, lastMessage)
-                                }
-                                else -> {
+                                    DocumentChange.Type.MODIFIED -> {
+                                        val list = lastMessageLocalRepo.filter {
+                                            it.chatThread == lastMessage.chatThread
+                                        }
 
+                                        for (e in list) {
+                                            val index = lastMessageLocalRepo.indexOf(e)
+                                            if (e.message.message == lastMessage.message.message) {
+                                                lastMessageLocalRepo.removeAt(index)
+                                                lastMessageLocalRepo.add(index, lastMessage)
+
+                                            } else {
+                                                lastMessageLocalRepo.removeAt(index)
+                                                lastMessageLocalRepo.add(0, lastMessage)
+                                            }
+                                        }
+                                    }
+                                    else -> {
+                                    }
                                 }
                             }
-                            lastMessageList.postValue(Event(Resource.Success(lastMessageLocalRepo)))
                         }
+                        job.join()
+                        lastMessageList.postValue(
+                            Event(
+                                Resource.Success(
+                                    lastMessageLocalRepo
+                                )
+                            )
+                        )
                     }
                 }
             }
@@ -472,32 +506,23 @@ class DefaultChatRepository @Inject constructor(
 
     }
 
-    override suspend fun getUnSeenLastMessagesCount(uid: String) {
-        try {
-            val query1 =
-                chatsCollection
-                    .whereArrayContains("$MESSAGE.$SENDER_AND_RECEIVER_UID", uid)
-                    .whereNotEqualTo("$MESSAGE.$STATUS", SEEN)
-                    .limit(100)
+    override suspend fun checkDoUserHaveUnseenMessages(uid: String) = withContext(Dispatchers.IO) {
+        safeCall {
+//            val query = chatsCollection
+//                .whereArrayContains("$MESSAGE.$SENDER_AND_RECEIVER_UID", Firebase.auth.uid!!)
+//                .whereNotEqualTo("$MESSAGE.$STATUS", SEEN)
+//                .orderBy("$MESSAGE.$DATE", Query.Direction.DESCENDING)
+//                .limit(1)
+//                .get()
+//                .await()
+//
+//            val count = query.documentChanges.count {
+//                it.document.toObject(LastMessage::class.java).message.senderAndReceiverUid[1] == Firebase.auth.uid
+//            }
+//
+//            Resource.Success(count)
 
-            query1.addSnapshotListener { value, error ->
-                error?.let {
-                    return@addSnapshotListener
-                }
-
-                value?.let { querySnapshot ->
-                    Log.i(TAG, "getUnSeenLastMessagesCount: invoked")
-                    querySnapshot.toObjects(LastMessage::class.java).filter {
-                        it.message.senderAndReceiverUid[1] == uid
-                    }.let {
-                        unSeenLastMessagesCount.postValue(Event(Resource.Success(it.size)))
-                    }
-                }
-            }
-        } catch (e: Exception) {
-            unSeenLastMessagesCount.postValue(Event(Resource.Error(e.localizedMessage ?: "")))
         }
-
     }
 
     override suspend fun checkUserIsOnline(uid: String) {

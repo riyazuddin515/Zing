@@ -74,6 +74,7 @@ object Constants {
     const val POST_PAGE_SIZE = 1
     const val COMMENT_PAGE_SIZE = 10
     const val NEW_CHAT_LIST_SIZE = 10
+    const val USERS_LIST_SIZE = 10
 
     const val VALID = "VALID"
     const val INVALID = "INVALID"

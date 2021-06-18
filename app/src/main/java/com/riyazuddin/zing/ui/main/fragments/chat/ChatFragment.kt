@@ -219,6 +219,7 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
     }
 
     override fun onDestroy() {
+        chatAdapter.messages = listOf()
         viewModel.clearChatList()
         super.onDestroy()
 

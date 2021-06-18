@@ -7,18 +7,23 @@ import androidx.core.view.isVisible
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.textfield.TextInputLayout
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import com.riyazuddin.zing.R
 import com.riyazuddin.zing.databinding.FragmentRegisterBinding
+import com.riyazuddin.zing.other.Constants.SEARCH_TIME_DELAY
 import com.riyazuddin.zing.other.Constants.VALID
 import com.riyazuddin.zing.other.EventObserver
 import com.riyazuddin.zing.other.Validator
 import com.riyazuddin.zing.other.snackBar
 import com.riyazuddin.zing.ui.auth.viewmodels.AuthViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class RegisterFragment : Fragment(R.layout.fragment_register) {
@@ -41,24 +46,24 @@ class RegisterFragment : Fragment(R.layout.fragment_register) {
                 findNavController().navigate(R.id.action_registerFragment_to_loginFragment)
         }
 
-//        var job: Job? = null
-//        binding.TIEUsername.addTextChangedListener { editable ->
-//            binding.TILUsername.endIconMode = TextInputLayout.END_ICON_NONE
-//            binding.TILUsername.error = null
-//            job?.cancel()
-//            job = lifecycleScope.launch {
-//                delay(SEARCH_TIME_DELAY)
-//                editable?.let {
-//                    validator.validateUsername(it.toString()).apply {
-//                        if (this != VALID) {
-//                            binding.TILUsername.error = this
-//                        } else {
-//                            viewModel.checkUserNameAvailability(it.toString())
-//                        }
-//                    }
-//                }
-//            }
-//        }
+        var job: Job? = null
+        binding.TIEUsername.addTextChangedListener { editable ->
+            binding.TILUsername.endIconMode = TextInputLayout.END_ICON_NONE
+            binding.TILUsername.error = null
+            job?.cancel()
+            job = lifecycleScope.launch {
+                delay(SEARCH_TIME_DELAY)
+                editable?.let {
+                    validator.validateUsername(it.toString()).apply {
+                        if (this != VALID) {
+                            binding.TILUsername.error = this
+                        } else {
+                            viewModel.checkUserNameAvailability(it.toString())
+                        }
+                    }
+                }
+            }
+        }
 
         binding.TIEName.addTextChangedListener {
             validator.validateName(it.toString()).apply {

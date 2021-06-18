@@ -1,6 +1,5 @@
 package com.riyazuddin.zing.ui.main.fragments
 
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -17,7 +16,6 @@ import androidx.navigation.fragment.findNavController
 import androidx.paging.LoadState
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import com.riyazuddin.zing.R
@@ -49,6 +47,8 @@ class HomeFragment : BasePostFragment(R.layout.fragment_home) {
     private lateinit var animation: Animation
     private var currentUser: User? = null
 
+    private val currentUserUid: String? = Firebase.auth.uid
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -63,7 +63,11 @@ class HomeFragment : BasePostFragment(R.layout.fragment_home) {
         animation = AnimationUtils.loadAnimation(requireContext(), R.anim.bounce)
 
         setUpRecyclerView()
-
+        currentUserUid?.let {
+            viewModel.onlineOfflineToggle(it)
+            viewModel.getUnSeenLastMessagesCount()
+            viewModel.getCurrentUser(it)
+        }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -71,9 +75,6 @@ class HomeFragment : BasePostFragment(R.layout.fragment_home) {
 
         subscribeToObservers()
         setupClickListeners()
-
-        viewModel.onlineOfflineToggle(Firebase.auth.uid!!)
-        viewModel.getUnSeenLastMessagesCount()
 
         binding.swipeRefreshLayout.setOnRefreshListener {
             postAdapter.refresh()
@@ -87,9 +88,7 @@ class HomeFragment : BasePostFragment(R.layout.fragment_home) {
             }
         }
 
-        if (currentUser == null) {
-            viewModel.getCurrentUser(Firebase.auth.uid!!)
-        } else {
+        if (currentUser != null) {
             binding.ibRecentChat.isVisible = true
         }
 
@@ -154,7 +153,7 @@ class HomeFragment : BasePostFragment(R.layout.fragment_home) {
 
     private fun setupClickListeners() {
         postAdapter.setOnUserClickListener {
-            if (it.postedBy == Firebase.auth.uid)
+            if (it.postedBy == currentUserUid)
                 findNavController().navigate(R.id.profileFragment)
             else
                 findNavController().navigate(
@@ -181,7 +180,7 @@ class HomeFragment : BasePostFragment(R.layout.fragment_home) {
             CustomDialog("Log Out", " Are you sure to logout of the app?").apply {
                 setPositiveListener {
 //                    Firebase.auth.signOut()
-                    viewModel.removeDeviceToken(Firebase.auth.uid!!)
+                    viewModel.removeDeviceToken(currentUserUid!!)
                 }
             }.show(parentFragmentManager, null)
         }
@@ -210,28 +209,6 @@ class HomeFragment : BasePostFragment(R.layout.fragment_home) {
                 }
             }
         })
-    }
-
-    override fun onAttach(context: Context) {
-        super.onAttach(context)
-        val auth = FirebaseAuth.getInstance()
-        if (auth.currentUser == null) {
-            Intent(requireContext(), AuthActivity::class.java).apply {
-                startActivity(this)
-                requireActivity().finish()
-            }
-        } else {
-            auth.currentUser?.let {
-                it.reload()
-                if (!it.isEmailVerified) {
-                    auth.signOut()
-                    Intent(requireContext(), AuthActivity::class.java).apply {
-                        startActivity(this)
-                        requireActivity().finish()
-                    }
-                }
-            }
-        }
     }
 
     companion object {

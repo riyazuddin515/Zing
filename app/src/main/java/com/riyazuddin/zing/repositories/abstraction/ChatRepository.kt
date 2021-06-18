@@ -35,7 +35,7 @@ interface ChatRepository {
 
     suspend fun getUser(uid: String): Resource<User>
 
-    suspend fun getUnSeenLastMessagesCount(uid: String)
+    suspend fun checkDoUserHaveUnseenMessages(uid: String): Resource<Int>
 
     suspend fun checkUserIsOnline(uid: String)
 }
