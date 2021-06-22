@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
@@ -23,6 +24,7 @@ import com.riyazuddin.zing.other.snackBar
 import com.riyazuddin.zing.ui.main.viewmodels.UsersViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -44,8 +46,8 @@ class UsersListFragment : Fragment(R.layout.fragment_users) {
         super.onCreate(savedInstanceState)
         binding = FragmentUsersBinding.inflate(layoutInflater)
 
-        viewModel.getListOfUsersUid(args.id, args.title)
         setupRecyclerView()
+        viewModel.setupTitle(args.id, args.title)
     }
 
     override fun onCreateView(
@@ -60,10 +62,23 @@ class UsersListFragment : Fragment(R.layout.fragment_users) {
         super.onViewCreated(view, savedInstanceState)
 
         binding.toolbar.title = args.title
-        subscribeToObservers()
 
         binding.toolbar.setNavigationOnClickListener {
             findNavController().popBackStack()
+        }
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.flowOfUsers(args.id, args.title).collect {
+                userAdapterPagingData.submitData(it)
+            }
+        }
+        viewLifecycleOwner.lifecycleScope.launch {
+            userAdapterPagingData.loadStateFlow.collect {
+                binding.linearProgressIndicatorFirstLoad.isVisible =
+                    it.refresh is LoadState.Loading
+                binding.linearProgressIndicatorLoadMore.isVisible =
+                    it.append is LoadState.Loading
+            }
         }
 
         userAdapterPagingData.setOnUserClickListener {
@@ -74,29 +89,6 @@ class UsersListFragment : Fragment(R.layout.fragment_users) {
                     UsersListFragmentDirections.globalActionToOthersProfileFragment(it.uid)
                 )
         }
-    }
-
-    private fun subscribeToObservers() {
-        viewModel.listOfUsersUid.observe(viewLifecycleOwner, EventObserver(
-            onError = {
-                snackBar(it)
-                Log.e(TAG, "subscribeToObservers: $it")
-            }
-        ) { list ->
-            viewLifecycleOwner.lifecycleScope.launch {
-                viewModel.getFlowOfUsers(list).collect {
-                    userAdapterPagingData.submitData(it)
-                }
-            }
-            viewLifecycleOwner.lifecycleScope.launch {
-                userAdapterPagingData.loadStateFlow.collect {
-                    binding.linearProgressIndicatorFirstLoad.isVisible =
-                        it.refresh is LoadState.Loading
-                    binding.linearProgressIndicatorLoadMore.isVisible =
-                        it.append is LoadState.Loading
-                }
-            }
-        })
     }
 
     private fun setupRecyclerView() {

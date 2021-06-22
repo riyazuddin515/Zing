@@ -56,7 +56,6 @@ class DefaultChatRepository @Inject constructor(
     private var isFirstPageFirstLoad = true
     private var lastVisible: DocumentSnapshot? = null
     private var firstListener: ListenerRegistration? = null
-    private var nextListener: ListenerRegistration? = null
 
     private var lastMessageFirstListenerRegistration: ListenerRegistration? = null
     private var lastMessageNextListenerRegistration: ListenerRegistration? = null
@@ -68,8 +67,6 @@ class DefaultChatRepository @Inject constructor(
     val haveUnSeenMessages = MutableLiveData<Event<Resource<Boolean>>>()
     var unSeenMessagesListener: ListenerRegistration? = null
     var isUserOnline = MutableLiveData<Event<Resource<UserStat>>>()
-
-    private val currentUserUid = Firebase.auth.uid!!
 
     companion object {
         const val TAG = "DefaultChatRepo"
@@ -150,338 +147,202 @@ class DefaultChatRepository @Inject constructor(
 
     override suspend fun getChatLoadFirstQuery(currentUid: String, otherEndUserUid: String) {
         withContext(Dispatchers.IO) {
+            Log.i(TAG, "getChatLoadFirstQuery: Invoked")
             val firstQuery = chatsCollection
                 .document(getChatThread(currentUid, otherEndUserUid))
                 .collection(MESSAGES_COLLECTION)
                 .orderBy(DATE, Query.Direction.DESCENDING)
-                .limit(CHAT_MESSAGE_PAGE_LIMIT)
+                .limit(CHAT_MESSAGE_PAGE_LIMIT + 3)
 
-            firstListener =
-                firstQuery.addSnapshotListener(MetadataChanges.INCLUDE) { value, error ->
-                    error?.let {
-                        Log.e(TAG, "getChatLoadFirstQuery: ", it)
-                        chatList.postValue(Event(Resource.Error(it.message!!)))
-                    }
-                    value?.let { querySnapshot ->
-                        when {
-                            querySnapshot.size() <= 0 -> {
-                                chatList.postValue(Event(Resource.Success(listOf())))
-                                return@addSnapshotListener
-                            }
-                            else -> {
-                                lastVisible = querySnapshot.documents[querySnapshot.size() - 1]
-                            }
-                        }
-                        for (doc in querySnapshot.documentChanges) {
-                            val message = doc.document.toObject(Message::class.java)
-                            when (doc.type) {
-                                DocumentChange.Type.ADDED -> {
-                                    val bool = doc.document.metadata.hasPendingWrites()
-                                    if (bool) {
-                                        message.status = SENDING
-                                    }
-                                    Log.e(TAG, "loadFirstQuery: ${message.message}")
-                                    if (isFirstPageFirstLoad) {
-                                        chatListLocalToRepo.add(message)
-                                    } else {
-                                        chatListLocalToRepo.add(0, message)
-                                        if (message.senderAndReceiverUid[0] != currentUid && !isFirstPageFirstLoad)
-                                            playTone.postValue(Event(Resource.Success(true)))
-                                    }
-                                }
-                                DocumentChange.Type.MODIFIED -> {
-                                    chatListLocalToRepo[doc.newIndex] = message
-                                    Log.i(TAG, "getChatLoadFirstQuery: Modified")
-                                }
-                                else -> {
-                                }
-                            }
-                        }
-                        chatList.postValue(Event(Resource.Success(chatListLocalToRepo)))
-                        isFirstPageFirstLoad = false
-                    }
-                }
-        }
-    }
-
-    // Method to load more post
-    override suspend fun getChatLoadMore(currentUid: String, otherEndUserUid: String) {
-        withContext(Dispatchers.IO) {
-            Log.i(TAG, "getChatLoadMore: inside function")
-            val nextQuery = chatsCollection
-                .document(getChatThread(currentUid, otherEndUserUid))
-                .collection(MESSAGES_COLLECTION)
-                .orderBy(DATE, Query.Direction.DESCENDING)
-                .startAfter(lastVisible ?: return@withContext)
-                .limit(CHAT_MESSAGE_PAGE_LIMIT)
-
-            nextListener = nextQuery.addSnapshotListener { value, error ->
+            firstListener = firstQuery.addSnapshotListener { value, error ->
                 error?.let {
-                    Log.e(TAG, "loadMorePost: ", it)
+                    Log.e(TAG, "getChatLoadFirstQuery: ", it)
                     chatList.postValue(Event(Resource.Error(it.message!!)))
-                    return@addSnapshotListener
                 }
                 value?.let { querySnapshot ->
                     when {
-                        querySnapshot.size() - 1 < 0 -> {
-                            Log.i(TAG, "getChatLoadMore: query less than zero")
-                            chatList.postValue(Event(Resource.Error(NO_MORE_MESSAGES)))
-                            return@addSnapshotListener
-                        }
-                        lastVisible == querySnapshot.documents[querySnapshot.size() - 1] -> {
-                            Log.i(TAG, "getChatLoadMore: same as previous")
-                            nextListener?.remove()
-                            chatList.postValue(Event(Resource.Error(NO_MORE_MESSAGES)))
+                        querySnapshot.isEmpty -> {
+                            chatList.postValue(Event(Resource.Success(listOf())))
                             return@addSnapshotListener
                         }
                         else -> {
                             lastVisible = querySnapshot.documents[querySnapshot.size() - 1]
                         }
                     }
-
                     for (doc in querySnapshot.documentChanges) {
+                        val message = doc.document.toObject(Message::class.java)
                         when (doc.type) {
                             DocumentChange.Type.ADDED -> {
-                                chatListLocalToRepo.add(doc.document.toObject(Message::class.java))
+                                if (doc.document.metadata.hasPendingWrites())
+                                    message.status = SENDING
+                                if (isFirstPageFirstLoad)
+                                    chatListLocalToRepo.add(message)
+                                else
+                                    chatListLocalToRepo.add(0, message)
                             }
                             DocumentChange.Type.MODIFIED -> {
-                                val message = doc.document.toObject(Message::class.java)
-                                val index = chatListLocalToRepo.filter { m ->
-                                    m.messageId == message.messageId
-                                }[0]
-                                Log.w(
-                                    TAG,
-                                    "loadFirstQuery: DeletedMessage ---> ${
-                                        chatListLocalToRepo.indexOf(
-                                            index
-                                        )
-                                    }"
-                                )
-                                chatListLocalToRepo[chatListLocalToRepo.indexOf(index)] = message
+                                chatListLocalToRepo[doc.newIndex] = message
                             }
                             else -> {
                             }
                         }
                     }
                     chatList.postValue(Event(Resource.Success(chatListLocalToRepo)))
+                    isFirstPageFirstLoad = false
+                    val lastMessage = chatListLocalToRepo.first()
+                    if (lastMessage.senderAndReceiverUid[0] != currentUid && lastMessage.status != SEEN)
+                        playTone.postValue(Event(Resource.Success(true)))
                 }
             }
+            Log.i(TAG, "getChatLoadFirstQuery: Completed")
+        }
+    }
+
+    override suspend fun getChatLoadMore(currentUid: String, otherEndUserUid: String) {
+        withContext(Dispatchers.IO) {
+            safeCall {
+                Log.i(TAG, "getChatLoadMore: Invoked")
+                val querySnapshot = chatsCollection
+                    .document(getChatThread(currentUid, otherEndUserUid))
+                    .collection(MESSAGES_COLLECTION)
+                    .orderBy(DATE, Query.Direction.DESCENDING)
+                    .startAfter(lastVisible ?: return@withContext)
+                    .limit(CHAT_MESSAGE_PAGE_LIMIT)
+                    .get().await()
+
+                if (querySnapshot.isEmpty || lastVisible == querySnapshot.documents[querySnapshot.size() - 1]) {
+                    chatList.postValue(Event(Resource.Error(NO_MORE_MESSAGES)))
+                    return@withContext
+                }
+                lastVisible = querySnapshot.documents[querySnapshot.size() - 1]
+                val list = querySnapshot.toObjects(Message::class.java)
+                chatListLocalToRepo.addAll(list)
+                chatList.postValue(Event(Resource.Success(chatListLocalToRepo)))
+                Log.i(TAG, "getChatLoadMore: Completed")
+                Resource.Success(true) //No Use
+            }
+
         }
     }
 
     override fun clearChatList() {
         isFirstPageFirstLoad = true
         firstListener?.remove()
-        nextListener?.remove()
+        firstListener = null
+        lastVisible = null
+        playTone.postValue(Event(Resource.Success(false)))
         chatListLocalToRepo.clear()
-        chatList.postValue(Event(Resource.Success(chatListLocalToRepo)))
+        chatList.postValue(Event(Resource.Success(listOf())))
     }
 
     override fun clearRecentMessagesList() {
         isLastMessageFirstLoad = true
+        lastMessageLastVisible = null
         lastMessageFirstListenerRegistration?.remove()
         lastMessageLocalRepo.clear()
         lastMessageList.postValue(Event((Resource.Success(lastMessageLocalRepo))))
     }
 
-    override suspend fun getLastMessageFirstQuery(currentUser: User) {
-        withContext(Dispatchers.IO) {
-            val query = chatsCollection
-                .whereArrayContains("$MESSAGE.$SENDER_AND_RECEIVER_UID", Firebase.auth.uid!!)
-                .orderBy("$MESSAGE.$DATE", Query.Direction.DESCENDING)
-                .limit(LAST_MESSAGE_PAGE_LIMIT)
+    override suspend fun lastMessageListener(currentUser: User) {
+        val querySnapshot = chatsCollection
+            .whereArrayContains("$MESSAGE.$SENDER_AND_RECEIVER_UID", Firebase.auth.uid!!)
+            .orderBy("$MESSAGE.$DATE", Query.Direction.DESCENDING)
+            .limit(1)
 
-            lastMessageFirstListenerRegistration = query.addSnapshotListener { value, error ->
-                error?.let {
-                    Log.e(TAG, "getLastMessageFirstQuery: ", it)
-                    lastMessageList.postValue(Event(Resource.Error(it.message!!)))
-                    return@addSnapshotListener
-                }
-                value?.let { querySnapshot ->
-                    when {
-                        querySnapshot.size() <= 0 -> {
-                            lastMessageList.postValue(Event(Resource.Success(listOf())))
-                            return@addSnapshotListener
-                        }
-                        else -> {
-                            lastMessageLastVisible =
-                                querySnapshot.documents[querySnapshot.size() - 1]
-                        }
+        querySnapshot.addSnapshotListener { value, error ->
+            error?.let {
+                lastMessageList.postValue(Event(Resource.Error(it.message ?: FAILURE)))
+                return@addSnapshotListener
+            }
+            value?.let {
+                Log.i(TAG, "lastMessageListener: invoked")
+                for (e in it.documentChanges) {
+                    val lastMessage = e.document.toObject(LastMessage::class.java)
+                    val list = lastMessageLocalRepo.filter { existingLastMessages ->
+                        existingLastMessages.chatThread == lastMessage.chatThread
                     }
+                    if (list.isEmpty()) {
+                        GlobalScope.launch {
+                            val l = getOtherUserForRecentChat(lastMessage, currentUser)
+                            lastMessageLocalRepo.add(0, l)
+                            lastMessageList.postValue(Event(Resource.Success(lastMessageLocalRepo)))
 
-                    GlobalScope.launch {
-                        val job = launch {
-                            for (doc in querySnapshot.documentChanges) {
-                                val lastMessage = doc.document.toObject(LastMessage::class.java)
+                        }
+                    } else {
+                        for (each in list) {
+                            val index = lastMessageLocalRepo.indexOf(each)
+                            val existing = lastMessageLocalRepo.removeAt(index)
+                            if(lastMessage.message.senderAndReceiverUid[0] == existing.sender.uid){
+                                lastMessage.sender = existing.sender
+                                lastMessage.receiver = existing.receiver
+                            }else{
+                                lastMessage.receiver = existing.sender
+                                lastMessage.sender = existing.receiver
+                            }
 
-                                val it = usersCollection.document(
-                                    if (lastMessage.message.senderAndReceiverUid[0] == currentUser.uid)
-                                        lastMessage.message.senderAndReceiverUid[1]
-                                    else
-                                        lastMessage.message.senderAndReceiverUid[0]
-                                ).get().await()
-
-                                val user = it.toObject(User::class.java)!!
-                                if (lastMessage.message.senderAndReceiverUid[0] == currentUser.uid) {
-                                    lastMessage.receiver = user
-                                    lastMessage.sender = currentUser
-                                } else {
-                                    lastMessage.receiver = currentUser
-                                    lastMessage.sender = user
-                                }
-
-                                Log.i(TAG, "getLastMessageFirstQuery: user -> ${user.name}")
-                                Log.i(TAG, "getLastMessageFirstQuery: $lastMessage")
-
-                                when (doc.type) {
-                                    DocumentChange.Type.ADDED -> {
-                                        lastMessageLocalRepo.removeAll { existingLastMessage ->
-                                            existingLastMessage.chatThread == lastMessage.chatThread
-                                        }
-                                        if (isLastMessageFirstLoad) {
-                                            Log.d(TAG, "getLastMessageFirstQuery: isFirstLoadTrue")
-                                            lastMessageLocalRepo.add(lastMessage)
-                                        } else {
-                                            Log.d(TAG, "getLastMessageFirstQuery: isFirstLoadFalse")
-                                            lastMessageLocalRepo.add(0, lastMessage)
-                                        }
-                                    }
-                                    DocumentChange.Type.MODIFIED -> {
-
-                                        val list = lastMessageLocalRepo.filter {
-                                            it.chatThread == lastMessage.chatThread
-                                        }
-
-                                        for (e in list) {
-                                            val index = lastMessageLocalRepo.indexOf(e)
-                                            if (e.message.message == lastMessage.message.message) {
-                                                lastMessageLocalRepo.removeAt(index)
-                                                lastMessageLocalRepo.add(index, lastMessage)
-
-                                            } else {
-                                                lastMessageLocalRepo.removeAt(index)
-                                                lastMessageLocalRepo.add(0, lastMessage)
-                                            }
-                                        }
-                                    }
-                                    else -> {
-                                    }
-                                }
+                            if (each.message != lastMessage.message) {
+                                lastMessageLocalRepo.add(0, lastMessage)
+                                lastMessageList.postValue(Event(Resource.Success(lastMessageLocalRepo)))
+                            } else {
+                                lastMessageLocalRepo.add(index, lastMessage)
+                                lastMessageList.postValue(Event(Resource.Success(lastMessageLocalRepo)))
                             }
                         }
-                        job.join()
-                        isLastMessageFirstLoad = false
-                        lastMessageList.postValue(
-                            Event(
-                                Resource.Success(
-                                    lastMessageLocalRepo
-                                )
-                            )
-                        )
                     }
                 }
             }
         }
     }
 
+    override suspend fun getLastMessageFirstQuery(currentUser: User): Resource<Boolean> =
+        withContext(Dispatchers.IO) {
+            safeCall {
+                val querySnapshot = chatsCollection
+                    .whereArrayContains("$MESSAGE.$SENDER_AND_RECEIVER_UID", Firebase.auth.uid!!)
+                    .orderBy("$MESSAGE.$DATE", Query.Direction.DESCENDING)
+                    .limit(LAST_MESSAGE_PAGE_LIMIT)
+                    .get().await()
+                if (querySnapshot.isEmpty) {
+                    lastMessageList.postValue(Event(Resource.Error(NO_MORE_MESSAGES)))
+                }
+                lastMessageLastVisible = querySnapshot.documents[querySnapshot.size() - 1]
+                querySnapshot.forEach {
+                    val documentSnapshot = getOtherUserForRecentChat(
+                        it.toObject(LastMessage::class.java),
+                        currentUser
+                    )
+                    Log.i(TAG, "getLastMessageFirstQuery: ${documentSnapshot.message.message}")
+                    lastMessageLocalRepo.add(documentSnapshot)
+                }
+                lastMessageList.postValue(Event(Resource.Success(lastMessageLocalRepo)))
+                Resource.Success(true)
+            }
+
+        }
+
     override suspend fun getLastMessageLoadMore(currentUser: User) {
         withContext(Dispatchers.IO) {
-            val nextQuery = chatsCollection
-                .whereArrayContains("$MESSAGE.$SENDER_AND_RECEIVER_UID", Firebase.auth.uid!!)
-                .orderBy("$MESSAGE.$DATE", Query.Direction.DESCENDING)
-                .startAfter(lastMessageLastVisible ?: return@withContext)
-                .limit(LAST_MESSAGE_PAGE_LIMIT)
-
-
-            lastMessageNextListenerRegistration = nextQuery.addSnapshotListener { value, error ->
-                error?.let {
-                    Log.e(TAG, "getLastMessageLoadMore: ", it)
-                    lastMessageList.postValue(Event(Resource.Error(it.message!!)))
-                    return@addSnapshotListener
+            safeCall {
+                val querySnapshot = chatsCollection
+                    .whereArrayContains("$MESSAGE.$SENDER_AND_RECEIVER_UID", Firebase.auth.uid!!)
+                    .orderBy("$MESSAGE.$DATE", Query.Direction.DESCENDING)
+                    .startAfter(lastMessageLastVisible ?: return@withContext)
+                    .limit(LAST_MESSAGE_PAGE_LIMIT)
+                    .get().await()
+                if (querySnapshot.isEmpty || lastMessageLastVisible == querySnapshot.documents[querySnapshot.size() - 1]) {
+                    lastMessageList.postValue(Event(Resource.Error(NO_MORE_MESSAGES)))
+                    return@withContext
                 }
-
-                value?.let { querySnapshot ->
-                    when {
-                        querySnapshot.size() <= 0 -> {
-                            Log.i(TAG, "getLastMessageLoadMore: query less than zero")
-                            lastMessageList.postValue(Event(Resource.Error(NO_MORE_MESSAGES)))
-                            return@addSnapshotListener
-                        }
-                        lastMessageLastVisible == querySnapshot.documents[querySnapshot.size() - 1] -> {
-                            Log.i(TAG, "getLastMessageLoadMore: same as previous")
-                            lastMessageNextListenerRegistration?.remove()
-                            lastMessageList.postValue(Event(Resource.Error(NO_MORE_MESSAGES)))
-                            return@addSnapshotListener
-                        }
-                        else -> {
-                            lastMessageLastVisible =
-                                querySnapshot.documents[querySnapshot.size() - 1]
-                        }
-                    }
-
-                    GlobalScope.launch {
-                        val job = launch {
-                            for (doc in querySnapshot.documentChanges) {
-                                val lastMessage = doc.document.toObject(LastMessage::class.java)
-                                val it = usersCollection.document(
-                                    if (lastMessage.message.senderAndReceiverUid[0] == currentUser.uid)
-                                        lastMessage.message.senderAndReceiverUid[1]
-                                    else
-                                        lastMessage.message.senderAndReceiverUid[0]
-
-                                ).get().await()
-
-                                val user = it.toObject(User::class.java)!!
-                                if (lastMessage.message.senderAndReceiverUid[0] == currentUser.uid) {
-                                    lastMessage.receiver = user
-                                    lastMessage.sender = currentUser
-                                } else {
-                                    lastMessage.receiver = currentUser
-                                    lastMessage.sender = user
-                                }
-
-                                Log.i(TAG, "getLastMessageLoadMore: user -> ${user.name}")
-                                Log.i(TAG, "getLastMessageLoadMore: $lastMessage")
-
-                                when (doc.type) {
-                                    DocumentChange.Type.ADDED -> {
-                                        lastMessageLocalRepo.removeAll { existingLastMessage ->
-                                            existingLastMessage.chatThread == lastMessage.chatThread
-                                        }
-                                        lastMessageLocalRepo.add(lastMessage)
-                                    }
-                                    DocumentChange.Type.MODIFIED -> {
-                                        val list = lastMessageLocalRepo.filter {
-                                            it.chatThread == lastMessage.chatThread
-                                        }
-
-                                        for (e in list) {
-                                            val index = lastMessageLocalRepo.indexOf(e)
-                                            if (e.message.message == lastMessage.message.message) {
-                                                lastMessageLocalRepo.removeAt(index)
-                                                lastMessageLocalRepo.add(index, lastMessage)
-
-                                            } else {
-                                                lastMessageLocalRepo.removeAt(index)
-                                                lastMessageLocalRepo.add(0, lastMessage)
-                                            }
-                                        }
-                                    }
-                                    else -> {
-                                    }
-                                }
-                            }
-                        }
-                        job.join()
-                        lastMessageList.postValue(
-                            Event(
-                                Resource.Success(
-                                    lastMessageLocalRepo
-                                )
-                            )
-                        )
-                    }
+                lastMessageLastVisible = querySnapshot.documents[querySnapshot.size() - 1]
+                querySnapshot.forEach {
+                    val documentSnapshot = getOtherUserForRecentChat(
+                        it.toObject(LastMessage::class.java),
+                        currentUser
+                    )
+                    lastMessageLocalRepo.add(documentSnapshot)
                 }
+                lastMessageList.postValue(Event(Resource.Success(lastMessageLocalRepo)))
+                Resource.Success(true) // No use
             }
         }
     }
@@ -529,11 +390,11 @@ class DefaultChatRepository @Inject constructor(
         }
     }
 
-    override suspend fun checkForUnSeenMessage() {
+    override suspend fun checkForUnSeenMessage(uid: String) {
         withContext(Dispatchers.IO) {
             try {
                 val query = chatsCollection
-                    .whereEqualTo(RECEIVER_UID, currentUserUid)
+                    .whereEqualTo(RECEIVER_UID, uid)
                     .whereNotEqualTo("$MESSAGE.$STATUS", SEEN)
                     .orderBy("$MESSAGE.$STATUS", Query.Direction.DESCENDING)
                     .orderBy("$MESSAGE.$DATE", Query.Direction.DESCENDING)
@@ -571,5 +432,28 @@ class DefaultChatRepository @Inject constructor(
                 )
             }
         }
+    }
+
+    private suspend fun getOtherUserForRecentChat(
+        lastMessage: LastMessage,
+        currentUser: User
+    ): LastMessage = run {
+        val docId = if (lastMessage.message.senderAndReceiverUid[0] == currentUser.uid)
+            lastMessage.message.senderAndReceiverUid[1]
+        else
+            lastMessage.message.senderAndReceiverUid[0]
+
+        val it = usersCollection.document(docId).get().await()
+
+        val user = it.toObject(User::class.java)!!
+        if (lastMessage.message.senderAndReceiverUid[0] == currentUser.uid) {
+            lastMessage.receiver = user
+            lastMessage.sender = currentUser
+        } else {
+            lastMessage.receiver = currentUser
+            lastMessage.sender = user
+        }
+
+        lastMessage
     }
 }

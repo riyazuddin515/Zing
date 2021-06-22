@@ -18,6 +18,7 @@ import com.riyazuddin.zing.R
 import com.riyazuddin.zing.adapters.LastMessageAdapter
 import com.riyazuddin.zing.databinding.FragmentRecentChatListBinding
 import com.riyazuddin.zing.other.Constants
+import com.riyazuddin.zing.other.Constants.SEEN
 import com.riyazuddin.zing.other.EventObserver
 import com.riyazuddin.zing.other.snackBar
 import com.riyazuddin.zing.ui.main.viewmodels.ChatViewModel
@@ -47,6 +48,7 @@ class RecentChatListFragment : Fragment(R.layout.fragment_recent_chat_list) {
         super.onCreate(savedInstanceState)
         binding = FragmentRecentChatListBinding.inflate(layoutInflater)
 
+        Log.i(TAG, "onCreate: ")
         setupRecyclerView()
         viewModel.getLastMessageFirstQuery(args.currentUser)
     }
@@ -70,7 +72,9 @@ class RecentChatListFragment : Fragment(R.layout.fragment_recent_chat_list) {
 
         subscribeToObservers()
 
-        lastMessageAdapter.setOnItemClickListener { lastMessage ->
+        lastMessageAdapter.setOnItemClickListener { lastMessage, position ->
+            lastMessageAdapter.lastMessages[position].message.status = SEEN
+            lastMessageAdapter.notifyItemChanged(position)
             val bundle = Bundle().apply {
                 putSerializable("currentUser", args.currentUser)
                 if (lastMessage.sender.uid == args.currentUser.uid)
@@ -99,6 +103,10 @@ class RecentChatListFragment : Fragment(R.layout.fragment_recent_chat_list) {
             binding.progressBar.isVisible = false
             lastMessageAdapter.notifyDataSetChanged()
         })
+        viewModel.isLastMessagesFirstLoadDone.observe(viewLifecycleOwner, EventObserver {
+            if (it)
+                viewModel.setLastMessageListener(args.currentUser)
+        })
     }
 
     private fun setupRecyclerView() {
@@ -126,7 +134,6 @@ class RecentChatListFragment : Fragment(R.layout.fragment_recent_chat_list) {
 
     override fun onDestroy() {
         Log.i(TAG, "onDestroy")
-        lastMessageAdapter.lastMessages = listOf()
         viewModel.clearRecentMessagesList()
         super.onDestroy()
     }

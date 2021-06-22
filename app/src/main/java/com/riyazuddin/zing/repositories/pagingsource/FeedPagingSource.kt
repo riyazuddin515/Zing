@@ -71,6 +71,8 @@ class FeedPagingSource(
                 resultList.addAll(parsedPage)
             }
 
+            Log.i(TAG, "load: result -> ${resultList.size}")
+
             val lastDocumentSnapshot = currentPage!!.documents[currentPage!!.size() - 1]
 
             val nextPage = db.collection(POSTS_COLLECTION)
@@ -81,6 +83,9 @@ class FeedPagingSource(
                 .get()
                 .await()
 
+            resultList.forEach {
+                Log.d(TAG, "load: ${it.username}")
+            }
             return LoadResult.Page(
                 resultList,
                 null,

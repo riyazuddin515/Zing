@@ -58,7 +58,8 @@ import javax.inject.Singleton
 @Singleton
 class DefaultMainRepository @Inject constructor(
     private val auth: FirebaseAuth,
-    private val firestore: FirebaseFirestore
+    private val firestore: FirebaseFirestore,
+    private val database: FirebaseDatabase
 ) : MainRepository {
 
     companion object {
@@ -78,7 +79,7 @@ class DefaultMainRepository @Inject constructor(
         withContext(Dispatchers.IO) {
             safeCall {
                 val userStatusDatabaseRef =
-                    FirebaseDatabase.getInstance().reference.child("status/$uid")
+                    database.reference.child("status/$uid")
 
                 val token = FirebaseMessaging.getInstance().token.await()
 
@@ -105,7 +106,7 @@ class DefaultMainRepository @Inject constructor(
                 )
                 Log.i(TAG, "onlineOfflineToggle: addingValueEvenListener")
 
-                FirebaseDatabase.getInstance().getReference(".info/connected")
+                database.getReference(".info/connected")
                     .addValueEventListener(object :
                         ValueEventListener {
                         override fun onDataChange(snapshot: DataSnapshot) {
@@ -430,33 +431,6 @@ class DefaultMainRepository @Inject constructor(
                     .await()
 
                 Resource.Success(comment)
-            }
-        }
-
-    override suspend fun getListOfPostLikes(postId: String): Resource<List<String>> =
-        withContext(Dispatchers.IO) {
-            safeCall {
-                val list = postLikesCollection.document(postId)
-                    .get().await().toObject(PostLikes::class.java)?.likedBy ?: listOf()
-                Resource.Success(list)
-            }
-        }
-
-    override suspend fun getListOfFollowingUsersUid(uid: String): Resource<List<String>> =
-        withContext(Dispatchers.IO) {
-            safeCall {
-                val list = followingCollection.document(uid).get()
-                    .await().toObject(Following::class.java)?.following ?: listOf()
-                Resource.Success(list)
-            }
-        }
-
-    override suspend fun getListOfFollowersUsersUid(uid: String): Resource<List<String>> =
-        withContext(Dispatchers.IO) {
-            safeCall {
-                val list = followersCollection.document(uid).get()
-                    .await().toObject(Followers::class.java)?.followers ?: listOf()
-                Resource.Success(list)
             }
         }
 }

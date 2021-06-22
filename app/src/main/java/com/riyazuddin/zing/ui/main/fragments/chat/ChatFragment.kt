@@ -43,6 +43,10 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class ChatFragment : Fragment(R.layout.fragment_chat) {
 
+    companion object {
+        const val TAG = "ChatFragment"
+    }
+
     private lateinit var binding: FragmentChatBinding
 
     private val viewModel: ChatViewModel by viewModels()
@@ -165,9 +169,6 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
                 binding.linearProgressIndicator.isVisible = true
             }
         ) {
-            it.forEach { message ->
-                Log.i(TAG, "subscribeToObserver it: ${message.message} ")
-            }
             binding.linearProgressIndicator.isVisible = false
             chatAdapter.messages = it
             chatAdapter.notifyDataSetChanged()
@@ -221,17 +222,12 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
     override fun onDestroy() {
         chatAdapter.messages = listOf()
         viewModel.clearChatList()
-        super.onDestroy()
-
         val sp = requireActivity().getSharedPreferences(CHATTING_WITH, Application.MODE_PRIVATE)
         sp.edit().let {
             it.putString(Constants.UID, NO_ONE)
             it.apply()
         }
-    }
-
-    companion object {
-        const val TAG = "ChatFragment"
+        super.onDestroy()
     }
 
     private fun hideKeyboard(view: View) {

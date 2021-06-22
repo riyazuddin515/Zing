@@ -17,10 +17,15 @@ import androidx.paging.LoadState
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.ktx.Firebase
 import com.riyazuddin.zing.R
+import com.riyazuddin.zing.data.entities.LastMessage
+import com.riyazuddin.zing.data.entities.Message
 import com.riyazuddin.zing.data.entities.User
 import com.riyazuddin.zing.databinding.FragmentHomeBinding
+import com.riyazuddin.zing.other.Constants.CHATS_COLLECTION
+import com.riyazuddin.zing.other.Constants.MESSAGES_COLLECTION
 import com.riyazuddin.zing.other.EventObserver
 import com.riyazuddin.zing.other.snackBar
 import com.riyazuddin.zing.ui.auth.AuthActivity
@@ -28,11 +33,19 @@ import com.riyazuddin.zing.ui.dialogs.CustomDialog
 import com.riyazuddin.zing.ui.main.viewmodels.BasePostViewModel
 import com.riyazuddin.zing.ui.main.viewmodels.HomeViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withContext
+import java.util.*
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class HomeFragment : BasePostFragment(R.layout.fragment_home) {
+
+    @Inject
+    lateinit var firestore: FirebaseFirestore
 
     private lateinit var binding: FragmentHomeBinding
 
@@ -66,7 +79,7 @@ class HomeFragment : BasePostFragment(R.layout.fragment_home) {
         currentUserUid?.let {
             viewModel.onlineOfflineToggle(it)
             viewModel.getCurrentUser(it)
-            viewModel.checkForUnSeenMessage()
+            viewModel.checkForUnSeenMessage(it)
         }
     }
 
@@ -91,6 +104,12 @@ class HomeFragment : BasePostFragment(R.layout.fragment_home) {
         if (currentUser != null) {
             binding.ibRecentChat.isVisible = true
         }
+
+//        binding.send.setOnClickListener {
+//            viewLifecycleOwner.lifecycleScope.launch {
+//                sendMessage()
+//            }
+//        }
 
     }
 
@@ -210,11 +229,72 @@ class HomeFragment : BasePostFragment(R.layout.fragment_home) {
     }
 
     override fun onDestroy() {
-        viewModel.unSeenMessagesListener?.remove()
+//        viewModel.unSeenMessagesListener?.remove()
         super.onDestroy()
     }
     companion object {
         const val TAG = "HomeFragment"
     }
+
+//    suspend fun sendMessage()  {
+//        withContext(Dispatchers.IO){
+//
+//            val arr = listOf(
+//                "fF1FTZ34HoAE952KJCRTGrhL0thX",
+//                "6RL1hZFb7u1e8wAPfx5x8jfViVge",
+//                "UD4m3tKiKnXarqnY7B46BWA2sRIH",
+//                "XDIXCKryjrsiEEIsofcO9QHCcyu9",
+//                "QPTCltUK5pIzqdZP8OYEyzNfm71N",
+//                "Gw1Ch0DiKr3KZL3EezPgYlY6N9RW",
+//                "53kcxSnKKGgZmjiyrNSvwti4LhWX",
+//                "Uo5DZAVQZRzn8g5B9puhY31pV9b8",
+//                "XNnrEExr6eZr1aCFoXNCfcNSIz6x",
+//                "hdXjK5bnbUOwkyJuG4Q42QcrlwaX",
+//                "ZJ3JA4NQlOZ8P3QZueg1L7v3yxVC",
+//                "EP8aqLMFAc51xlrKAgEWe0Nhdci2",
+//                "DAKdCnfJE8rccbPDw0FYEsWt53Qu",
+//                "8GNTQTaqOE47nB2B592qnIwJxAfm",
+//                "9GdMt56TNQPgF1yYdQSeAzYgT1tx",
+//                "AnrllBTPFxrJ55Key7E3fSeb1sff",
+//                "HMUrY5xZJuXZgJQIrLlqyZ8OJax9",
+//                "GX8ksR7oFk0bWUZmTgq0tVhH2OnB",
+//                "0OeYjcSAukYETrQhDePG8XfcOMb2",
+//                "Cph7nvfN7k6B13vkSONSRforp0EV",
+//                "erZ0PYQpSR9QCOFuw6uI4Zcnaxlq",
+//                "p73F16NbqkoZdxKG7CBuu5QHQIwC",
+//                "LLTpsAkAUiDn1q0g9kOQjcBdJoel",
+//                "1GTVaY85CQNDrHVBl3lWbaGpombw"
+//            )
+//
+//            var i = 1
+//            val currentUid = Firebase.auth.uid!!
+//            arr.forEach { uid ->
+//                val chatThread = getChatThread(currentUid, uid)
+//                val messageId = UUID.randomUUID().toString()
+//
+//                val messageOb = Message(
+//                    messageId = messageId,
+//                    message = "$i",
+//                    date = System.currentTimeMillis(),
+//                    senderAndReceiverUid = listOf(uid ,currentUid),
+//                    url = ""
+//                )
+//                firestore.collection(CHATS_COLLECTION)
+//                    .document(chatThread).collection(MESSAGES_COLLECTION).document(messageId)
+//                    .set(messageOb).await()
+//
+//                val lastMessage =
+//                    LastMessage(message = messageOb, chatThread = chatThread, receiverUid = currentUid)
+//                firestore.collection(CHATS_COLLECTION).document(chatThread).set(lastMessage).await()
+//                i += 1
+//            }
+//
+//        }
+//    }
+//    private fun getChatThread(currentUid: String, otherEndUserUid: String) =
+//        if (currentUid < otherEndUserUid)
+//            currentUid + otherEndUserUid
+//        else
+//            otherEndUserUid + currentUid
 
 }

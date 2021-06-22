@@ -1,6 +1,7 @@
 package com.riyazuddin.zing.ui.main.viewmodels
 
 import android.net.Uri
+import android.util.Log
 import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -30,6 +31,9 @@ class ChatViewModel @ViewModelInject constructor(
     private val repository: ChatRepository
 ) : ViewModel() {
 
+    companion object{
+        const val TAG = "ChatViewModel"
+    }
     private val _sendMessageStatus = MutableLiveData<Event<Resource<Message>>>()
     val sendMessageStatus: LiveData<Event<Resource<Message>>> = _sendMessageStatus
 
@@ -45,6 +49,9 @@ class ChatViewModel @ViewModelInject constructor(
     val recentMessagesList: LiveData<Event<Resource<List<LastMessage>>>> = _recentMessagesList
 
     val isUserOnline: LiveData<Event<Resource<UserStat>>> = (repository as DefaultChatRepository).isUserOnline
+
+    private val _isLastMessagesFirstLoadDone = MutableLiveData<Event<Resource<Boolean>>>()
+    val isLastMessagesFirstLoadDone: LiveData<Event<Resource<Boolean>>> = _isLastMessagesFirstLoadDone
 
     fun getChatLoadFirstQuery(currentUid: String, otherEndUserUid: String) {
         _chatList.postValue(Event(Resource.Loading()))
@@ -100,10 +107,17 @@ class ChatViewModel @ViewModelInject constructor(
         }
     }
 
+    fun setLastMessageListener(currentUser: User) {
+        viewModelScope.launch {
+            repository.lastMessageListener(currentUser)
+        }
+    }
     fun getLastMessageFirstQuery(currentUser: User) {
         _recentMessagesList.postValue(Event(Resource.Loading()))
         viewModelScope.launch {
-            repository.getLastMessageFirstQuery(currentUser)
+            val result = repository.getLastMessageFirstQuery(currentUser)
+            Log.i(TAG, "getLastMessageFirstQuery: viewmodel --> ${result.data}")
+            _isLastMessagesFirstLoadDone.postValue(Event(result))
         }
     }
 
@@ -122,7 +136,6 @@ class ChatViewModel @ViewModelInject constructor(
 
 
     fun clearChatList() {
-        _chatList.postValue(Event(Resource.Success(listOf())))
         repository.clearChatList()
     }
 

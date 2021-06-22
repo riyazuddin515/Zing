@@ -19,6 +19,9 @@ import com.riyazuddin.zing.R
 import com.riyazuddin.zing.data.entities.User
 import com.riyazuddin.zing.databinding.FragmentProfileBinding
 import com.riyazuddin.zing.other.EventObserver
+import com.riyazuddin.zing.other.NavGraphArgsConstants.FOLLOWERS_ARG
+import com.riyazuddin.zing.other.NavGraphArgsConstants.FOLLOWING_ARG
+import com.riyazuddin.zing.other.NavGraphArgsConstants.LIKED_BY_ARG
 import com.riyazuddin.zing.other.snackBar
 import com.riyazuddin.zing.ui.main.viewmodels.BasePostViewModel
 import com.riyazuddin.zing.ui.main.viewmodels.ProfileViewModel
@@ -125,22 +128,22 @@ open class ProfileFragment : BasePostFragment(R.layout.fragment_profile) {
     private fun setupClickListeners() {
         binding.tvFollowersCount.setOnClickListener {
             findNavController().navigate(
-                ProfileFragmentDirections.globalActionToUserListFragment(uid, "Followers")
+                ProfileFragmentDirections.globalActionToUserListFragment(uid, FOLLOWERS_ARG)
             )
         }
         binding.tvFollowingCount.setOnClickListener {
             findNavController().navigate(
-                ProfileFragmentDirections.globalActionToUserListFragment(uid, "Following")
+                ProfileFragmentDirections.globalActionToUserListFragment(uid, FOLLOWING_ARG)
             )
         }
         binding.tvFollowers.setOnClickListener {
             findNavController().navigate(
-                ProfileFragmentDirections.globalActionToUserListFragment(uid, "Followers")
+                ProfileFragmentDirections.globalActionToUserListFragment(uid, FOLLOWERS_ARG)
             )
         }
         binding.tvFollowing.setOnClickListener {
             findNavController().navigate(
-                ProfileFragmentDirections.globalActionToUserListFragment(uid, "Following")
+                ProfileFragmentDirections.globalActionToUserListFragment(uid, FOLLOWING_ARG)
             )
         }
         binding.btnEditProfile.setOnClickListener {
@@ -148,7 +151,7 @@ open class ProfileFragment : BasePostFragment(R.layout.fragment_profile) {
         }
         postAdapter.setOnLikedByClickListener {
             findNavController().navigate(
-                ProfileFragmentDirections.globalActionToUserListFragment(it.postId, "LikedBy")
+                ProfileFragmentDirections.globalActionToUserListFragment(it.postId, LIKED_BY_ARG)
             )
         }
         postAdapter.setOnCommentClickListener { post ->

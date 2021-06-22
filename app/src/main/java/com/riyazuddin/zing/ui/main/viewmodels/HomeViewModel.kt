@@ -43,9 +43,9 @@ class HomeViewModel @ViewModelInject constructor(
 
     val haveUnSeenMessages = (chatRepository as DefaultChatRepository).haveUnSeenMessages
     val unSeenMessagesListener = (chatRepository as DefaultChatRepository).unSeenMessagesListener
-    fun checkForUnSeenMessage() {
+    fun checkForUnSeenMessage(uid: String) {
         viewModelScope.launch {
-            chatRepository.checkForUnSeenMessage()
+            chatRepository.checkForUnSeenMessage(uid)
         }
     }
 

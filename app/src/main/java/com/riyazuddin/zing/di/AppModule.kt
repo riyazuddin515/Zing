@@ -5,7 +5,9 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.request.RequestOptions
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.FirebaseFirestoreSettings
 import com.riyazuddin.zing.R
 import dagger.Module
 import dagger.Provides
@@ -44,13 +46,12 @@ object AppModule {
     @Provides
     fun provideFirestore() = run {
         val instance = FirebaseFirestore.getInstance()
-//        val settings = FirebaseFirestoreSettings.Builder()
-//            .setHost("192.168.0.6:8085")
-//            .setSslEnabled(false)
-//            .setPersistenceEnabled(false)
-//            .build()
-//
-//        instance.firestoreSettings = settings
+        val settings = FirebaseFirestoreSettings.Builder()
+            .setHost("192.168.0.7:2023")
+            .setSslEnabled(false)
+            .setPersistenceEnabled(false)
+            .build()
+        instance.firestoreSettings = settings
         instance
     }
 
@@ -58,8 +59,16 @@ object AppModule {
     @Provides
     fun provideFirebaseAuth() = run {
         val auth = FirebaseAuth.getInstance()
-//        auth.useEmulator("192.168.0.6", 9099)
+        auth.useEmulator("192.168.0.7", 1023)
         auth
+    }
+
+    @Singleton
+    @Provides
+    fun providesFirebaseDatabase() = run {
+        val database = FirebaseDatabase.getInstance()
+        database.useEmulator("192.168.0.7",4011)
+        database
     }
 
 }

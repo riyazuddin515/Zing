@@ -113,28 +113,4 @@ interface MainRepository {
      */
     suspend fun deleteComment(comment: Comment): Resource<Comment>
 
-    /**
-     * @since 17-Jun-21
-     * @param postId uses to get the list of
-     * uid who likes the post associated with this postId
-     * @author Resource<List<String>>
-     */
-    suspend fun getListOfPostLikes(postId: String): Resource<List<String>>
-
-    /**
-     * @since 17-Jun-21
-     * @param uid uses to get the list of
-     * uid of users whom this uid user is following
-     * @author Resource<List<String>>
-     */
-    suspend fun getListOfFollowingUsersUid(uid: String): Resource<List<String>>
-
-    /**
-     * @since 17-Jun-21
-     * @param uid uses to get the list of
-     * uid of users who are the followers ot this uid
-     * @author Resource<List<String>>
-     */
-    suspend fun getListOfFollowersUsersUid(uid: String): Resource<List<String>>
-
 }

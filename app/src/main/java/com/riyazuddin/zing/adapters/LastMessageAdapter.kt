@@ -78,22 +78,24 @@ class LastMessageAdapter @Inject constructor(private val glide: RequestManager) 
                 ivUnSeen.isVisible = false
             }
 
-            if (isCurrentUserIsSender) {
-                when (lastMessage.message.status) {
-                    SENDING -> {
-                        tvLastMessage.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_sending_grey, 0, 0, 0)
-                    }
-                    SENT -> {
-                        tvLastMessage.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_sent_grey, 0, 0, 0)
-                    }
-                    DELIVERED -> {
-                        tvLastMessage.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_delivered_grey, 0, 0, 0)
-                    }
-                    SEEN -> {
-                        tvLastMessage.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_seen_blue, 0, 0, 0)
-                    }
-                }
-            }
+//            if (isCurrentUserIsSender) {
+//                when (lastMessage.message.status) {
+//                    SENDING -> {
+//                        tvLastMessage.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_sending_grey, 0, 0, 0)
+//                    }
+//                    SENT -> {
+//                        tvLastMessage.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_sent_grey, 0, 0, 0)
+//                    }
+//                    DELIVERED -> {
+//                        tvLastMessage.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_delivered_grey, 0, 0, 0)
+//                    }
+//                    SEEN -> {
+//                        tvLastMessage.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_seen_blue, 0, 0, 0)
+//                    }
+//                }
+//            }else{
+//                tvLastMessage.setCompoundDrawablesWithIntrinsicBounds(0,0,0,0)
+//            }
 
             val date =
                 SimpleDateFormat("hh:mm a", Locale.US).format(Date(lastMessage.message.date))
@@ -106,7 +108,7 @@ class LastMessageAdapter @Inject constructor(private val glide: RequestManager) 
             }
             root.setOnClickListener {
                 onItemClickListener?.let {
-                    it(lastMessage)
+                    it(lastMessage, position)
                 }
             }
         }
@@ -114,8 +116,8 @@ class LastMessageAdapter @Inject constructor(private val glide: RequestManager) 
 
     override fun getItemCount(): Int = lastMessages.size
 
-    private var onItemClickListener: ((LastMessage) -> Unit)? = null
-    fun setOnItemClickListener(listener: (LastMessage) -> Unit) {
+    private var onItemClickListener: ((LastMessage, Int) -> Unit)? = null
+    fun setOnItemClickListener(listener: (LastMessage, Int) -> Unit) {
         onItemClickListener = listener
     }
 

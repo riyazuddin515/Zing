@@ -1,6 +1,5 @@
 package com.riyazuddin.zing.repositories.pagingsource
 
-import android.util.Log
 import androidx.paging.PagingSource
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
@@ -25,10 +24,11 @@ class FollowingAndFollowersPagingSource(
     }
 
     private var isFirst = true
-    private lateinit var list: List<String>
+    private lateinit var list: MutableList<List<String>>
 
     override suspend fun load(params: LoadParams<QuerySnapshot>): LoadResult<QuerySnapshot, User> {
         try {
+            val result = mutableListOf<User>()
             if (isFirst) {
                 val following = firestore
                     .collection(FOLLOWING_COLLECTION)
@@ -44,38 +44,31 @@ class FollowingAndFollowersPagingSource(
                     .await()
                     .toObject(Followers::class.java)?.followers ?: listOf()
 
-                list = following + followers
-
-                Log.i(TAG, "load: $list")
+                list = (following + followers).chunked(10).toMutableList()
                 isFirst = false
+                if (list.isEmpty())
+                    return LoadResult.Page(result, null, null)
             }
 
-            val chunks = list.chunked(10)
-            var currentPage = params.key
-            chunks.forEach { chunk ->
-                currentPage = params.key ?: firestore
-                    .collection(USERS_COLLECTION)
-                    .whereIn(UID, chunk)
-                    .orderBy(NAME, Query.Direction.ASCENDING)
-                    .get()
-                    .await()
-            }
+            val currentPage = params.key ?: firestore
+                .collection(USERS_COLLECTION)
+                .whereIn(UID, list.removeFirst())
+                .orderBy(NAME, Query.Direction.ASCENDING)
+                .get()
+                .await()
+            result.addAll(currentPage.toObjects(User::class.java))
 
-            val lastDocumentSnapshot = currentPage!!.documents[currentPage!!.size() - 1]
+            if (list.isEmpty())
+                return LoadResult.Page(result, null, null)
 
             val nextQuery = firestore
                 .collection(USERS_COLLECTION)
-                .whereIn(UID, if (chunks.isNotEmpty()) chunks[0] else listOf())
+                .whereIn(UID, list.removeFirst())
                 .orderBy(NAME, Query.Direction.ASCENDING)
-                .startAfter(lastDocumentSnapshot)
                 .get()
                 .await()
 
-            return LoadResult.Page(
-                currentPage!!.toObjects(User::class.java),
-                null,
-                nextQuery
-            )
+            return LoadResult.Page(result, null, nextQuery)
 
         } catch (e: Exception) {
             return LoadResult.Error(e)

@@ -17,11 +17,11 @@ class UserAdapterPagingData @Inject constructor(val glide: RequestManager) :
 
     companion object : DiffUtil.ItemCallback<User>() {
         override fun areItemsTheSame(oldItem: User, newItem: User): Boolean {
-            return oldItem.hashCode() == newItem.hashCode()
+            return oldItem.uid == newItem.uid
         }
 
         override fun areContentsTheSame(oldItem: User, newItem: User): Boolean {
-            return oldItem.uid == newItem.uid
+            return oldItem == newItem
         }
     }
 
