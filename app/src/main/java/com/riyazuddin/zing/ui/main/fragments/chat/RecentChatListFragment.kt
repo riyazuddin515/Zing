@@ -35,6 +35,8 @@ class RecentChatListFragment : Fragment(R.layout.fragment_recent_chat_list) {
 
     @Inject
     lateinit var lastMessageAdapter: LastMessageAdapter
+    
+    private var isFirstTime = true
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -104,8 +106,10 @@ class RecentChatListFragment : Fragment(R.layout.fragment_recent_chat_list) {
             lastMessageAdapter.notifyDataSetChanged()
         })
         viewModel.isLastMessagesFirstLoadDone.observe(viewLifecycleOwner, EventObserver {
-            if (it)
+            if (it and isFirstTime) {
+                isFirstTime = false
                 viewModel.setLastMessageListener(args.currentUser)
+            }
         })
     }
 
@@ -132,10 +136,14 @@ class RecentChatListFragment : Fragment(R.layout.fragment_recent_chat_list) {
         }
     }
 
-    override fun onDestroy() {
-        Log.i(TAG, "onDestroy")
+//    override fun onStop() {
+//        viewModel.clearRecentMessagesList()
+//        super.onStop()
+//    }
+
+    override fun onDetach() {
         viewModel.clearRecentMessagesList()
-        super.onDestroy()
+        super.onDetach()
     }
 
     override fun onStart() {

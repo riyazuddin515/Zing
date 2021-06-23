@@ -62,6 +62,7 @@ class FirebaseMessagingService : FirebaseMessagingService() {
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
         super.onMessageReceived(remoteMessage)
 
+        Log.i(TAG, "onMessageReceived: ")
         val notificationDataObj =
             Gson().fromJson(remoteMessage.data["notification"], Notification::class.java)
 
@@ -107,6 +108,14 @@ class FirebaseMessagingService : FirebaseMessagingService() {
                 notification.setContentIntent(pi)
             }
             POST_LIKE_TYPE -> {
+                val pi = NavDeepLinkBuilder(this)
+                    .setGraph(R.navigation.nav_graph_main)
+                    .setDestination(R.id.postFragment)
+                    .setArguments(PostFragmentArgs(remoteMessage.data[POST_ID]!!).toBundle())
+                    .createPendingIntent()
+                notification.setContentIntent(pi)
+            }
+            "COMMENT_TYPE" -> {
                 val pi = NavDeepLinkBuilder(this)
                     .setGraph(R.navigation.nav_graph_main)
                     .setDestination(R.id.postFragment)

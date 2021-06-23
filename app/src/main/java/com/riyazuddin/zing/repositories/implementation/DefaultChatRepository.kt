@@ -23,6 +23,7 @@ import com.riyazuddin.zing.other.Constants.RECEIVER_UID
 import com.riyazuddin.zing.other.Constants.SEEN
 import com.riyazuddin.zing.other.Constants.SENDER_AND_RECEIVER_UID
 import com.riyazuddin.zing.other.Constants.SENDING
+import com.riyazuddin.zing.other.Constants.SENT
 import com.riyazuddin.zing.other.Constants.STATUS
 import com.riyazuddin.zing.other.Constants.SUCCESS
 import com.riyazuddin.zing.other.Constants.TYPE
@@ -48,25 +49,25 @@ class DefaultChatRepository @Inject constructor(
     private val usersCollection = firestore.collection(USERS_COLLECTION)
     private val chatsCollection = firestore.collection(CHATS_COLLECTION)
     private val usersStatCollection = firestore.collection(USERS_STAT_COLLECTION)
+
     var playTone = MutableLiveData<Event<Resource<Boolean>>>()
 
     private var chatListLocalToRepo = mutableListOf<Message>()
     val chatList = MutableLiveData<Event<Resource<List<Message>>>>()
-
     private var isFirstPageFirstLoad = true
     private var lastVisible: DocumentSnapshot? = null
     private var firstListener: ListenerRegistration? = null
 
-    private var lastMessageFirstListenerRegistration: ListenerRegistration? = null
-    private var lastMessageNextListenerRegistration: ListenerRegistration? = null
-    private var isLastMessageFirstLoad = true
+    private var lastMessageListener: ListenerRegistration? = null
     private var lastMessageLocalRepo = mutableListOf<LastMessage>()
     val lastMessageList = MutableLiveData<Event<Resource<List<LastMessage>>>>()
     private var lastMessageLastVisible: DocumentSnapshot? = null
 
     val haveUnSeenMessages = MutableLiveData<Event<Resource<Boolean>>>()
-    var unSeenMessagesListener: ListenerRegistration? = null
+    private var unSeenMessagesListener: ListenerRegistration? = null
+
     var isUserOnline = MutableLiveData<Event<Resource<UserStat>>>()
+    private var checkOnlineListener: ListenerRegistration? = null
 
     companion object {
         const val TAG = "DefaultChatRepo"
@@ -99,7 +100,6 @@ class DefaultChatRepository @Inject constructor(
                 messageId = messageId,
                 message = message,
                 type = type,
-                date = System.currentTimeMillis(),
                 senderAndReceiverUid = listOf(currentUid, receiverUid),
                 url = messageMediaUrl ?: ""
             )
@@ -113,6 +113,7 @@ class DefaultChatRepository @Inject constructor(
             Resource.Success(messageOb)
         }
     }
+
 
     override suspend fun updateMessageStatusAsSeen(message: Message): Resource<String> =
         withContext(Dispatchers.IO) {
@@ -137,12 +138,12 @@ class DefaultChatRepository @Inject constructor(
         }
 
     override fun updateChatListOnMessageSent(message: Message) {
-        val m = chatListLocalToRepo.filter {
-            it.messageId == message.messageId
-        }[0]
-        val index = chatListLocalToRepo.indexOf(m)
-        chatListLocalToRepo[index] = message
-        chatList.postValue(Event(Resource.Success(chatListLocalToRepo)))
+//        val m = chatListLocalToRepo.filter {
+//            it.messageId == message.messageId
+//        }[0]
+//        val index = chatListLocalToRepo.indexOf(m)
+//        chatListLocalToRepo[index] = message
+//        chatList.postValue(Event(Resource.Success(chatListLocalToRepo)))
     }
 
     override suspend fun getChatLoadFirstQuery(currentUid: String, otherEndUserUid: String) {
@@ -173,8 +174,11 @@ class DefaultChatRepository @Inject constructor(
                         val message = doc.document.toObject(Message::class.java)
                         when (doc.type) {
                             DocumentChange.Type.ADDED -> {
-                                if (doc.document.metadata.hasPendingWrites())
+                                if (doc.document.metadata.hasPendingWrites()) {
                                     message.status = SENDING
+                                    message.date = Date()
+                                }
+
                                 if (isFirstPageFirstLoad)
                                     chatListLocalToRepo.add(message)
                                 else
@@ -189,9 +193,12 @@ class DefaultChatRepository @Inject constructor(
                     }
                     chatList.postValue(Event(Resource.Success(chatListLocalToRepo)))
                     isFirstPageFirstLoad = false
-                    val lastMessage = chatListLocalToRepo.first()
-                    if (lastMessage.senderAndReceiverUid[0] != currentUid && lastMessage.status != SEEN)
-                        playTone.postValue(Event(Resource.Success(true)))
+                    if (chatListLocalToRepo.isNotEmpty()){
+                        val lastMessage = chatListLocalToRepo[0]
+                        if (lastMessage.senderAndReceiverUid[0] != currentUid && lastMessage.status != SEEN)
+                            playTone.postValue(Event(Resource.Success(true)))
+                    }
+
                 }
             }
             Log.i(TAG, "getChatLoadFirstQuery: Completed")
@@ -228,17 +235,16 @@ class DefaultChatRepository @Inject constructor(
     override fun clearChatList() {
         isFirstPageFirstLoad = true
         firstListener?.remove()
-        firstListener = null
         lastVisible = null
         playTone.postValue(Event(Resource.Success(false)))
         chatListLocalToRepo.clear()
-        chatList.postValue(Event(Resource.Success(listOf())))
+        chatList.postValue(Event(Resource.Success(chatListLocalToRepo)))
     }
 
     override fun clearRecentMessagesList() {
-        isLastMessageFirstLoad = true
         lastMessageLastVisible = null
-        lastMessageFirstListenerRegistration?.remove()
+        lastMessageListener?.remove()
+        lastMessageListener = null
         lastMessageLocalRepo.clear()
         lastMessageList.postValue(Event((Resource.Success(lastMessageLocalRepo))))
     }
@@ -249,12 +255,17 @@ class DefaultChatRepository @Inject constructor(
             .orderBy("$MESSAGE.$DATE", Query.Direction.DESCENDING)
             .limit(1)
 
-        querySnapshot.addSnapshotListener { value, error ->
+        lastMessageListener = querySnapshot
+            .addSnapshotListener { value, error ->
             error?.let {
                 lastMessageList.postValue(Event(Resource.Error(it.message ?: FAILURE)))
                 return@addSnapshotListener
             }
             value?.let {
+                if (it.isEmpty) {
+                    lastMessageList.postValue(Event(Resource.Error(NO_MORE_MESSAGES)))
+                    return@addSnapshotListener
+                }
                 Log.i(TAG, "lastMessageListener: invoked")
                 for (e in it.documentChanges) {
                     val lastMessage = e.document.toObject(LastMessage::class.java)
@@ -266,26 +277,37 @@ class DefaultChatRepository @Inject constructor(
                             val l = getOtherUserForRecentChat(lastMessage, currentUser)
                             lastMessageLocalRepo.add(0, l)
                             lastMessageList.postValue(Event(Resource.Success(lastMessageLocalRepo)))
-
                         }
                     } else {
                         for (each in list) {
                             val index = lastMessageLocalRepo.indexOf(each)
                             val existing = lastMessageLocalRepo.removeAt(index)
-                            if(lastMessage.message.senderAndReceiverUid[0] == existing.sender.uid){
+                            if (lastMessage.message.senderAndReceiverUid[0] == existing.sender.uid) {
                                 lastMessage.sender = existing.sender
                                 lastMessage.receiver = existing.receiver
-                            }else{
+                            } else {
                                 lastMessage.receiver = existing.sender
                                 lastMessage.sender = existing.receiver
                             }
 
                             if (each.message != lastMessage.message) {
                                 lastMessageLocalRepo.add(0, lastMessage)
-                                lastMessageList.postValue(Event(Resource.Success(lastMessageLocalRepo)))
+                                lastMessageList.postValue(
+                                    Event(
+                                        Resource.Success(
+                                            lastMessageLocalRepo
+                                        )
+                                    )
+                                )
                             } else {
                                 lastMessageLocalRepo.add(index, lastMessage)
-                                lastMessageList.postValue(Event(Resource.Success(lastMessageLocalRepo)))
+                                lastMessageList.postValue(
+                                    Event(
+                                        Resource.Success(
+                                            lastMessageLocalRepo
+                                        )
+                                    )
+                                )
                             }
                         }
                     }
@@ -297,24 +319,26 @@ class DefaultChatRepository @Inject constructor(
     override suspend fun getLastMessageFirstQuery(currentUser: User): Resource<Boolean> =
         withContext(Dispatchers.IO) {
             safeCall {
+                lastMessageList.postValue(Event(Resource.Loading()))
                 val querySnapshot = chatsCollection
                     .whereArrayContains("$MESSAGE.$SENDER_AND_RECEIVER_UID", Firebase.auth.uid!!)
                     .orderBy("$MESSAGE.$DATE", Query.Direction.DESCENDING)
                     .limit(LAST_MESSAGE_PAGE_LIMIT)
                     .get().await()
-                if (querySnapshot.isEmpty) {
+                if (querySnapshot.documents.size <= 0) {
                     lastMessageList.postValue(Event(Resource.Error(NO_MORE_MESSAGES)))
+                }else{
+                    lastMessageLastVisible = querySnapshot.documents[querySnapshot.size() - 1]
+                    querySnapshot.forEach {
+                        val documentSnapshot = getOtherUserForRecentChat(
+                            it.toObject(LastMessage::class.java),
+                            currentUser
+                        )
+                        Log.i(TAG, "getLastMessageFirstQuery: ${documentSnapshot.message.message}")
+                        lastMessageLocalRepo.add(documentSnapshot)
+                    }
+                    lastMessageList.postValue(Event(Resource.Success(lastMessageLocalRepo)))
                 }
-                lastMessageLastVisible = querySnapshot.documents[querySnapshot.size() - 1]
-                querySnapshot.forEach {
-                    val documentSnapshot = getOtherUserForRecentChat(
-                        it.toObject(LastMessage::class.java),
-                        currentUser
-                    )
-                    Log.i(TAG, "getLastMessageFirstQuery: ${documentSnapshot.message.message}")
-                    lastMessageLocalRepo.add(documentSnapshot)
-                }
-                lastMessageList.postValue(Event(Resource.Success(lastMessageLocalRepo)))
                 Resource.Success(true)
             }
 
@@ -379,7 +403,7 @@ class DefaultChatRepository @Inject constructor(
 
     override suspend fun checkUserIsOnline(uid: String) {
         val query = usersStatCollection.document(uid)
-        query.addSnapshotListener { value, error ->
+        checkOnlineListener = query.addSnapshotListener { value, error ->
             error?.let {
                 return@addSnapshotListener
             }
@@ -455,5 +479,13 @@ class DefaultChatRepository @Inject constructor(
         }
 
         lastMessage
+    }
+
+    override fun removeUnSeenMessageListener() {
+        unSeenMessagesListener?.remove()
+    }
+
+    override fun removeCheckOnlineListener() {
+        checkOnlineListener?.remove()
     }
 }

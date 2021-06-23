@@ -18,6 +18,7 @@ import com.riyazuddin.zing.data.entities.User
 import com.riyazuddin.zing.databinding.FragmentSearchBinding
 import com.riyazuddin.zing.other.Constants.SEARCH_TIME_DELAY
 import com.riyazuddin.zing.other.EventObserver
+import com.riyazuddin.zing.other.snackBar
 import com.riyazuddin.zing.ui.main.viewmodels.SearchViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Job
@@ -47,7 +48,8 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
             job = lifecycleScope.launch {
                 delay(SEARCH_TIME_DELAY)
                 eiditable?.let {
-                    viewModel.search(it.toString())
+                    viewModel.firebaseUserSearch(it.toString())
+//                    viewModel.search(it.toString())
                 }
             }
         }
@@ -67,6 +69,13 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
     }
 
     private fun subscribeToObservers() {
+        viewModel.firebaseUserSearchResult.observe(viewLifecycleOwner, EventObserver(
+            onError = {
+                snackBar(it)
+            }
+        ){
+            userAdapter.users = it
+        })
         viewModel.algoliaSearchResult.observe(viewLifecycleOwner, EventObserver(
             onError = { binding.progressBar.isVisible = false },
             onLoading = { binding.progressBar.isVisible = true }

@@ -177,16 +177,17 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
         viewModel.playTone.observe(viewLifecycleOwner, EventObserver(
             oneTimeConsume = true
         ) {
-            if (it) {
+            if (it)
                 mediaPlayer.start()
-            }
+            else
+                mediaPlayer.stop()
         })
         viewModel.isUserOnline.observe(viewLifecycleOwner, EventObserver {
             if (it.state == ONLINE)
                 binding.toolbar.subtitle = ONLINE
             else
                 binding.toolbar.subtitle =
-                    LAST_SEEN + " " + simpleDateFormat.format(Date(it.lastSeen))
+                    LAST_SEEN + " " + simpleDateFormat.format(it.lastSeen!!)
         })
     }
 

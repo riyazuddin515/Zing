@@ -2,7 +2,9 @@ package com.riyazuddin.zing.ui.main.fragments
 
 import android.os.Bundle
 import android.util.Log
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -37,12 +39,24 @@ class PostFragment : Fragment(R.layout.fragment_post) {
     @Inject
     lateinit var glide: RequestManager
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        binding = FragmentPostBinding.inflate(layoutInflater)
+        viewModel.getPost(args.postId)
+    }
+
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        return binding.root
+    }
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        binding = FragmentPostBinding.bind(view)
 
         subscribeToObservers()
-        viewModel.getPost(args.postId)
+
 
         binding.postLayout.ibLike.setOnClickListener {
             post?.let {
@@ -96,6 +110,7 @@ class PostFragment : Fragment(R.layout.fragment_post) {
                 binding.progressBar.isVisible = true
             }
         ) { post ->
+            binding.progressBar.isVisible = true
             this.post = post
             binding.postLayout.apply {
                 glide.load(post.userProfilePic).into(CIVProfilePic)
@@ -106,7 +121,7 @@ class PostFragment : Fragment(R.layout.fragment_post) {
                 val likesText =
                     if (likeCount == 1) "1 like" else "${String.format("%,d", likeCount)} likes"
                 tvLikeCount.text = likesText
-                tvPostedOn.text = getTimeAgo(post.date)
+                tvPostedOn.text = getTimeAgo(post.date!!.time)
                 if (post.caption.isEmpty())
                     tvCaption.isVisible = false
                 else tvCaption.text = post.caption

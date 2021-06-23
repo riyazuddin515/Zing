@@ -54,7 +54,7 @@ class PostAdapter @Inject constructor(
             val likesText =
                 if (likeCount == 1) "1 like" else "${String.format("%,d", likeCount)} likes"
             tvLikeCount.text = likesText
-            tvPostedOn.text = getTimeAgo(post.date)
+            tvPostedOn.text = getTimeAgo(post.date!!.time)
             if (post.caption.isEmpty())
                 tvCaption.isVisible = false
             else tvCaption.text = post.caption

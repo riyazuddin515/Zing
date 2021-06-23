@@ -116,7 +116,6 @@ class ChatViewModel @ViewModelInject constructor(
         _recentMessagesList.postValue(Event(Resource.Loading()))
         viewModelScope.launch {
             val result = repository.getLastMessageFirstQuery(currentUser)
-            Log.i(TAG, "getLastMessageFirstQuery: viewmodel --> ${result.data}")
             _isLastMessagesFirstLoadDone.postValue(Event(result))
         }
     }
@@ -140,7 +139,6 @@ class ChatViewModel @ViewModelInject constructor(
     }
 
     fun clearRecentMessagesList() {
-        _recentMessagesList.postValue(Event(Resource.Success(listOf())))
         repository.clearRecentMessagesList()
     }
 
@@ -148,5 +146,8 @@ class ChatViewModel @ViewModelInject constructor(
         viewModelScope.launch {
             repository.checkUserIsOnline(uid)
         }
+    }
+    fun removeCheckOnlineListener(){
+        repository.removeCheckOnlineListener()
     }
 }

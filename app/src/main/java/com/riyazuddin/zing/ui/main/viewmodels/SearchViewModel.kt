@@ -6,6 +6,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.algolia.search.model.response.ResponseSearch
+import com.riyazuddin.zing.data.entities.User
 import com.riyazuddin.zing.other.Event
 import com.riyazuddin.zing.other.Resource
 import com.riyazuddin.zing.repositories.abstraction.MainRepository
@@ -25,6 +26,18 @@ class SearchViewModel @ViewModelInject constructor(
         viewModelScope.launch {
             val result = repository.algoliaSearch(query)
             _algoliaSearchResult.postValue(Event(result))
+        }
+    }
+
+    private val _firebaseUserSearchResult = MutableLiveData<Event<Resource<List<User>>>>()
+    val firebaseUserSearchResult: LiveData<Event<Resource<List<User>>>> = _firebaseUserSearchResult
+    fun firebaseUserSearch(query: String){
+        if (query.isEmpty())
+            return
+        _firebaseUserSearchResult.postValue(Event(Resource.Loading()))
+        viewModelScope.launch {
+            val result = repository.firebaseUserSearch(query)
+            _firebaseUserSearchResult.postValue(Event(result))
         }
     }
 }

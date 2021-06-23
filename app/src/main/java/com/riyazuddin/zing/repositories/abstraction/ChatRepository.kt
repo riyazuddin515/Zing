@@ -40,4 +40,7 @@ interface ChatRepository {
     suspend fun checkUserIsOnline(uid: String)
 
     suspend fun checkForUnSeenMessage(uid: String)
+
+    fun removeUnSeenMessageListener()
+    fun removeCheckOnlineListener()
 }

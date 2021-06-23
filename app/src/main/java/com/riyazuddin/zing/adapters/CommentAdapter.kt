@@ -48,7 +48,7 @@ class CommentAdapter @Inject constructor(private val glide: RequestManager) :
             tvUsername.text = comment.username
             tvCommentText.text = comment.comment
             val date =
-                SimpleDateFormat("d MMM yy hh:mm a", Locale.ENGLISH).format(Date(comment.date))
+                SimpleDateFormat("d MMM yy hh:mm a", Locale.ENGLISH).format(comment.date ?: Date())
             tvTime.text = date
 
             CIVProfilePic.setOnClickListener {

@@ -48,9 +48,14 @@ class ProfilePostPagingSource(
                         .document(uid).get().await().toObject(User::class.java)!!
                     post.username = user.username
                     post.userProfilePic = user.profilePicUrl
-                    val likesList = db.collection(POST_LIKES_COLLECTION)
+                    val postLikesDocumentSnapshot = db.collection(POST_LIKES_COLLECTION)
                         .document(post.postId).get().await()
-                        .toObject(PostLikes::class.java)!!.likedBy
+                    val likesList =
+                    if (postLikesDocumentSnapshot.exists())
+                        postLikesDocumentSnapshot.toObject(PostLikes::class.java)?.likedBy ?: listOf()
+                    else
+                        listOf()
+
                     post.isLiked = Firebase.auth.uid in likesList
                 },
                 null,
@@ -58,6 +63,7 @@ class ProfilePostPagingSource(
             )
 
         } catch (e: Exception) {
+            Log.e(TAG, "load: ", e)
             LoadResult.Error(e)
         }
     }

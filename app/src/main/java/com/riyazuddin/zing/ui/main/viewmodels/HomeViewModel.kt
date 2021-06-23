@@ -42,11 +42,14 @@ class HomeViewModel @ViewModelInject constructor(
     val feed: LiveData<PagingData<Post>> = _feed
 
     val haveUnSeenMessages = (chatRepository as DefaultChatRepository).haveUnSeenMessages
-    val unSeenMessagesListener = (chatRepository as DefaultChatRepository).unSeenMessagesListener
+
     fun checkForUnSeenMessage(uid: String) {
         viewModelScope.launch {
             chatRepository.checkForUnSeenMessage(uid)
         }
+    }
+    fun removeUnSeenMessageListener() {
+        chatRepository.removeUnSeenMessageListener()
     }
 
     fun onlineOfflineToggle(uid: String) {

@@ -93,24 +93,13 @@ class DefaultMainRepository @Inject constructor(
                     LAST_SEEN to ServerValue.TIMESTAMP
                 )
 
-                val isOfflineForFirestore = mapOf(
-                    STATE to OFFLINE,
-                    LAST_SEEN to System.currentTimeMillis(),
-                    TOKEN to token
-                )
-
-                val isOnlineForFirestore = mapOf(
-                    STATE to ONLINE,
-                    LAST_SEEN to System.currentTimeMillis(),
-                    TOKEN to token
-                )
-                Log.i(TAG, "onlineOfflineToggle: addingValueEvenListener")
+                val isOfflineForFirestore = UserStat(state = OFFLINE, token = token)
+                val isOnlineForFirestore = UserStat(state = ONLINE, token = token)
 
                 database.getReference(".info/connected")
                     .addValueEventListener(object :
                         ValueEventListener {
                         override fun onDataChange(snapshot: DataSnapshot) {
-                            Log.i(TAG, "onDataChange: indise")
                             if (snapshot.value == false) {
                                 GlobalScope.launch {
                                     usersStatCollection.document(uid)
@@ -118,10 +107,8 @@ class DefaultMainRepository @Inject constructor(
                                 }
                                 return
                             }
-                            Log.i(TAG, "onDataChange: local")
                             userStatusDatabaseRef.onDisconnect().setValue(isOfflineForDatabase)
                                 .addOnCompleteListener {
-                                    Log.i(TAG, "onDataChange: inside")
                                     userStatusDatabaseRef.setValue(isOnlineForDatabase)
                                     usersStatCollection.document(uid)
                                         .set(isOnlineForFirestore, SetOptions.merge())
@@ -151,7 +138,7 @@ class DefaultMainRepository @Inject constructor(
             val postDownloadUrl = storage.reference.child("posts/$uid/$postID").putFile(imageUri)
                 .await().metadata?.reference?.downloadUrl?.await().toString()
             firestore.runBatch { batch ->
-                val post = Post(postID, uid, System.currentTimeMillis(), postDownloadUrl, caption)
+                val post = Post(postID, uid, postDownloadUrl, caption)
                 batch.set(postsCollection.document(postID), post)
                 batch.update(usersCollection.document(uid), POST_COUNT, FieldValue.increment(1))
                 batch.set(postLikesCollection.document(postID), PostLikes(uid = uid))
@@ -168,7 +155,7 @@ class DefaultMainRepository @Inject constructor(
                 usersCollection.document(post.postedBy).get().await().toObject(User::class.java)!!
             post.userProfilePic = user.profilePicUrl
             post.username = user.username
-            post.isLiked = user.uid in getPostLikes(postId).data?.likedBy!!
+            post.isLiked = user.uid in getPostLikes(postId).data?.likedBy ?: listOf()
             Resource.Success(post)
         }
     }
@@ -219,9 +206,12 @@ class DefaultMainRepository @Inject constructor(
             var isLiked = false
             firestore.runTransaction { transition ->
                 val uid = auth.uid!!
-                val currentLikes = transition.get(postLikesCollection.document(post.postId))
-                    .toObject(PostLikes::class.java)?.likedBy ?: listOf()
+                val documentSnapshot = transition.get(postLikesCollection.document(post.postId))
+                if (!documentSnapshot.exists()) {
+                    transition.set(postLikesCollection.document(post.postId), PostLikes(uid = post.postedBy))
+                }
 
+                val currentLikes = documentSnapshot.toObject(PostLikes::class.java)?.likedBy ?: listOf()
                 if (uid in currentLikes) {
                     transition.update(
                         postLikesCollection.document(post.postId),
@@ -347,7 +337,7 @@ class DefaultMainRepository @Inject constructor(
             safeCall {
                 val commentId = UUID.randomUUID().toString()
                 val comment =
-                    Comment(commentId, commentText, postId, System.currentTimeMillis(), auth.uid!!)
+                    Comment(commentId, commentText, postId, auth.uid!!)
 
                 commentsCollection.document(postId).collection(COMMENTS_COLLECTION)
                     .document(commentId).set(comment).await()
@@ -433,4 +423,17 @@ class DefaultMainRepository @Inject constructor(
                 Resource.Success(comment)
             }
         }
+
+    override suspend fun firebaseUserSearch(query: String) = withContext(Dispatchers.IO) {
+        safeCall {
+            val usersList = usersCollection
+                .orderBy("username")
+                .startAt(query)
+                .endAt(query + "\uf8ff")
+                .get()
+                .await()
+                .toObjects(User::class.java)
+            Resource.Success(usersList)
+        }
+    }
 }

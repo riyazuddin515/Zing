@@ -19,12 +19,21 @@ class PostCommentsPagingSource(
     override suspend fun load(params: LoadParams<QuerySnapshot>): LoadResult<QuerySnapshot, Comment> {
         return try {
 
+            var result = mutableListOf<Comment>()
             val currentPage = params.key ?: postCommentsCollectionReference
                 .orderBy(DATE, Query.Direction.DESCENDING)
                 .limit(COMMENT_PAGE_SIZE.toLong())
                 .get()
                 .await()
 
+            if (currentPage.size() <= 0)
+                return LoadResult.Page(result, null, null)
+            result = currentPage.toObjects(Comment::class.java).onEach {
+                val user = usersCollectionReference.document(it.commentedBy).get().await()
+                    .toObject(User::class.java)!!
+                it.username = user.username
+                it.userProfilePic = user.profilePicUrl
+            }
             val lastDocument = currentPage.documents[currentPage.size() - 1]
             Log.i(TAG, "load: ${currentPage.size()}")
 
@@ -36,17 +45,13 @@ class PostCommentsPagingSource(
                 .await()
 
             LoadResult.Page(
-                currentPage.toObjects(Comment::class.java).onEach {
-                    val user = usersCollectionReference.document(it.commentedBy).get().await()
-                        .toObject(User::class.java)!!
-                    it.username = user.username
-                    it.userProfilePic = user.profilePicUrl
-                },
+                result,
                 null,
                 nextPage
             )
 
         } catch (e: Exception) {
+            Log.e(TAG, "load: ", e)
             LoadResult.Error(e)
         }
     }
