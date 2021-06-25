@@ -12,11 +12,15 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
+import com.google.gson.Gson
 import com.riyazuddin.zing.R
 import com.riyazuddin.zing.adapters.UserAdapter
 import com.riyazuddin.zing.data.entities.User
 import com.riyazuddin.zing.databinding.FragmentSearchBinding
+import com.riyazuddin.zing.other.Constants.NAME
+import com.riyazuddin.zing.other.Constants.PROFILE_PIC_URL
 import com.riyazuddin.zing.other.Constants.SEARCH_TIME_DELAY
+import com.riyazuddin.zing.other.Constants.USERNAME
 import com.riyazuddin.zing.other.EventObserver
 import com.riyazuddin.zing.other.snackBar
 import com.riyazuddin.zing.ui.main.viewmodels.SearchViewModel
@@ -82,19 +86,11 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
         ) {
             val hits = it.hits
             val users = mutableListOf<User>()
+            val gson = Gson()
             hits.forEach { hit ->
-                val user = User(
-                    name = hit.json.getValue("name").toString().replace("\"", ""),
-                    uid = hit.json.getValue("uid").toString().replace("\"", ""),
-                    username = hit.json.getValue("username").toString().replace("\"", ""),
-                    profilePicUrl = hit.json.getValue("profilePicUrl").toString().replace("\"", ""),
-                    bio = hit.json.getValue("bio").toString().replace("\"", ""),
-                    followingCount = hit.json.getValue("followingCount").toString().toInt(),
-                    followersCount = hit.json.getValue("followersCount").toString().toInt(),
-                    postCount = hit.json.getValue("postCount").toString().toInt()
-                )
-                users.add(user)
-                Log.i(TAG, "subscribeToObservers: ${hit.json}")
+                val u = gson.fromJson(hit.json.toString(), User::class.java)
+                u.uid = hit.json.getValue("objectID").toString().replace("\"", "")
+                users.add(u)
             }
             binding.progressBar.isVisible = false
             userAdapter.users = users

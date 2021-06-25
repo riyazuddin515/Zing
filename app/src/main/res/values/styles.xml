@@ -30,4 +30,14 @@
         <item name="android:windowBackground">@color/black</item>
     </style>
 
+
+    <style name="MaterialAlertDialog.Round" parent="ThemeOverlay.MaterialComponents.MaterialAlertDialog">
+        <item name="shapeAppearanceOverlay">
+            @style/shapeAppearanceOverlay.MaterialAlertDialog.Rounded
+        </item>
+    </style>
+    <style name="shapeAppearanceOverlay.MaterialAlertDialog.Rounded" parent="">
+        <item name="cornerSize">20dp</item>
+    </style>
+
 </resources>

@@ -100,4 +100,5 @@
     <string name="enter_valid_email">Enter Valid Email</string>
     <string name="plus_99">99+</string>
     <string name="edit_profile">Edit Profile</string>
+    <string name="check_for_updates">Check For Updates</string>
 </resources>

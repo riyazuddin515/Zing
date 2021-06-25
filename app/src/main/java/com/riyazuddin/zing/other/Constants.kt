@@ -70,6 +70,8 @@ object Constants {
     const val STATUS = "status"
     const val RECEIVER_UID = "receiverUid"
 
+    const val CHAT_THREAD = "chatThread"
+
     const val CHAT_MESSAGE_PAGE_LIMIT = 10L
     const val LAST_MESSAGE_PAGE_LIMIT = 10L
     const val POST_PAGE_SIZE = 5
@@ -82,11 +84,10 @@ object Constants {
     const val MAX_NAME = 20
     const val MIN_PASSWORD = 8
     const val MAX_PASSWORD = 20
-    const val VALID_USERNAME_MESSAGE = "Only a-z,A-z,0-9,_ are allowed. Should start with alphabet"
     const val MIN_USERNAME = 3
     const val MAX_USERNAME = 15
 
-    const val SEARCH_TIME_DELAY = 500L
+    const val SEARCH_TIME_DELAY = 1000L
 
     const val TEXT = "TEXT"
     const val IMAGE = "IMAGE"

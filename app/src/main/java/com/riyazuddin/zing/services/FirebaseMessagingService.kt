@@ -13,6 +13,7 @@ import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
 import com.google.firebase.ktx.Firebase
+import com.google.firebase.messaging.FirebaseMessaging
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import com.google.gson.Gson
@@ -22,11 +23,13 @@ import com.riyazuddin.zing.data.entities.Message
 import com.riyazuddin.zing.data.entities.User
 import com.riyazuddin.zing.other.Constants.CHATS_COLLECTION
 import com.riyazuddin.zing.other.Constants.CHATTING_WITH
+import com.riyazuddin.zing.other.Constants.CHAT_THREAD
 import com.riyazuddin.zing.other.Constants.CHAT_TYPE
 import com.riyazuddin.zing.other.Constants.COMMENT_TYPE
 import com.riyazuddin.zing.other.Constants.DELIVERED
 import com.riyazuddin.zing.other.Constants.FOLLOW_TYPE
 import com.riyazuddin.zing.other.Constants.MESSAGES_COLLECTION
+import com.riyazuddin.zing.other.Constants.MESSAGE_ID
 import com.riyazuddin.zing.other.Constants.NOTIFICATION_ID
 import com.riyazuddin.zing.other.Constants.NO_ONE
 import com.riyazuddin.zing.other.Constants.POST_ID
@@ -48,7 +51,7 @@ class FirebaseMessagingService : FirebaseMessagingService() {
 
     override fun onNewToken(token: String) {
         super.onNewToken(token)
-
+        FirebaseMessaging.getInstance().subscribeToTopic("PUSH_RC")
         Log.i(TAG, "onNewToken: $token")
         Firebase.auth.currentUser?.let {
             GlobalScope.launch {
@@ -61,7 +64,6 @@ class FirebaseMessagingService : FirebaseMessagingService() {
                 Log.i(TAG, "onNewToken: updated")
             }
         }
-
     }
 
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
@@ -96,8 +98,8 @@ class FirebaseMessagingService : FirebaseMessagingService() {
         when (remoteMessage.data["type"]) {
             CHAT_TYPE -> {
                 GlobalScope.launch {
-                    val chatThread = remoteMessage.data["chatThread"]!!
-                    val messageId = remoteMessage.data["messageId"]!!
+                    val chatThread = remoteMessage.data[CHAT_THREAD]!!
+                    val messageId = remoteMessage.data[MESSAGE_ID]!!
                     val chatCollection =
                         FirebaseFirestore.getInstance().collection(CHATS_COLLECTION)
                     val message = chatCollection

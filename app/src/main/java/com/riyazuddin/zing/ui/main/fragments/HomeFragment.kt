@@ -150,6 +150,11 @@ class HomeFragment : BasePostFragment(R.layout.fragment_home) {
     }
 
     private fun setupClickListeners() {
+
+//        binding.crashButton.setOnClickListener {
+//            throw RuntimeException("Test Crash") // Force a crash
+//        }
+
         postAdapter.setOnUserClickListener {
             if (it.postedBy == currentUserUid)
                 findNavController().navigate(R.id.profileFragment)

@@ -17,7 +17,7 @@ class CustomDialog(
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        return MaterialAlertDialogBuilder(requireContext())
+        return MaterialAlertDialogBuilder(requireContext(), R.style.MaterialAlertDialog_Round)
             .setTitle(title)
             .setMessage(message)
             .setPositiveButton(R.string.delete_post_dialog_positive) { _, _ ->
