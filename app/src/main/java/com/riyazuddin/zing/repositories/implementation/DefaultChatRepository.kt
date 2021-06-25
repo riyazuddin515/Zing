@@ -292,23 +292,11 @@ class DefaultChatRepository @Inject constructor(
 
                             if (each.message != lastMessage.message) {
                                 lastMessageLocalRepo.add(0, lastMessage)
-                                lastMessageList.postValue(
-                                    Event(
-                                        Resource.Success(
-                                            lastMessageLocalRepo
-                                        )
-                                    )
-                                )
                             } else {
                                 lastMessageLocalRepo.add(index, lastMessage)
-                                lastMessageList.postValue(
-                                    Event(
-                                        Resource.Success(
-                                            lastMessageLocalRepo
-                                        )
-                                    )
-                                )
+
                             }
+                            lastMessageList.postValue(Event(Resource.Success(lastMessageLocalRepo)))
                         }
                     }
                 }

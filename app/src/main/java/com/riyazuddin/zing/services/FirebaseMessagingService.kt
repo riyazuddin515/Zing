@@ -18,14 +18,21 @@ import com.google.firebase.messaging.RemoteMessage
 import com.google.gson.Gson
 import com.riyazuddin.zing.R
 import com.riyazuddin.zing.data.Notification
+import com.riyazuddin.zing.data.entities.Message
 import com.riyazuddin.zing.data.entities.User
+import com.riyazuddin.zing.other.Constants.CHATS_COLLECTION
 import com.riyazuddin.zing.other.Constants.CHATTING_WITH
 import com.riyazuddin.zing.other.Constants.CHAT_TYPE
+import com.riyazuddin.zing.other.Constants.COMMENT_TYPE
+import com.riyazuddin.zing.other.Constants.DELIVERED
 import com.riyazuddin.zing.other.Constants.FOLLOW_TYPE
+import com.riyazuddin.zing.other.Constants.MESSAGES_COLLECTION
 import com.riyazuddin.zing.other.Constants.NOTIFICATION_ID
 import com.riyazuddin.zing.other.Constants.NO_ONE
 import com.riyazuddin.zing.other.Constants.POST_ID
 import com.riyazuddin.zing.other.Constants.POST_LIKE_TYPE
+import com.riyazuddin.zing.other.Constants.SEEN
+import com.riyazuddin.zing.other.Constants.STATUS
 import com.riyazuddin.zing.other.Constants.TOKEN
 import com.riyazuddin.zing.other.Constants.UID
 import com.riyazuddin.zing.other.Constants.USERS_COLLECTION
@@ -43,10 +50,8 @@ class FirebaseMessagingService : FirebaseMessagingService() {
         super.onNewToken(token)
 
         Log.i(TAG, "onNewToken: $token")
-
         Firebase.auth.currentUser?.let {
             GlobalScope.launch {
-                Log.i(TAG, "onNewToken: updating")
                 val map = mapOf(
                     TOKEN to token
                 )
@@ -90,14 +95,31 @@ class FirebaseMessagingService : FirebaseMessagingService() {
 
         when (remoteMessage.data["type"]) {
             CHAT_TYPE -> {
-                val c = User()
-                val o = Gson().fromJson(remoteMessage.data["ou"], User::class.java)
-                val pi = NavDeepLinkBuilder(this)
-                    .setGraph(R.navigation.nav_graph_main)
-                    .setDestination(R.id.chatFragment)
-                    .setArguments(ChatFragmentArgs(o, c).toBundle())
-                    .createPendingIntent()
-                notification.setContentIntent(pi)
+                GlobalScope.launch {
+                    val chatThread = remoteMessage.data["chatThread"]!!
+                    val messageId = remoteMessage.data["messageId"]!!
+                    val chatCollection =
+                        FirebaseFirestore.getInstance().collection(CHATS_COLLECTION)
+                    val message = chatCollection
+                        .document(chatThread).collection(MESSAGES_COLLECTION).document(messageId)
+                        .get().await().toObject(Message::class.java)!!
+                    if (message.status != SEEN) {
+                        chatCollection
+                            .document(chatThread).collection(MESSAGES_COLLECTION)
+                            .document(messageId)
+                            .update(STATUS, DELIVERED).await()
+                        val c = User()
+                        val o = Gson().fromJson(remoteMessage.data["ou"], User::class.java)
+                        val pi = NavDeepLinkBuilder(baseContext)
+                            .setGraph(R.navigation.nav_graph_main)
+                            .setDestination(R.id.chatFragment)
+                            .setArguments(ChatFragmentArgs(o, c).toBundle())
+                            .createPendingIntent()
+                        notification.setContentIntent(pi)
+                        notifyNotification(notificationDataObj.tag, notification.build())
+                    } else
+                        Log.i(TAG, "onMessageReceived: seen")
+                }
             }
             FOLLOW_TYPE -> {
                 val pi = NavDeepLinkBuilder(this)
@@ -106,26 +128,18 @@ class FirebaseMessagingService : FirebaseMessagingService() {
                     .setArguments(OthersProfileFragmentArgs(remoteMessage.data[UID]!!).toBundle())
                     .createPendingIntent()
                 notification.setContentIntent(pi)
+                notifyNotification(notificationDataObj.tag, notification.build())
             }
-            POST_LIKE_TYPE -> {
+            POST_LIKE_TYPE, COMMENT_TYPE -> {
                 val pi = NavDeepLinkBuilder(this)
                     .setGraph(R.navigation.nav_graph_main)
                     .setDestination(R.id.postFragment)
                     .setArguments(PostFragmentArgs(remoteMessage.data[POST_ID]!!).toBundle())
                     .createPendingIntent()
                 notification.setContentIntent(pi)
-            }
-            "COMMENT_TYPE" -> {
-                val pi = NavDeepLinkBuilder(this)
-                    .setGraph(R.navigation.nav_graph_main)
-                    .setDestination(R.id.postFragment)
-                    .setArguments(PostFragmentArgs(remoteMessage.data[POST_ID]!!).toBundle())
-                    .createPendingIntent()
-                notification.setContentIntent(pi)
+                notifyNotification(notificationDataObj.tag, notification.build())
             }
         }
-
-        notifyNotification(notificationDataObj.tag, notification.build())
     }
 
     private fun notifyNotification(tag: String, notification: android.app.Notification) {

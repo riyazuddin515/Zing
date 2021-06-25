@@ -33,13 +33,9 @@ class HomeViewModel @ViewModelInject constructor(
     private val _removeDeviceTokeStatus = MutableLiveData<Event<Resource<Boolean>>>()
     val removeDeviceTokeStatus: LiveData<Event<Resource<Boolean>>> = _removeDeviceTokeStatus
 
-    private val _feed: MutableLiveData<PagingData<Post>> =
-        Pager(PagingConfig(POST_PAGE_SIZE)) {
-            FeedPagingSource(FirebaseFirestore.getInstance())
-        }.flow.cachedIn(viewModelScope).asLiveData().let {
-            it as MutableLiveData<PagingData<Post>>
-        }
-    val feed: LiveData<PagingData<Post>> = _feed
+    val feed = Pager(PagingConfig(POST_PAGE_SIZE)) {
+        FeedPagingSource(FirebaseFirestore.getInstance())
+    }.flow.cachedIn(viewModelScope)
 
     val haveUnSeenMessages = (chatRepository as DefaultChatRepository).haveUnSeenMessages
 
@@ -48,6 +44,7 @@ class HomeViewModel @ViewModelInject constructor(
             chatRepository.checkForUnSeenMessage(uid)
         }
     }
+
     fun removeUnSeenMessageListener() {
         chatRepository.removeUnSeenMessageListener()
     }
@@ -71,14 +68,6 @@ class HomeViewModel @ViewModelInject constructor(
         viewModelScope.launch {
             val result = repository.removeDeviceToken(uid)
             _removeDeviceTokeStatus.postValue(Event(result))
-        }
-    }
-
-    fun removePostFromLiveData(post: Post) {
-        feed.value?.filter {
-            it.postId != post.postId
-        }.let {
-            _feed.postValue(it)
         }
     }
 

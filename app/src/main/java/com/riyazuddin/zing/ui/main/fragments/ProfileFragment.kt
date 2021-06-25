@@ -35,7 +35,7 @@ open class ProfileFragment : BasePostFragment(R.layout.fragment_profile) {
 
     private lateinit var binding: FragmentProfileBinding
 
-     var currentUser: User? = null
+    protected open var currentUser: User? = null
 
     override val basePostViewModel: BasePostViewModel
         get() {
@@ -77,18 +77,18 @@ open class ProfileFragment : BasePostFragment(R.layout.fragment_profile) {
         subscribeToObservers()
         setupClickListeners()
 
-        viewLifecycleOwner.lifecycleScope.launch {
-            postAdapter.loadStateFlow.collectLatest {
-                binding.linearProgressIndicatorFirstLoad.isVisible = it.refresh is LoadState.Loading
-                binding.linearProgressIndicatorLoadMore.isVisible = it.append is LoadState.Loading
-            }
-        }
+//        lifecycleScope.launch {
+//            postAdapter.loadStateFlow.collectLatest {
+//                binding.linearProgressIndicatorFirstLoad.isVisible = it.refresh is LoadState.Loading
+//                binding.linearProgressIndicatorLoadMore.isVisible = it.append is LoadState.Loading
+//            }
+//        }
 
     }
 
     private fun subscribeToObservers() {
         viewModel.flowOfProfilePosts.observe(viewLifecycleOwner, {
-            postAdapter.submitData(viewLifecycleOwner.lifecycle, it)
+            postAdapter.submitData(lifecycle, it)
         })
         viewModel.loadProfileMetadata.observe(viewLifecycleOwner, EventObserver(
             onError = {

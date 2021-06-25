@@ -39,7 +39,7 @@ class FeedPagingSource(
             if (isFirstLoad) {
                 followingList = db.collection(FOLLOWING_COLLECTION)
                     .document(uid).get().await().toObject(Following::class.java)
-                    ?.following?.plus(uid) ?: listOf()
+                    ?.following ?: listOf()
                 isFirstLoad = false
                 if (followingList.isEmpty())
                     return LoadResult.Page(resultList, null, null)

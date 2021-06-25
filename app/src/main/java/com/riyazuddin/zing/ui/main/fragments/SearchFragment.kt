@@ -48,8 +48,8 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
             job = lifecycleScope.launch {
                 delay(SEARCH_TIME_DELAY)
                 eiditable?.let {
-                    viewModel.firebaseUserSearch(it.toString())
-//                    viewModel.search(it.toString())
+//                    viewModel.firebaseUserSearch(it.toString())
+                    viewModel.search(it.toString())
                 }
             }
         }

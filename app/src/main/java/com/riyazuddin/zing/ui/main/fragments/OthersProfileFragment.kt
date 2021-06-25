@@ -7,14 +7,22 @@ import android.view.animation.OvershootInterpolator
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
+import androidx.paging.LoadState
 import androidx.transition.ChangeBounds
 import androidx.transition.TransitionManager
 import com.riyazuddin.zing.R
 import com.riyazuddin.zing.data.entities.User
 import com.riyazuddin.zing.databinding.FragmentProfileBinding
 import com.riyazuddin.zing.other.EventObserver
+import com.riyazuddin.zing.other.NavGraphArgsConstants.FOLLOWERS_ARG
+import com.riyazuddin.zing.other.NavGraphArgsConstants.FOLLOWING_ARG
+import com.riyazuddin.zing.other.NavGraphArgsConstants.LIKED_BY_ARG
+import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 
 class OthersProfileFragment : ProfileFragment() {
 
@@ -22,7 +30,7 @@ class OthersProfileFragment : ProfileFragment() {
     override val uid: String
         get() = args.uid
 
-    private var curUser: User? = null
+    override var currentUser: User? = null
 
     private lateinit var binding: FragmentProfileBinding
 
@@ -30,12 +38,12 @@ class OthersProfileFragment : ProfileFragment() {
         super.onViewCreated(view, savedInstanceState)
         binding = FragmentProfileBinding.bind(view)
 
+        subscribeToObservers()
+        setupClickListeners()
+
         binding.btnToggleFollow.setOnClickListener {
             viewModel.toggleFollowForUser(uid)
         }
-
-        subscribeToObservers()
-        setupClickListeners()
 
     }
 
@@ -43,33 +51,33 @@ class OthersProfileFragment : ProfileFragment() {
         viewModel.loadProfileMetadata.observe(viewLifecycleOwner, EventObserver { user ->
             binding.btnToggleFollow.isVisible = true
             setUpToggleFollowButton(user)
-            curUser = user
+            currentUser = user
         })
         viewModel.followStatus.observe(viewLifecycleOwner, EventObserver {
-            curUser?.isFollowing = it
-            setUpToggleFollowButton(curUser ?: return@EventObserver)
+            currentUser?.isFollowing = it
+            setUpToggleFollowButton(currentUser ?: return@EventObserver)
         })
     }
 
     private fun setupClickListeners() {
         binding.tvFollowersCount.setOnClickListener {
             findNavController().navigate(
-                OthersProfileFragmentDirections.globalActionToUserListFragment(uid, "Followers")
+                OthersProfileFragmentDirections.globalActionToUserListFragment(uid, FOLLOWERS_ARG)
             )
         }
         binding.tvFollowingCount.setOnClickListener {
             findNavController().navigate(
-                OthersProfileFragmentDirections.globalActionToUserListFragment(uid, "Following")
+                OthersProfileFragmentDirections.globalActionToUserListFragment(uid, FOLLOWING_ARG)
             )
         }
         binding.tvFollowers.setOnClickListener {
             findNavController().navigate(
-                OthersProfileFragmentDirections.globalActionToUserListFragment(uid, "Followers")
+                OthersProfileFragmentDirections.globalActionToUserListFragment(uid, FOLLOWERS_ARG)
             )
         }
         binding.tvFollowing.setOnClickListener {
             findNavController().navigate(
-                OthersProfileFragmentDirections.globalActionToUserListFragment(uid, "Following")
+                OthersProfileFragmentDirections.globalActionToUserListFragment(uid, FOLLOWING_ARG)
             )
         }
         binding.btnEditProfile.setOnClickListener {
@@ -77,7 +85,7 @@ class OthersProfileFragment : ProfileFragment() {
         }
         postAdapter.setOnLikedByClickListener {
             findNavController().navigate(
-                OthersProfileFragmentDirections.globalActionToUserListFragment(it.postId, "LikedBy")
+                OthersProfileFragmentDirections.globalActionToUserListFragment(it.postId, LIKED_BY_ARG)
             )
         }
         postAdapter.setOnCommentClickListener {

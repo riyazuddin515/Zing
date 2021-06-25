@@ -87,6 +87,11 @@ class HomeFragment : BasePostFragment(R.layout.fragment_home) {
         }
 
         viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.feed.collectLatest {
+                postAdapter.submitData(it)
+            }
+        }
+        viewLifecycleOwner.lifecycleScope.launch {
             postAdapter.loadStateFlow.collectLatest {
                 binding.linearProgressIndicatorFirstLoad.isVisible = it.refresh is LoadState.Loading
                 binding.linearProgressIndicatorLoadMore.isVisible = it.append is LoadState.Loading
@@ -100,16 +105,6 @@ class HomeFragment : BasePostFragment(R.layout.fragment_home) {
     }
 
     private fun subscribeToObservers() {
-        viewModel.feed.observe(viewLifecycleOwner, {
-            postAdapter.submitData(viewLifecycleOwner.lifecycle, it)
-        })
-        viewModel.deletePostStatus.observe(viewLifecycleOwner, EventObserver(
-            oneTimeConsume = true,
-            onError = { snackBar(it) },
-            onLoading = { snackBar("Deleting...") }
-        ) { deletedPost ->
-            viewModel.removePostFromLiveData(deletedPost)
-        })
         viewModel.loadCurrentUserStatus.observe(viewLifecycleOwner, EventObserver(
             oneTimeConsume = true,
             onError = {

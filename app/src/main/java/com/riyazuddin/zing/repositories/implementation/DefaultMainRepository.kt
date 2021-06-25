@@ -1,7 +1,6 @@
 package com.riyazuddin.zing.repositories.implementation
 
 import android.net.Uri
-import android.util.Log
 import com.algolia.search.client.ClientSearch
 import com.algolia.search.model.APIKey
 import com.algolia.search.model.ApplicationID
@@ -181,7 +180,7 @@ class DefaultMainRepository @Inject constructor(
         safeCall {
             val postLikes =
                 postLikesCollection.document(postId).get().await().toObject(PostLikes::class.java)
-                    ?: throw IllegalStateException()
+                    ?: PostLikes()
             Resource.Success(postLikes)
         }
     }
@@ -208,10 +207,14 @@ class DefaultMainRepository @Inject constructor(
                 val uid = auth.uid!!
                 val documentSnapshot = transition.get(postLikesCollection.document(post.postId))
                 if (!documentSnapshot.exists()) {
-                    transition.set(postLikesCollection.document(post.postId), PostLikes(uid = post.postedBy))
+                    transition.set(
+                        postLikesCollection.document(post.postId),
+                        PostLikes(uid = post.postedBy)
+                    )
                 }
 
-                val currentLikes = documentSnapshot.toObject(PostLikes::class.java)?.likedBy ?: listOf()
+                val currentLikes =
+                    documentSnapshot.toObject(PostLikes::class.java)?.likedBy ?: listOf()
                 if (uid in currentLikes) {
                     transition.update(
                         postLikesCollection.document(post.postId),

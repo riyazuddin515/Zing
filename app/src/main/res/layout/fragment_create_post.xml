@@ -84,6 +84,9 @@
             android:id="@+id/TIECaption"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:maxLength="250"
+            android:maxLines="10"
+            android:scrollbars="vertical"
             android:textColor="@color/black" />
 
     </com.google.android.material.textfield.TextInputLayout>
