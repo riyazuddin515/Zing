@@ -98,7 +98,7 @@ interface MainRepository {
      * Change Password
      * @param newPassword
      */
-    suspend fun changePassword(newPassword: String): Resource<Any>
+    suspend fun changePassword(newPassword: String): Resource<String>
 
     /**
      * @param postId

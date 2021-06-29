@@ -84,7 +84,7 @@ class FollowersRequestFragment : Fragment(R.layout.fragment_followers_request) {
     }
 
     private fun setupClickListeners() {
-        binding.toolbar.setNavigationOnClickListener {
+        binding.btnClose.setOnClickListener {
             findNavController().popBackStack()
         }
         followerRequestsAdapter.setOnClickListener {

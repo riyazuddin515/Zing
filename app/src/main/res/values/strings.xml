@@ -118,4 +118,9 @@
     <string name="accept">Accept</string>
     <string name="reject">Reject</string>
     <string name="follower_requests">Follower Requests</string>
+    <string name="enter_your_current_password">Enter your Current Password</string>
+    <string name="set_your_new_password">Set your New Password</string>
+    <string name="terms_conditions"><![CDATA[Terms & Conditions]]></string>
+    <string name="privacy_policy">Privacy Policy</string>
+    <string name="private_account">Private Account</string>
 </resources>

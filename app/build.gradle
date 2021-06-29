@@ -9,6 +9,10 @@ plugins {
     id 'com.google.firebase.crashlytics'
 }
 
+def versionMajor = 1
+def versionMinor = 1
+def versionPatch = 0
+
 android {
     compileSdkVersion 30
     buildToolsVersion '30.0.3'
@@ -23,15 +27,20 @@ android {
         applicationId "com.riyazuddin.zing"
         minSdkVersion 21
         targetSdkVersion 30
-        versionCode 1
-        versionName "1.0"
+        versionCode versionMajor * 10 + versionMinor * 10 + versionPatch
+        versionName "$versionMajor.$versionMinor.$versionPatch"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
+        debug {
+            versionNameSuffix ".debug"
+            resValue "string", "app_version", "${defaultConfig.versionName}${versionNameSuffix}"
+        }
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            resValue "string", "app_version", "${defaultConfig.versionName}"
         }
     }
     buildFeatures {
@@ -59,6 +68,7 @@ dependencies {
 
     // Architectural Components
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
 //    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
 
     def paging_version = "3.0.0-alpha08"

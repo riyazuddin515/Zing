@@ -17,6 +17,7 @@ import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig
 import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings
+import com.riyazuddin.zing.BuildConfig
 import com.riyazuddin.zing.R
 import com.riyazuddin.zing.data.entities.User
 import com.riyazuddin.zing.databinding.FragmentSettingsBinding
@@ -57,23 +58,7 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
         binding.switchPrivateAccount.isClickable = currentUser != null
 
         subscribeToObservers()
-
-        binding.tvEditProfile.setOnClickListener {
-            findNavController().navigate(R.id.action_settingsFragment_to_profileInfo)
-        }
-        binding.tvnChangePassword.setOnClickListener {
-            findNavController().navigate(R.id.action_settingsFragment_to_currentPasswordVerification)
-        }
-        binding.tvCheckForUpdates.setOnClickListener {
-            get()
-        }
-        binding.btnLogout.setOnClickListener {
-            CustomDialog(getString(R.string.log_out), getString(R.string.log_out_message)).apply {
-                setPositiveListener {
-                    viewModel.removeDeviceToken(Firebase.auth.uid!!)
-                }
-            }.show(parentFragmentManager, null)
-        }
+        setClickListeners()
 
 
         binding.switchPrivateAccount.setOnClickListener {
@@ -95,6 +80,8 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
             }
 
         }
+        val version = "Version : ${BuildConfig.VERSION_NAME}"
+        binding.tvVersion.text = version
     }
 
     private fun subscribeToObservers() {
@@ -191,5 +178,41 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
                 }
             }
         }
+    }
+
+    private fun setClickListeners() {
+        binding.tvEditProfile.setOnClickListener {
+            findNavController().navigate(R.id.action_settingsFragment_to_profileInfo)
+        }
+        binding.tvnChangePassword.setOnClickListener {
+            findNavController().navigate(R.id.action_settingsFragment_to_currentPasswordVerification)
+        }
+        binding.tvCheckForUpdates.setOnClickListener {
+            get()
+        }
+        binding.btnLogout.setOnClickListener {
+            CustomDialog(getString(R.string.log_out), getString(R.string.log_out_message)).apply {
+                setPositiveListener {
+                    viewModel.removeDeviceToken(Firebase.auth.uid!!)
+                }
+            }.show(parentFragmentManager, null)
+        }
+        binding.tvPrivacyPolicy.setOnClickListener {
+            findNavController().navigate(
+                R.id.action_settingsFragment_to_privacyPolicyAndTermsAndConditionsFragment,
+                Bundle().apply {
+                    putString("type", "PRIVACY_POLICY")
+                }
+            )
+        }
+        binding.tvTermsAndConditions.setOnClickListener {
+            findNavController().navigate(
+                R.id.action_settingsFragment_to_privacyPolicyAndTermsAndConditionsFragment,
+                Bundle().apply {
+                    putString("type", "TERMS_AND_CONDITIONS")
+                }
+            )
+        }
+
     }
 }

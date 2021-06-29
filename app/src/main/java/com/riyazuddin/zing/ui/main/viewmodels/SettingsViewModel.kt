@@ -55,8 +55,8 @@ class SettingsViewModel @ViewModelInject constructor(
         }
     }
 
-    private val _changePasswordStatus = MutableLiveData<Event<Resource<Any>>>()
-    val changePasswordStatus: LiveData<Event<Resource<Any>>> = _changePasswordStatus
+    private val _changePasswordStatus = MutableLiveData<Event<Resource<String>>>()
+    val changePasswordStatus: LiveData<Event<Resource<String>>> = _changePasswordStatus
     fun changePassword(newPassword: String) {
         _changePasswordStatus.postValue(Event(Resource.Loading()))
         viewModelScope.launch {

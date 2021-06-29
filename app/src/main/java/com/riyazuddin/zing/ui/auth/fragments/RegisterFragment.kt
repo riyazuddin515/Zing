@@ -58,7 +58,7 @@ class RegisterFragment : Fragment(R.layout.fragment_register) {
                         if (this != VALID) {
                             binding.TILUsername.error = this
                         } else {
-//                            viewModel.checkUserNameAvailability(it.toString())
+                            viewModel.checkUserNameAvailability(it.toString())
                         }
                     }
                 }
@@ -115,12 +115,12 @@ class RegisterFragment : Fragment(R.layout.fragment_register) {
                 }
             }
 
-//            validator.validateUsername(username).apply {
-//                if (this != VALID) {
-//                    binding.TILUsername.error = this
-//                    return@setOnClickListener
-//                }
-//            }
+            validator.validateUsername(username).apply {
+                if (this != VALID) {
+                    binding.TILUsername.error = this
+                    return@setOnClickListener
+                }
+            }
 
             validator.validateEmail(email).apply {
                 if (this != VALID) {

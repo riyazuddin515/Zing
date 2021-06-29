@@ -38,7 +38,6 @@ import kotlinx.coroutines.tasks.await
 import java.util.*
 import javax.inject.Inject
 import javax.inject.Singleton
-import kotlin.math.log
 
 
 @Singleton
@@ -367,7 +366,7 @@ class DefaultChatRepository @Inject constructor(
         currentUid: String,
         otherEndUserUid: String,
         message: Message
-    ): Resource<Message> = withContext(Dispatchers.IO){
+    ): Resource<Message> = withContext(Dispatchers.IO) {
         safeCall {
             val map = mutableMapOf(
                 MESSAGE to "This message was Deleted",

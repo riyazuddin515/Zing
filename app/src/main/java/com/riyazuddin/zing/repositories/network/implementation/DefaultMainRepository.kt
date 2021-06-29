@@ -402,7 +402,7 @@ class DefaultMainRepository @Inject constructor(
 
     override suspend fun changePassword(
         newPassword: String
-    ): Resource<Any> = withContext(Dispatchers.IO) {
+    ): Resource<String> = withContext(Dispatchers.IO) {
         safeCall {
             val currentUser = auth.currentUser!!
             currentUser.updatePassword(newPassword).await()

@@ -5,101 +5,107 @@
     android:layout_height="match_parent"
     android:background="@color/white">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/appBarLayout"
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        app:title="Settings"
+        app:titleTextColor="@color/white"
         android:background="@drawable/top_menu_background_red"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toTopOf="parent" />
 
-        <com.google.android.material.appbar.MaterialToolbar
-            android:id="@+id/toolbar"
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:orientation="vertical"
+        app:layout_constraintBottom_toTopOf="@+id/tvVersion"
+        app:layout_constraintEnd_toEndOf="@id/guideline2"
+        app:layout_constraintStart_toStartOf="@id/guideline1"
+        app:layout_constraintTop_toBottomOf="@id/toolbar"
+        app:layout_constraintVertical_bias="0.0">
+
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/tvEditProfile"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:title="Settings"
-            app:titleTextColor="@color/white" />
+            android:layout_marginTop="15dp"
+            android:drawableStart="@drawable/ic_person"
+            android:drawablePadding="5dp"
+            android:text="@string/profile_info"
+            android:textAllCaps="false"
+            android:textColor="@color/black"
+            android:textSize="25sp" />
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/tvnChangePassword"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="15dp"
+            android:drawableStart="@drawable/ic__password"
+            android:drawablePadding="5dp"
+            android:text="@string/change_password"
+            android:textAllCaps="false"
+            android:textColor="@color/black"
+            android:textSize="25sp" />
 
-    <com.google.android.material.textview.MaterialTextView
-        android:id="@+id/tvEditProfile"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="15dp"
-        android:drawableStart="@drawable/ic_person"
-        android:drawablePadding="5dp"
-        android:text="@string/profile_info"
-        android:textAllCaps="false"
-        android:textColor="@color/black"
-        android:textSize="25sp"
-        app:layout_constraintEnd_toEndOf="@id/guideline2"
-        app:layout_constraintStart_toStartOf="@id/guideline1"
-        app:layout_constraintTop_toBottomOf="@id/appBarLayout" />
+        <com.google.android.material.switchmaterial.SwitchMaterial
+            android:id="@+id/switchPrivateAccount"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:drawableStart="@drawable/ic_lock"
+            android:drawablePadding="5dp"
+            android:text="@string/private_account"
+            android:textColor="@color/black"
+            android:textSize="25sp"
+            app:thumbTint="@color/colorPrimary" />
 
-    <com.google.android.material.textview.MaterialTextView
-        android:id="@+id/tvnChangePassword"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="15dp"
-        android:drawableStart="@drawable/ic__password"
-        android:drawablePadding="5dp"
-        android:text="@string/change_password"
-        android:textAllCaps="false"
-        android:textColor="@color/black"
-        android:textSize="25sp"
-        app:layout_constraintEnd_toStartOf="@+id/guideline2"
-        app:layout_constraintStart_toStartOf="@+id/guideline1"
-        app:layout_constraintTop_toBottomOf="@+id/tvEditProfile" />
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/tvCheckForUpdates"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="15dp"
+            android:drawableStart="@drawable/ic_update"
+            android:drawablePadding="5dp"
+            android:text="@string/check_for_updates"
+            android:textAllCaps="false"
+            android:textColor="@color/black"
+            android:textSize="25sp" />
 
-    <com.google.android.material.textview.MaterialTextView
-        android:id="@+id/tvCheckForUpdates"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="15dp"
-        android:drawableStart="@drawable/ic_update"
-        android:drawablePadding="5dp"
-        android:text="@string/check_for_updates"
-        android:textAllCaps="false"
-        android:textColor="@color/black"
-        android:textSize="25sp"
-        app:layout_constraintEnd_toStartOf="@+id/guideline2"
-        app:layout_constraintStart_toStartOf="@+id/guideline1"
-        app:layout_constraintTop_toBottomOf="@+id/tvnChangePassword" />
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/tvPrivacyPolicy"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="15dp"
+            android:text="@string/privacy_policy"
+            android:textColor="@color/black"
+            android:textSize="25sp" />
 
-    <com.google.android.material.switchmaterial.SwitchMaterial
-        android:id="@+id/switchPrivateAccount"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        app:layout_constraintStart_toStartOf="@id/guideline1"
-        app:layout_constraintEnd_toEndOf="@id/guideline2"
-        app:layout_constraintTop_toBottomOf="@id/tvCheckForUpdates"
-        android:textSize="25sp"
-        android:drawableStart="@drawable/ic_lock"
-        android:drawablePadding="5dp"
-        app:thumbTint="@color/colorPrimary"
-        android:layout_marginTop="10dp"
-        android:textColor="@color/black"
-        android:text="Private Account"/>
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/tvTermsAndConditions"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="15dp"
+            android:text="@string/terms_conditions"
+            android:textColor="@color/black"
+            android:textSize="25sp" />
 
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/btnLogout"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
-        android:text="@string/log_out"
-        android:textAllCaps="false"
-        android:textSize="25sp"
-        app:icon="@drawable/ic_outline_logout"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/switchPrivateAccount" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnLogout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="20dp"
+            android:text="@string/log_out"
+            android:textAllCaps="false"
+            android:textSize="25sp"
+            app:icon="@drawable/ic_outline_logout" />
+
+    </LinearLayout>
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/guideline1"
@@ -114,5 +120,16 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         app:layout_constraintGuide_percent="0.95" />
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/tvVersion"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="24dp"
+        android:textColor="@color/black"
+        android:textSize="20sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/guideline2"
+        app:layout_constraintStart_toStartOf="@+id/guideline1" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

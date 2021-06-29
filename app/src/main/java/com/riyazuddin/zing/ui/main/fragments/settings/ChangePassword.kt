@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.View
 import android.widget.Toast
 import androidx.core.view.isVisible
+import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
@@ -11,6 +12,7 @@ import com.riyazuddin.zing.R
 import com.riyazuddin.zing.databinding.FragmentChangePasswordBinding
 import com.riyazuddin.zing.other.Constants
 import com.riyazuddin.zing.other.EventObserver
+import com.riyazuddin.zing.other.Validator
 import com.riyazuddin.zing.other.snackBar
 import com.riyazuddin.zing.ui.main.viewmodels.SettingsViewModel
 import dagger.hilt.android.AndroidEntryPoint
@@ -18,6 +20,7 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class ChangePassword : Fragment(R.layout.fragment_change_password) {
 
+    private lateinit var validator: Validator
     private lateinit var binding: FragmentChangePasswordBinding
 
     private val viewModel: SettingsViewModel by viewModels()
@@ -25,6 +28,7 @@ class ChangePassword : Fragment(R.layout.fragment_change_password) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding = FragmentChangePasswordBinding.bind(view)
+        validator = Validator(requireContext())
 
         subscribeToObservers()
 
@@ -32,35 +36,41 @@ class ChangePassword : Fragment(R.layout.fragment_change_password) {
             findNavController().navigateUp()
         }
 
+        binding.TIENewPassword.addTextChangedListener {
+            validator.validatePassword(it.toString()).apply {
+                if (this != Constants.VALID)
+                    binding.TILNewPassword.error = this
+                else
+                    binding.TILNewPassword.error = null
+            }
+        }
+        binding.TIERepeatNewPassword.addTextChangedListener {
+            validator.validatePassword(it.toString()).apply {
+                if (this != Constants.VALID)
+                    binding.TILRepeatNewPassword.error = this
+                else
+                    binding.TILRepeatNewPassword.error = null
+            }
+        }
+
         binding.btnUpdate.setOnClickListener {
 
             val newPassword = binding.TIENewPassword.text.toString()
             val confirmNewPassword = binding.TIERepeatNewPassword.text.toString()
 
-            if (newPassword.isEmpty() || confirmNewPassword.isEmpty())
-                Toast.makeText(
-                    requireContext(),
-                    getString(R.string.error_fields_can_not_be_empty),
-                    Toast.LENGTH_SHORT
-                ).show()
-            else if (newPassword.length < Constants.MIN_PASSWORD)
-                binding.TIENewPassword.error = getString(
-                    R.string.error_password_too_short,
-                    Constants.MIN_PASSWORD
-                )
-            else if (newPassword.length > Constants.MAX_USERNAME)
-                binding.TIENewPassword.error = getString(
-                    R.string.error_username_too_long,
-                    Constants.MAX_USERNAME
-                )
-            else if (newPassword != confirmNewPassword)
-                binding.TIERepeatNewPassword.error = getString(R.string.error_password_not_match)
-            else {
-                it.isEnabled = false
-                viewModel.changePassword(
-                    binding.TIENewPassword.text.toString()
-                )
+            validator.validatePassword(newPassword).apply {
+                if (this != Constants.VALID) {
+                    binding.TILNewPassword.error = this
+                    return@setOnClickListener
+                }
             }
+            if (confirmNewPassword != newPassword) {
+                binding.TILRepeatNewPassword.error = this.getString(R.string.error_password_not_match)
+                return@setOnClickListener
+            }
+
+            it.isVisible = false
+            viewModel.changePassword(binding.TIENewPassword.text.toString())
         }
 
     }
@@ -69,7 +79,7 @@ class ChangePassword : Fragment(R.layout.fragment_change_password) {
         viewModel.changePasswordStatus.observe(viewLifecycleOwner, EventObserver(
             onError = {
                 binding.progressBar.isVisible = false
-                binding.btnUpdate.isEnabled = true
+                binding.btnUpdate.isVisible = true
                 snackBar(it)
             },
             onLoading = {
@@ -77,9 +87,9 @@ class ChangePassword : Fragment(R.layout.fragment_change_password) {
             }
         ) {
             binding.progressBar.isVisible = false
-            binding.btnUpdate.isEnabled = true
-            snackBar(it.toString())
-            findNavController().navigateUp()
+            binding.btnUpdate.isVisible = true
+            snackBar(it)
+            findNavController().popBackStack()
         })
     }
 }

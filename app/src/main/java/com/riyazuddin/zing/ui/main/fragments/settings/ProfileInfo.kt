@@ -84,8 +84,8 @@ class ProfileInfo : Fragment(R.layout.fragment_profile_info) {
 
         subscribeToObservers()
 
-        binding.toolbar.setNavigationOnClickListener {
-            findNavController().navigateUp()
+        binding.btnClose.setOnClickListener {
+            findNavController().popBackStack()
         }
 
         viewModel.getUserProfile(Firebase.auth.uid!!)

@@ -30,7 +30,7 @@ class CurrentPasswordVerification : Fragment(R.layout.fragment_current_password_
         }
 
         binding.btnVerify.setOnClickListener {
-            it.isEnabled = false
+            it.isVisible = false
             viewModel.verifyAccount(
                 binding.TIECurrentPassword.text.toString()
             )
@@ -43,13 +43,13 @@ class CurrentPasswordVerification : Fragment(R.layout.fragment_current_password_
             onError = {
                 binding.progressBar.isVisible = false
                 binding.TILCurrentPassword.error = it
-                binding.btnVerify.isEnabled = true
+                binding.btnVerify.isVisible = true
                 snackBar(it)
             },
             onLoading = { binding.progressBar.isVisible = true }
         ) {
             binding.progressBar.isVisible = false
-            binding.btnVerify.isEnabled = true
+            binding.btnVerify.isVisible = true
             findNavController().navigate(R.id.action_currentPasswordVerification_to_changePassword)
         })
     }
