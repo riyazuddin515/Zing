@@ -13,8 +13,8 @@ import com.riyazuddin.zing.other.Constants.COMMENT_PAGE_SIZE
 import com.riyazuddin.zing.other.Constants.USERS_COLLECTION
 import com.riyazuddin.zing.other.Event
 import com.riyazuddin.zing.other.Resource
-import com.riyazuddin.zing.repositories.abstraction.MainRepository
-import com.riyazuddin.zing.repositories.pagingsource.PostCommentsPagingSource
+import com.riyazuddin.zing.repositories.network.abstraction.MainRepository
+import com.riyazuddin.zing.repositories.network.pagingsource.PostCommentsPagingSource
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch

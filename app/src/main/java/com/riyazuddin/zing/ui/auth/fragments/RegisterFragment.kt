@@ -58,7 +58,7 @@ class RegisterFragment : Fragment(R.layout.fragment_register) {
                         if (this != VALID) {
                             binding.TILUsername.error = this
                         } else {
-                            viewModel.checkUserNameAvailability(it.toString())
+//                            viewModel.checkUserNameAvailability(it.toString())
                         }
                     }
                 }

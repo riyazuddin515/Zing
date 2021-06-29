@@ -1,5 +1,6 @@
 package com.riyazuddin.zing.ui.main.fragments.chat
 
+import android.app.Application
 import android.app.NotificationManager
 import android.content.Context
 import android.os.Bundle
@@ -14,6 +15,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.riyazuddin.zing.R
 import com.riyazuddin.zing.adapters.LastMessageAdapter
 import com.riyazuddin.zing.databinding.FragmentRecentChatListBinding
@@ -49,10 +51,19 @@ class RecentChatListFragment : Fragment(R.layout.fragment_recent_chat_list) {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = FragmentRecentChatListBinding.inflate(layoutInflater)
-
-        Log.i(TAG, "onCreate: ")
         setupRecyclerView()
-        viewModel.getLastMessageFirstQuery(args.currentUser)
+        val sp = requireContext().getSharedPreferences("isFirstLoadOfRecentChat", Application.MODE_PRIVATE)
+        val a = sp.getBoolean("isFirstLoadOfRecentChat", true)
+        if (a) {
+            Log.i(TAG, "onCreate: calling")
+            viewModel.getLastMessageFirstQuery(args.currentUser)
+            sp.edit().let {
+                it.putBoolean("isFirstLoadOfRecentChat", false)
+                it.apply()
+            }
+        }else
+            Log.i(TAG, "onCreate: Not calling")
+
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -89,18 +100,7 @@ class RecentChatListFragment : Fragment(R.layout.fragment_recent_chat_list) {
     }
 
     private fun subscribeToObservers() {
-        viewModel.recentMessagesList.observe(viewLifecycleOwner, EventObserver(
-            onError = {
-                if (it != Constants.NO_MORE_MESSAGES) {
-                    snackBar(it)
-                }
-                binding.progressBar.isVisible = false
-            },
-            onLoading = {
-                Log.i(TAG, "subscribeToObservers: Loading")
-                binding.progressBar.isVisible = true
-            }
-        ) {
+        viewModel.recentMessagesList.observe(viewLifecycleOwner, {
             lastMessageAdapter.lastMessages = it
             binding.progressBar.isVisible = false
             lastMessageAdapter.notifyDataSetChanged()
@@ -134,16 +134,6 @@ class RecentChatListFragment : Fragment(R.layout.fragment_recent_chat_list) {
                 }
             })
         }
-    }
-
-//    override fun onStop() {
-//        viewModel.clearRecentMessagesList()
-//        super.onStop()
-//    }
-
-    override fun onDetach() {
-        viewModel.clearRecentMessagesList()
-        super.onDetach()
     }
 
     override fun onStart() {

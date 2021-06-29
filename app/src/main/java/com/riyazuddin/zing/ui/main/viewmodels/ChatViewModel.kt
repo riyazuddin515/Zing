@@ -1,7 +1,6 @@
 package com.riyazuddin.zing.ui.main.viewmodels
 
 import android.net.Uri
-import android.util.Log
 import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -9,7 +8,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
-import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import com.google.firebase.firestore.FirebaseFirestore
 import com.riyazuddin.zing.data.entities.LastMessage
@@ -19,10 +17,9 @@ import com.riyazuddin.zing.data.entities.UserStat
 import com.riyazuddin.zing.other.Constants
 import com.riyazuddin.zing.other.Event
 import com.riyazuddin.zing.other.Resource
-import com.riyazuddin.zing.repositories.abstraction.ChatRepository
-import com.riyazuddin.zing.repositories.implementation.DefaultChatRepository
-import com.riyazuddin.zing.repositories.pagingsource.FollowingAndFollowersPagingSource
-import kotlinx.coroutines.flow.Flow
+import com.riyazuddin.zing.repositories.network.abstraction.ChatRepository
+import com.riyazuddin.zing.repositories.network.implementation.DefaultChatRepository
+import com.riyazuddin.zing.repositories.network.pagingsource.FollowingAndFollowersPagingSource
 import kotlinx.coroutines.launch
 import javax.inject.Singleton
 
@@ -44,9 +41,9 @@ class ChatViewModel @ViewModelInject constructor(
     val playTone: LiveData<Event<Resource<Boolean>>> =
         (repository as DefaultChatRepository).playTone
 
-    private val _recentMessagesList: MutableLiveData<Event<Resource<List<LastMessage>>>> =
+    private val _recentMessagesList: MutableLiveData<List<LastMessage>> =
         (repository as DefaultChatRepository).lastMessageList
-    val recentMessagesList: LiveData<Event<Resource<List<LastMessage>>>> = _recentMessagesList
+    val recentMessagesList: LiveData<List<LastMessage>> = _recentMessagesList
 
     val isUserOnline: LiveData<Event<Resource<UserStat>>> = (repository as DefaultChatRepository).isUserOnline
 
@@ -71,7 +68,7 @@ class ChatViewModel @ViewModelInject constructor(
     fun setUid(uid: String){
         this.uid = uid
     }
-    val flow = Pager(PagingConfig(Constants.NEW_CHAT_LIST_SIZE)) {
+    val flow = Pager(PagingConfig(Constants.NEW_CHAT_PAGE_SIZE)) {
         FollowingAndFollowersPagingSource(uid, FirebaseFirestore.getInstance())
     }.flow.cachedIn(viewModelScope)
 
@@ -113,7 +110,6 @@ class ChatViewModel @ViewModelInject constructor(
         }
     }
     fun getLastMessageFirstQuery(currentUser: User) {
-        _recentMessagesList.postValue(Event(Resource.Loading()))
         viewModelScope.launch {
             val result = repository.getLastMessageFirstQuery(currentUser)
             _isLastMessagesFirstLoadDone.postValue(Event(result))
@@ -121,15 +117,18 @@ class ChatViewModel @ViewModelInject constructor(
     }
 
     fun getLastMessageLoadMore(currentUser: User) {
-        _recentMessagesList.postValue(Event(Resource.Loading()))
         viewModelScope.launch {
             repository.getLastMessageLoadMore(currentUser)
         }
     }
 
+    private val _messageDeleteStatus = MutableLiveData<Event<Resource<Message>>>()
+    val messageDeleteStatus: LiveData<Event<Resource<Message>>> = _messageDeleteStatus
     fun deleteMessage(currentUid: String, otherEndUserUid: String, message: Message) {
         viewModelScope.launch {
-            repository.deleteChatMessage(currentUid, otherEndUserUid, message)
+            _messageDeleteStatus.postValue(
+                Event(repository.deleteChatMessage(currentUid, otherEndUserUid, message))
+            )
         }
     }
 

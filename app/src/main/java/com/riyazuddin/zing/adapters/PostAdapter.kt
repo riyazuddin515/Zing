@@ -21,7 +21,7 @@ class PostAdapter @Inject constructor(
     val glide: RequestManager
 ) : PagingDataAdapter<Post, PostAdapter.PostViewHolder>(Companion) {
 
-    class PostViewHolder(val binding: ItemPostBinding) : RecyclerView.ViewHolder(binding.root)
+    inner class PostViewHolder(val binding: ItemPostBinding) : RecyclerView.ViewHolder(binding.root)
 
     companion object : DiffUtil.ItemCallback<Post>() {
         override fun areItemsTheSame(oldItem: Post, newItem: Post): Boolean {

@@ -10,8 +10,8 @@ import java.util.*
 data class Message(
     val messageId: String = "",
     var message: String = "",
-    val url: String = "",
-    val type: String = "",
+    var url: String = "",
+    var type: String = "",
     @ServerTimestamp
     var date: Date? = null,
     val senderAndReceiverUid: List<String> = listOf(),

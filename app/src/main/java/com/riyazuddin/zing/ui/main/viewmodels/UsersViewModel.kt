@@ -7,8 +7,8 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.cachedIn
 import com.google.firebase.firestore.FirebaseFirestore
-import com.riyazuddin.zing.other.Constants.USERS_LIST_SIZE
-import com.riyazuddin.zing.repositories.pagingsource.UsersPagingSource
+import com.riyazuddin.zing.other.Constants.USER_PAGE_SIZE
+import com.riyazuddin.zing.repositories.network.pagingsource.UsersPagingSource
 
 class UsersViewModel @ViewModelInject constructor(
     private val firestore: FirebaseFirestore
@@ -21,7 +21,7 @@ class UsersViewModel @ViewModelInject constructor(
         this.title = title
     }
 
-    fun flowOfUsers(uid: String, title: String) = Pager(PagingConfig(USERS_LIST_SIZE)) {
+    fun flowOfUsers(uid: String, title: String) = Pager(PagingConfig(USER_PAGE_SIZE)) {
         UsersPagingSource(uid, title, firestore)
     }.flow.cachedIn(viewModelScope)
 

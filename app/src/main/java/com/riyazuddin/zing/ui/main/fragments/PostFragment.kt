@@ -147,7 +147,6 @@ class PostFragment : Fragment(R.layout.fragment_post) {
         })
 
         homeViewModel.likePostStatus.observe(viewLifecycleOwner, EventObserver(
-            oneTimeConsume = true,
             onError = {
                 post?.isLiking = false
                 snackBar(it)

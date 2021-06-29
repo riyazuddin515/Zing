@@ -8,8 +8,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.riyazuddin.zing.other.Event
 import com.riyazuddin.zing.other.Resource
-import com.riyazuddin.zing.repositories.abstraction.AuthRepository
-import com.riyazuddin.zing.repositories.abstraction.MainRepository
+import com.riyazuddin.zing.repositories.network.abstraction.AuthRepository
+import com.riyazuddin.zing.repositories.network.abstraction.MainRepository
 import kotlinx.coroutines.launch
 
 class AuthViewModel @ViewModelInject constructor(

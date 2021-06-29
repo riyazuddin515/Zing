@@ -57,7 +57,7 @@ class ProfileInfo : Fragment(R.layout.fragment_profile_info) {
         override fun createIntent(context: Context, input: String?): Intent {
             return CropImage.activity()
                 .setAspectRatio(1, 1)
-                .setOutputCompressQuality(50)
+                .setOutputCompressQuality(40)
                 .setActivityTitle("Crop Image")
                 .setGuidelines(CropImageView.Guidelines.ON)
                 .getIntent(requireContext())

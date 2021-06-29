@@ -13,7 +13,7 @@ import javax.inject.Inject
 class UserAdapterPagingData @Inject constructor(val glide: RequestManager) :
     PagingDataAdapter<User, UserAdapterPagingData.UserViewHolder>(Companion) {
 
-    class UserViewHolder(val binding: ItemUserBinding) : RecyclerView.ViewHolder(binding.root)
+    inner class UserViewHolder(val binding: ItemUserBinding) : RecyclerView.ViewHolder(binding.root)
 
     companion object : DiffUtil.ItemCallback<User>() {
         override fun areItemsTheSame(oldItem: User, newItem: User): Boolean {

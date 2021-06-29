@@ -18,7 +18,6 @@ class Event<out T>(private val content: T) {
 }
 
 class EventObserver<T>(
-    private val oneTimeConsume: Boolean = false,
     private inline val onError: ((String) -> Unit)? = null,
     private inline val onLoading: (() -> Unit)? = null,
     private inline val onSuccess: ((T) -> Unit)
@@ -26,11 +25,7 @@ class EventObserver<T>(
     override fun onChanged(t: Event<Resource<T>>?) {
         when (val content = t?.peekContent()) {
             is Resource.Success -> {
-                if (oneTimeConsume) {
-                    t.getContentHasBeenHandled()?.let {
-                        content.data?.let(onSuccess)
-                    }
-                } else {
+                t.getContentHasBeenHandled()?.let {
                     content.data?.let(onSuccess)
                 }
             }

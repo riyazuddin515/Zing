@@ -25,6 +25,7 @@
             android:textColorHint="@color/black"
             app:boxCornerRadiusBottomStart="20dp"
             app:boxCornerRadiusBottomEnd="20dp"
+            app:endIconMode="clear_text"
             app:boxBackgroundColor="@android:color/transparent"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"

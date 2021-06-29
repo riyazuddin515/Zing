@@ -1,8 +1,8 @@
 package com.riyazuddin.zing.di
 
 import com.google.firebase.firestore.FirebaseFirestore
-import com.riyazuddin.zing.repositories.abstraction.ChatRepository
-import com.riyazuddin.zing.repositories.implementation.DefaultChatRepository
+import com.riyazuddin.zing.repositories.network.abstraction.ChatRepository
+import com.riyazuddin.zing.repositories.network.implementation.DefaultChatRepository
 import com.riyazuddin.zing.ui.main.viewmodels.ChatViewModel
 import dagger.Module
 import dagger.Provides

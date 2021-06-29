@@ -39,7 +39,7 @@ class CreatePostFragment : Fragment(R.layout.fragment_create_post) {
         override fun createIntent(context: Context, input: String?): Intent {
             return CropImage.activity()
                 .setGuidelines(CropImageView.Guidelines.ON)
-                .setOutputCompressQuality(60)
+                .setOutputCompressQuality(50)
                 .setActivityTitle("Crop Image")
                 .getIntent(requireContext())
         }

@@ -1,10 +1,13 @@
 package com.riyazuddin.zing.ui.main.fragments
 
+import android.content.Context.MODE_PRIVATE
+import android.content.SharedPreferences
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
@@ -12,12 +15,16 @@ import androidx.navigation.fragment.findNavController
 import androidx.paging.LoadState
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.algolia.search.dsl.ruleQuery
+import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import com.riyazuddin.zing.R
 import com.riyazuddin.zing.data.entities.User
 import com.riyazuddin.zing.databinding.FragmentProfileBinding
+import com.riyazuddin.zing.databinding.ProfileBottomSheetBinding
+import com.riyazuddin.zing.other.Constants.PRIVATE
 import com.riyazuddin.zing.other.EventObserver
 import com.riyazuddin.zing.other.NavGraphArgsConstants.FOLLOWERS_ARG
 import com.riyazuddin.zing.other.NavGraphArgsConstants.FOLLOWING_ARG
@@ -33,7 +40,6 @@ import kotlinx.coroutines.launch
 @AndroidEntryPoint
 open class ProfileFragment : BasePostFragment(R.layout.fragment_profile) {
 
-    private lateinit var binding: FragmentProfileBinding
 
     protected open var currentUser: User? = null
 
@@ -46,9 +52,14 @@ open class ProfileFragment : BasePostFragment(R.layout.fragment_profile) {
     protected val viewModel: ProfileViewModel
         get() = basePostViewModel as ProfileViewModel
 
-
     protected open val uid: String
         get() = FirebaseAuth.getInstance().uid!!
+
+    private lateinit var binding: FragmentProfileBinding
+
+    private lateinit var bottomSheetDialog: BottomSheetDialog
+    private lateinit var bottomSheetBinding: ProfileBottomSheetBinding
+    private var sharedPreferences: SharedPreferences? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -63,12 +74,13 @@ open class ProfileFragment : BasePostFragment(R.layout.fragment_profile) {
         binding = FragmentProfileBinding.inflate(layoutInflater)
 
         setUpRecyclerView()
+        setUpBottomSlider()
 
         binding.btnToggleFollow.isVisible = false
         binding.btnEditProfile.isVisible = uid == Firebase.auth.uid
-        viewModel.setUid(uid)
         viewModel.loadProfile(uid)
-
+        viewModel.getUserMetaData(uid)
+        viewModel.setUid(uid)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -77,20 +89,20 @@ open class ProfileFragment : BasePostFragment(R.layout.fragment_profile) {
         subscribeToObservers()
         setupClickListeners()
 
-//        lifecycleScope.launch {
-//            postAdapter.loadStateFlow.collectLatest {
-//                binding.linearProgressIndicatorFirstLoad.isVisible = it.refresh is LoadState.Loading
-//                binding.linearProgressIndicatorLoadMore.isVisible = it.append is LoadState.Loading
-//            }
-//        }
+        lifecycleScope.launch {
+            postAdapter.loadStateFlow.collectLatest {
+                binding.linearProgressIndicatorFirstLoad.isVisible = it.refresh is LoadState.Loading
+                binding.linearProgressIndicatorLoadMore.isVisible = it.append is LoadState.Loading
+            }
+        }
 
     }
 
     private fun subscribeToObservers() {
         viewModel.flowOfProfilePosts.observe(viewLifecycleOwner, {
-            postAdapter.submitData(lifecycle, it)
+            postAdapter.submitData(viewLifecycleOwner.lifecycle, it)
         })
-        viewModel.loadProfileMetadata.observe(viewLifecycleOwner, EventObserver(
+        viewModel.userData.observe(viewLifecycleOwner, EventObserver(
             onError = {
                 binding.progressBarProfileMetadata.isVisible = false
                 snackBar(it)
@@ -105,15 +117,40 @@ open class ProfileFragment : BasePostFragment(R.layout.fragment_profile) {
             binding.tvName.text = user.name
             binding.toolbar.title = user.username
             glide.load(user.profilePicUrl).into(binding.CIVProfilePic)
-            binding.tvBio.text = if (user.bio.isEmpty()) "No Bio" else user.bio
-
-            binding.tvPostCount.text = user.postCount.toString()
-            binding.tvFollowingCount.text = user.followingCount.toString()
-            binding.tvFollowersCount.text = user.followersCount.toString()
+            if (user.bio.isNotEmpty()) {
+                binding.tvBio.text = user.bio
+            }
+            if (user.privacy == PRIVATE) {
+                bottomSheetBinding.tvFollowingRequests.isVisible = true
+                sharedPreferences = requireContext().getSharedPreferences("haveFollowingRequests", MODE_PRIVATE)
+                val bool = sharedPreferences?.getBoolean("haveFollowingRequests", false) ?: false
+                if (bool) {
+                    binding.ivMoreBadge.isVisible = true
+                    bottomSheetBinding.tvFollowingRequests.setCompoundDrawablesWithIntrinsicBounds(0,0,R.drawable.ic_circle_primary_color, 0)
+//                    bottomSheetBinding.tvFollowingRequests.setOnClickListener {
+//                        bottomSheetBinding.tvFollowingRequests.setCompoundDrawablesWithIntrinsicBounds(0,0,0, 0)
+//                        sp.edit().let {
+//                            it.putBoolean("haveFollowingRequests", false)
+//                            it.apply()
+//                        }
+//                        bottomSheetDialog.dismiss()
+//                        findNavController().navigate(R.id.action_profileFragment_to_followersRequestFragment)
+//                    }
+                }
+            }
+        })
+        viewModel.userMetadata.observe(viewLifecycleOwner, EventObserver(
+            onError = {
+                snackBar(it)
+                Log.e(TAG, "subscribeToObservers: $it")
+            },
+        ) { userMetadata ->
+            binding.tvPostCount.text = userMetadata.postCount.toString()
+            binding.tvFollowingCount.text = userMetadata.followingCount.toString()
+            binding.tvFollowersCount.text = userMetadata.followersCount.toString()
         })
 
         basePostViewModel.deletePostStatus.observe(viewLifecycleOwner, EventObserver(
-            oneTimeConsume = true,
             onError = {
                 snackBar(it)
                 Log.e(TAG, "subscribeToObservers: $it")
@@ -126,6 +163,10 @@ open class ProfileFragment : BasePostFragment(R.layout.fragment_profile) {
     }
 
     private fun setupClickListeners() {
+        binding.ivMore.setOnClickListener {
+            binding.ivMoreBadge.isVisible = false
+            bottomSheetDialog.show()
+        }
         binding.tvFollowersCount.setOnClickListener {
             findNavController().navigate(
                 ProfileFragmentDirections.globalActionToUserListFragment(uid, FOLLOWERS_ARG)
@@ -165,12 +206,34 @@ open class ProfileFragment : BasePostFragment(R.layout.fragment_profile) {
 
     private fun setUpRecyclerView() {
         binding.rvPostList.apply {
+//            adapter = postAdapterStaggered
+//            layoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
             adapter = postAdapter
             adapter?.stateRestorationPolicy =
                 RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
             layoutManager = LinearLayoutManager(requireContext())
-            itemAnimator = null
         }
+    }
+
+    private fun setUpBottomSlider() {
+        bottomSheetDialog = BottomSheetDialog(requireContext(), R.style.AppBottomSheetDialogTheme)
+        bottomSheetBinding = ProfileBottomSheetBinding.inflate(layoutInflater)
+        bottomSheetBinding.apply {
+            btnEditProfile.setOnClickListener {
+                findNavController().navigate(ProfileFragmentDirections.actionProfileFragmentToProfileInfo())
+                bottomSheetDialog.dismiss()
+            }
+            tvFollowingRequests.setOnClickListener {
+                bottomSheetBinding.tvFollowingRequests.setCompoundDrawablesWithIntrinsicBounds(0,0,0, 0)
+                sharedPreferences?.edit()?.let {
+                    it.putBoolean("haveFollowingRequests", false)
+                    it.apply()
+                }
+                bottomSheetDialog.dismiss()
+                findNavController().navigate(R.id.action_profileFragment_to_followersRequestFragment)
+            }
+        }
+        bottomSheetDialog.setContentView(bottomSheetBinding.root)
     }
 
     companion object {

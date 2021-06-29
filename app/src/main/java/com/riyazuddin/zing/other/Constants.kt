@@ -22,6 +22,7 @@ object Constants {
     const val ALGOLIA_USER_SEARCH_INDEX = "user_search"
 
     const val USERS_COLLECTION = "users"
+    const val USERS_METADATA_COLLECTION = "usersMetadata"
     const val USERS_STAT_COLLECTION = "usersStat"
     const val POSTS_COLLECTION = "posts"
     const val COMMENTS_COLLECTION = "comments"
@@ -30,6 +31,8 @@ object Constants {
     const val POST_LIKES_COLLECTION = "postLikes"
     const val CHATS_COLLECTION = "chats"
     const val MESSAGES_COLLECTION = "messages"
+    const val FOLLOWING_REQUESTS_COLLECTION = "followingRequests"
+    const val FOLLOWER_REQUESTS_COLLECTION = "followerRequsts"
 
     /**
      * For User Stat
@@ -49,6 +52,7 @@ object Constants {
     const val FOLLOWING_COUNT = "followingCount"
     const val FOLLOWERS_COUNT = "followersCount"
     const val POST_COUNT = "postCount"
+    const val PRIVACY = "privacy"
 
     const val POST_ID = "postId"
     const val POSTED_BY = "postedBy"
@@ -76,8 +80,8 @@ object Constants {
     const val LAST_MESSAGE_PAGE_LIMIT = 10L
     const val POST_PAGE_SIZE = 5
     const val COMMENT_PAGE_SIZE = 10
-    const val NEW_CHAT_LIST_SIZE = 10
-    const val USERS_LIST_SIZE = 10
+    const val NEW_CHAT_PAGE_SIZE = 10
+    const val USER_PAGE_SIZE = 10
 
     const val VALID = "VALID"
     const val INVALID = "INVALID"
@@ -104,5 +108,13 @@ object Constants {
 
     const val ONLINE = "Online"
     const val OFFLINE = "Offline"
+
+    const val PUBLIC = "public"
+    const val PRIVATE = "private"
+
+
+    //For Following Request
+    const val REQUESTED_TO_UIDS = "requestedToUids"
+    const val REQUESTED_UIDS = "requestedUids"
 
 }

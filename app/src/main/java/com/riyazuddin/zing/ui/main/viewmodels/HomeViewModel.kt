@@ -3,21 +3,17 @@ package com.riyazuddin.zing.ui.main.viewmodels
 import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
 import androidx.paging.*
-import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.ktx.Firebase
-import com.riyazuddin.zing.data.entities.Post
 import com.riyazuddin.zing.data.entities.User
 import com.riyazuddin.zing.other.Constants.POST_PAGE_SIZE
 import com.riyazuddin.zing.other.Event
 import com.riyazuddin.zing.other.Resource
-import com.riyazuddin.zing.repositories.abstraction.ChatRepository
-import com.riyazuddin.zing.repositories.abstraction.MainRepository
-import com.riyazuddin.zing.repositories.implementation.DefaultChatRepository
-import com.riyazuddin.zing.repositories.pagingsource.FeedPagingSource
+import com.riyazuddin.zing.repositories.network.abstraction.ChatRepository
+import com.riyazuddin.zing.repositories.network.abstraction.MainRepository
+import com.riyazuddin.zing.repositories.network.implementation.DefaultChatRepository
+import com.riyazuddin.zing.repositories.network.pagingsource.FeedPagingSource
 import kotlinx.coroutines.launch
 import javax.inject.Singleton
 
@@ -29,9 +25,6 @@ class HomeViewModel @ViewModelInject constructor(
 
     private val _loadCurrentUserStatus = MutableLiveData<Event<Resource<User>>>()
     val loadCurrentUserStatus: LiveData<Event<Resource<User>>> = _loadCurrentUserStatus
-
-    private val _removeDeviceTokeStatus = MutableLiveData<Event<Resource<Boolean>>>()
-    val removeDeviceTokeStatus: LiveData<Event<Resource<Boolean>>> = _removeDeviceTokeStatus
 
     val feed = Pager(PagingConfig(POST_PAGE_SIZE)) {
         FeedPagingSource(FirebaseFirestore.getInstance())
@@ -63,11 +56,13 @@ class HomeViewModel @ViewModelInject constructor(
         }
     }
 
-    fun removeDeviceToken(uid: String) {
-        _removeDeviceTokeStatus.postValue(Event(Resource.Loading()))
+    private val _doesUserHaveFollowingRequests = MutableLiveData<Event<Resource<Boolean>>>()
+    val doesUserHaveFollowingRequests: LiveData<Event<Resource<Boolean>>> = _doesUserHaveFollowingRequests
+    fun checkDoesUserHaveFollowerRequests() {
         viewModelScope.launch {
-            val result = repository.removeDeviceToken(uid)
-            _removeDeviceTokeStatus.postValue(Event(result))
+            _doesUserHaveFollowingRequests.postValue(
+                Event(repository.checkDoesUserHaveFollowerRequests())
+            )
         }
     }
 

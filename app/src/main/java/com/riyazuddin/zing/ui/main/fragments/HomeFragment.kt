@@ -1,6 +1,8 @@
 package com.riyazuddin.zing.ui.main.fragments
 
+import android.content.Context.MODE_PRIVATE
 import android.content.Intent
+import android.content.SharedPreferences
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -9,6 +11,7 @@ import android.view.ViewGroup
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import android.widget.Toast
+import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
@@ -22,10 +25,12 @@ import com.google.firebase.ktx.Firebase
 import com.riyazuddin.zing.R
 import com.riyazuddin.zing.data.entities.User
 import com.riyazuddin.zing.databinding.FragmentHomeBinding
+import com.riyazuddin.zing.other.Constants.PRIVATE
 import com.riyazuddin.zing.other.EventObserver
 import com.riyazuddin.zing.other.snackBar
 import com.riyazuddin.zing.ui.auth.AuthActivity
 import com.riyazuddin.zing.ui.dialogs.CustomDialog
+import com.riyazuddin.zing.ui.main.MainActivity
 import com.riyazuddin.zing.ui.main.viewmodels.BasePostViewModel
 import com.riyazuddin.zing.ui.main.viewmodels.HomeViewModel
 import dagger.hilt.android.AndroidEntryPoint
@@ -106,7 +111,6 @@ class HomeFragment : BasePostFragment(R.layout.fragment_home) {
 
     private fun subscribeToObservers() {
         viewModel.loadCurrentUserStatus.observe(viewLifecycleOwner, EventObserver(
-            oneTimeConsume = true,
             onError = {
                 snackBar(it)
                 Log.e(TAG, "subscribeToObservers: $it")
@@ -115,26 +119,25 @@ class HomeFragment : BasePostFragment(R.layout.fragment_home) {
         ) {
             currentUser = it
             binding.ibRecentChat.isVisible = true
+            if (it.privacy == PRIVATE)
+                viewModel.checkDoesUserHaveFollowerRequests()
         })
-        viewModel.removeDeviceTokeStatus.observe(viewLifecycleOwner, EventObserver(
-            oneTimeConsume = true,
-            onError = {
-                snackBar(it)
-                Log.e(TAG, "subscribeToObservers: $it")
-            },
-            onLoading = {
-                Toast.makeText(requireContext(), "Logging Out", Toast.LENGTH_SHORT).show()
-            }
-        ) {
+        viewModel.doesUserHaveFollowingRequests.observe(viewLifecycleOwner, EventObserver {
             if (it) {
-                Firebase.auth.signOut()
-                Intent(requireActivity(), AuthActivity::class.java).apply {
-                    startActivity(this)
-                    requireActivity().finish()
+                Log.i(TAG, "subscribeToObservers: true")
+                ((requireActivity()) as MainActivity).binding.bottomNavigation.apply {
+                    getOrCreateBadge(R.id.profileFragment).apply {
+                        backgroundColor = ContextCompat.getColor(requireContext(), R.color.colorPrimary)
+                        isVisible = true
+                    }
                 }
-            } else {
-                snackBar("can't logout. Try again")
-            }
+                val sp = requireContext().getSharedPreferences("haveFollowingRequests", MODE_PRIVATE)
+                sp.edit()?.let { editor ->
+                    editor.putBoolean("haveFollowingRequests", true)
+                    editor.apply()
+                }
+            } else
+                Log.i(TAG, "subscribeToObservers: false")
         })
         viewModel.haveUnSeenMessages.observe(viewLifecycleOwner, EventObserver(
             onError = {
@@ -150,11 +153,6 @@ class HomeFragment : BasePostFragment(R.layout.fragment_home) {
     }
 
     private fun setupClickListeners() {
-
-//        binding.crashButton.setOnClickListener {
-//            throw RuntimeException("Test Crash") // Force a crash
-//        }
-
         postAdapter.setOnUserClickListener {
             if (it.postedBy == currentUserUid)
                 findNavController().navigate(R.id.profileFragment)
@@ -178,14 +176,6 @@ class HomeFragment : BasePostFragment(R.layout.fragment_home) {
                     HomeFragmentDirections.globalActionToCommentsFragment(post.postId, it)
                 )
             } ?: snackBar("Please wait...")
-        }
-        binding.btnLogout.setOnClickListener {
-            CustomDialog("Log Out", " Are you sure to logout of the app?").apply {
-                setPositiveListener {
-//                    Firebase.auth.signOut()
-                    viewModel.removeDeviceToken(currentUserUid!!)
-                }
-            }.show(parentFragmentManager, null)
         }
 
         binding.ibRecentChat.setOnClickListener {

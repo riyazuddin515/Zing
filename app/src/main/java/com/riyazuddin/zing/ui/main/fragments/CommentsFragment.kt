@@ -134,7 +134,6 @@ class CommentsFragment : Fragment(R.layout.fragment_comments) {
         })
 
         viewModel.createCommentStatus.observe(viewLifecycleOwner, EventObserver(
-            oneTimeConsume = true,
             onError = {
                 binding.btnSend.isEnabled = true
                 snackBar(it)

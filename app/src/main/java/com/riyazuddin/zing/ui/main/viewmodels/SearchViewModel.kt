@@ -9,7 +9,7 @@ import com.algolia.search.model.response.ResponseSearch
 import com.riyazuddin.zing.data.entities.User
 import com.riyazuddin.zing.other.Event
 import com.riyazuddin.zing.other.Resource
-import com.riyazuddin.zing.repositories.abstraction.MainRepository
+import com.riyazuddin.zing.repositories.network.abstraction.MainRepository
 import kotlinx.coroutines.launch
 
 class SearchViewModel @ViewModelInject constructor(

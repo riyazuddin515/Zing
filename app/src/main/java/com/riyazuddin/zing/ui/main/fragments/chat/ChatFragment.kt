@@ -175,7 +175,6 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
 
         })
         viewModel.playTone.observe(viewLifecycleOwner, EventObserver(
-            oneTimeConsume = true
         ) {
             if (it)
                 mediaPlayer.start()
@@ -188,6 +187,24 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
             else
                 binding.toolbar.subtitle =
                     LAST_SEEN + " " + simpleDateFormat.format(it.lastSeen!!)
+        })
+
+        viewModel.messageDeleteStatus.observe(viewLifecycleOwner, EventObserver{
+            it.message = "This message was Deleted"
+            it.url = ""
+            it.type = "DELETE"
+            val list = chatAdapter.messages.toMutableList()
+            val filterList = list.filter { filter ->
+                filter.messageId == it.messageId
+            }
+            if (filterList.isNotEmpty()){
+                for (e in filterList){
+                    val index = list.indexOf(e)
+                    list.removeAt(index)
+                    list.add(index, it)
+                }
+                chatAdapter.notifyDataSetChanged()
+            }
         })
     }
 

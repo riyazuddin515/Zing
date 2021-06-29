@@ -27,23 +27,3 @@ fun slideUpViews(context: Context, vararg views: View, animTime: Long = 300L, de
         views[i].slideUp(context, animTime, delay * i)
     }
 }
-
-fun TextView.leftDrawable(
-    @DrawableRes id: Int = 0,
-    @DimenRes sizeRes: Int = 0,
-    @ColorInt color: Int = 0,
-    @ColorRes colorRes: Int = 0
-) {
-    val drawable = ContextCompat.getDrawable(context, id)
-    if (sizeRes != 0) {
-        val size = resources.getDimension(sizeRes)
-        drawable?.setBounds(0, 0, size.toInt(), size.toInt())
-    }
-    if (color != 0) {
-        drawable?.setColorFilter(color, PorterDuff.Mode.SRC_ATOP)
-    } else if (colorRes != 0) {
-        val colorInt = ContextCompat.getColor(context, colorRes)
-        drawable?.setColorFilter(colorInt, PorterDuff.Mode.SRC_ATOP)
-    }
-    this.setCompoundDrawables(drawable, null, null, null)
-}

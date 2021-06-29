@@ -53,7 +53,6 @@ abstract class BasePostFragment(layoutId: Int) : Fragment(layoutId) {
 
     private fun subscribeToObservers() {
         basePostViewModel.likePostStatus.observe(viewLifecycleOwner, EventObserver(
-            oneTimeConsume = true,
             onError = {
                 curLikeIndex?.let { index ->
                     postAdapter.peek(index)?.isLiking = false

@@ -65,8 +65,9 @@
 
             <ImageView
                 android:id="@+id/ivPostImage"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:scaleType="fitCenter"
                 android:adjustViewBounds="true"
                 android:contentDescription="@string/postimage"
                 tools:src="@drawable/default_profile_pic" />

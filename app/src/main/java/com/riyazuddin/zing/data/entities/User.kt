@@ -4,6 +4,7 @@ import com.google.firebase.firestore.Exclude
 import com.google.firebase.firestore.IgnoreExtraProperties
 import com.google.firebase.firestore.ServerTimestamp
 import com.riyazuddin.zing.other.Constants.DEFAULT_PROFILE_PICTURE_URL
+import com.riyazuddin.zing.other.Constants.PUBLIC
 import java.io.Serializable
 import java.util.*
 
@@ -14,9 +15,7 @@ data class User(
     val username: String = "",
     val profilePicUrl: String = DEFAULT_PROFILE_PICTURE_URL,
     val bio: String = "I'm on Zing now",
-    var followingCount: Int = 0,
-    var followersCount: Int = 0,
-    var postCount: Int = 0,
+    var privacy: String = PUBLIC,
     @ServerTimestamp
     var date: Date? = null,
 
