@@ -52,8 +52,8 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
             job = lifecycleScope.launch {
                 delay(SEARCH_TIME_DELAY)
                 eiditable?.let {
-                    viewModel.firebaseUserSearch(it.toString())
-//                    viewModel.search(it.toString())
+//                    viewModel.firebaseUserSearch(it.toString())
+                    viewModel.search(it.toString())
                 }
             }
         }
@@ -73,13 +73,13 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
     }
 
     private fun subscribeToObservers() {
-        viewModel.firebaseUserSearchResult.observe(viewLifecycleOwner, EventObserver(
-            onError = {
-                snackBar(it)
-            }
-        ){
-            userAdapter.users = it
-        })
+//        viewModel.firebaseUserSearchResult.observe(viewLifecycleOwner, EventObserver(
+//            onError = {
+//                snackBar(it)
+//            }
+//        ){
+//            userAdapter.users = it
+//        })
         viewModel.algoliaSearchResult.observe(viewLifecycleOwner, EventObserver(
             onError = { binding.progressBar.isVisible = false },
             onLoading = { binding.progressBar.isVisible = true }

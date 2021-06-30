@@ -17,6 +17,10 @@ object MainModule {
 
     @ActivityScoped
     @Provides
-    fun provideMainRepository(auth: FirebaseAuth, firestore: FirebaseFirestore, database: FirebaseDatabase) =
+    fun provideMainRepository(
+        auth: FirebaseAuth,
+        firestore: FirebaseFirestore,
+        database: FirebaseDatabase
+    ) =
         DefaultMainRepository(auth, firestore, database) as MainRepository
 }

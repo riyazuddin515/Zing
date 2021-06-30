@@ -29,15 +29,15 @@ class SearchViewModel @ViewModelInject constructor(
         }
     }
 
-    private val _firebaseUserSearchResult = MutableLiveData<Event<Resource<List<User>>>>()
-    val firebaseUserSearchResult: LiveData<Event<Resource<List<User>>>> = _firebaseUserSearchResult
-    fun firebaseUserSearch(query: String){
-        if (query.isEmpty())
-            return
-        _firebaseUserSearchResult.postValue(Event(Resource.Loading()))
-        viewModelScope.launch {
-            val result = repository.firebaseUserSearch(query)
-            _firebaseUserSearchResult.postValue(Event(result))
-        }
-    }
+//    private val _firebaseUserSearchResult = MutableLiveData<Event<Resource<List<User>>>>()
+//    val firebaseUserSearchResult: LiveData<Event<Resource<List<User>>>> = _firebaseUserSearchResult
+//    fun firebaseUserSearch(query: String){
+//        if (query.isEmpty())
+//            return
+//        _firebaseUserSearchResult.postValue(Event(Resource.Loading()))
+//        viewModelScope.launch {
+//            val result = repository.firebaseUserSearch(query)
+//            _firebaseUserSearchResult.postValue(Event(result))
+//        }
+//    }
 }

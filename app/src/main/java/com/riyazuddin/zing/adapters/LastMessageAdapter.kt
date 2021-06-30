@@ -11,14 +11,10 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.RequestManager
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
-import com.riyazuddin.zing.R
 import com.riyazuddin.zing.data.entities.LastMessage
 import com.riyazuddin.zing.databinding.ItemRecentChatBinding
-import com.riyazuddin.zing.other.Constants.DELIVERED
 import com.riyazuddin.zing.other.Constants.IMAGE
 import com.riyazuddin.zing.other.Constants.SEEN
-import com.riyazuddin.zing.other.Constants.SENDING
-import com.riyazuddin.zing.other.Constants.SENT
 import java.text.SimpleDateFormat
 import java.util.*
 import javax.inject.Inject
@@ -77,25 +73,6 @@ class LastMessageAdapter @Inject constructor(private val glide: RequestManager) 
                 tvLastMessage.typeface = Typeface.DEFAULT
                 ivUnSeen.isVisible = false
             }
-
-//            if (isCurrentUserIsSender) {
-//                when (lastMessage.message.status) {
-//                    SENDING -> {
-//                        tvLastMessage.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_sending_grey, 0, 0, 0)
-//                    }
-//                    SENT -> {
-//                        tvLastMessage.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_sent_grey, 0, 0, 0)
-//                    }
-//                    DELIVERED -> {
-//                        tvLastMessage.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_delivered_grey, 0, 0, 0)
-//                    }
-//                    SEEN -> {
-//                        tvLastMessage.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_seen_blue, 0, 0, 0)
-//                    }
-//                }
-//            }else{
-//                tvLastMessage.setCompoundDrawablesWithIntrinsicBounds(0,0,0,0)
-//            }
 
             val date =
                 SimpleDateFormat("hh:mm a", Locale.US).format(lastMessage.message.date!!)

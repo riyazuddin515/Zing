@@ -47,6 +47,7 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Firebase.auth.uid?.let {
+            Log.i(TAG, "onCreate: Calling")
             viewModel.getUserProfile(it)
         }
     }
@@ -136,45 +137,54 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
         mFirebaseRemoteConfig.setConfigSettingsAsync(configSettings)
         mFirebaseRemoteConfig.fetchAndActivate().addOnCompleteListener {
             if (it.isSuccessful) {
-                val newVersionCode = mFirebaseRemoteConfig.getString("new_version_code")
 
-                val currentVersionCode = requireContext().packageManager.getPackageInfo(
-                    requireContext().packageName,
-                    0
-                ).longVersionCode
+                try {
+                    val newVersionCode = mFirebaseRemoteConfig.getLong("new_version_code")
+                    val a = requireContext().packageManager.getPackageInfo(
+                        requireContext().packageName,
+                        0
+                    )
+                    if (newVersionCode > a.longVersionCode) {
+                        MaterialAlertDialogBuilder(
+                            requireContext(),
+                            R.style.MaterialAlertDialog_Round
+                        ).apply {
+                            setIcon(R.drawable.ic_update)
+                            setTitle("New Update Available")
+                            setMessage("Update the app to the latest version for new features and bug fix. Note: UnInstall current app and install new apk from Downloads Directory")
+                            setPositiveButton("Update") { _, _ ->
+                                val newVersionUrl =
+                                    mFirebaseRemoteConfig.getString("new_version_url")
 
-                if (Integer.parseInt(newVersionCode) > currentVersionCode) {
-                    MaterialAlertDialogBuilder(
-                        requireContext(),
-                        R.style.MaterialAlertDialog_Round
-                    ).apply {
-                        setIcon(R.drawable.ic_update)
-                        setTitle("New Update Available")
-                        setMessage("Update the app to the latest version for new features and bug fix. Note: UnInstall current app and install new apk from Downloads Directory")
-                        setPositiveButton("Update") { _, _ ->
-                            val newVersionUrl = mFirebaseRemoteConfig.getString("new_version_url")
+                                val request = DownloadManager.Request(Uri.parse(newVersionUrl))
+                                val title = "Zing-${newVersionCode}.apk"
+                                request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
+                                request.setDestinationInExternalPublicDir(
+                                    Environment.DIRECTORY_DOWNLOADS,
+                                    title
+                                )
 
-                            val request = DownloadManager.Request(Uri.parse(newVersionUrl))
-                            val title = "Zing-${newVersionCode}.apk"
-                            request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
-                            request.setDestinationInExternalPublicDir(
-                                Environment.DIRECTORY_DOWNLOADS,
-                                title
-                            )
+                                val manager =
+                                    requireContext().getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
+                                manager.enqueue(request)
+                                Toast.makeText(
+                                    requireContext(),
+                                    "Downloading...",
+                                    Toast.LENGTH_SHORT
+                                )
+                                    .show()
 
-                            val manager =
-                                requireContext().getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
-                            manager.enqueue(request)
-                            Toast.makeText(requireContext(), "Downloading...", Toast.LENGTH_SHORT)
-                                .show()
-
-                        }
-                        setNegativeButton("Cancel") { dialogInterface, _ ->
-                            dialogInterface.dismiss()
-                        }
-                    }.show()
-                } else {
-                    Toast.makeText(requireContext(), "App is up-to date", Toast.LENGTH_SHORT).show()
+                            }
+                            setNegativeButton("Cancel") { dialogInterface, _ ->
+                                dialogInterface.dismiss()
+                            }
+                        }.show()
+                    } else {
+                        Toast.makeText(requireContext(), "App is up-to date", Toast.LENGTH_SHORT)
+                            .show()
+                    }
+                } catch (e: Exception) {
+                    Toast.makeText(requireContext(), e.message, Toast.LENGTH_SHORT).show()
                 }
             }
         }

@@ -11,9 +11,17 @@ plugins {
 
 def versionMajor = 1
 def versionMinor = 1
-def versionPatch = 0
+def versionPatch = 1
 
 android {
+    signingConfigs {
+        zingSigningConfig {
+            storeFile file('C:\\Users\\riyaz\\OneDrive\\Zing\\ZingKeyStoreFile.jks')
+            storePassword 'MDr!y@zudd!n143$'
+            keyAlias 'ZingKey'
+            keyPassword 'MDr!y@zudd!n143$'
+        }
+    }
     compileSdkVersion 30
     buildToolsVersion '30.0.3'
 
@@ -27,7 +35,7 @@ android {
         applicationId "com.riyazuddin.zing"
         minSdkVersion 21
         targetSdkVersion 30
-        versionCode versionMajor * 10 + versionMinor * 10 + versionPatch
+        versionCode versionMajor * 10000 + versionMinor * 100 + versionPatch
         versionName "$versionMajor.$versionMinor.$versionPatch"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -41,6 +49,7 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             resValue "string", "app_version", "${defaultConfig.versionName}"
+            signingConfig signingConfigs.zingSigningConfig
         }
     }
     buildFeatures {

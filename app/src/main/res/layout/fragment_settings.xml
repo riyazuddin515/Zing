@@ -44,7 +44,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="15dp"
-            android:drawableStart="@drawable/ic__password"
+            android:drawableStart="@drawable/ic_password"
             android:drawablePadding="5dp"
             android:text="@string/change_password"
             android:textAllCaps="false"
@@ -74,6 +74,18 @@
             android:textAllCaps="false"
             android:textColor="@color/black"
             android:textSize="25sp" />
+
+<!--        <com.google.android.material.textview.MaterialTextView-->
+<!--            android:id="@+id/tvReportABug"-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:layout_marginTop="15dp"-->
+<!--            android:drawableStart="@drawable/ic_bug_report"-->
+<!--            android:drawablePadding="5dp"-->
+<!--            android:text="@string/report_a_bug"-->
+<!--            android:textAllCaps="false"-->
+<!--            android:textColor="@color/black"-->
+<!--            android:textSize="25sp" />-->
 
         <com.google.android.material.textview.MaterialTextView
             android:id="@+id/tvPrivacyPolicy"

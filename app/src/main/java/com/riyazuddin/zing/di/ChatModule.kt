@@ -16,7 +16,8 @@ object ChatModule {
 
     @ActivityScoped
     @Provides
-    fun provideChatRepository(firestore: FirebaseFirestore) = DefaultChatRepository(firestore) as ChatRepository
+    fun provideChatRepository(firestore: FirebaseFirestore) =
+        DefaultChatRepository(firestore) as ChatRepository
 
     /**
      * Providing ChatViewModel for ChatAdapter

@@ -260,7 +260,7 @@ class DefaultMainRepository @Inject constructor(
             firestore.runTransaction { transition ->
                 transition.delete(postsCollection.document(post.postId))
                 transition.update(
-                    usersCollection.document(post.postedBy),
+                    usersMetadataCollection.document(post.postedBy),
                     POST_COUNT,
                     FieldValue.increment(-1)
                 )
@@ -440,18 +440,18 @@ class DefaultMainRepository @Inject constructor(
             }
         }
 
-    override suspend fun firebaseUserSearch(query: String) = withContext(Dispatchers.IO) {
-        safeCall {
-            val usersList = usersCollection
-                .orderBy("username")
-                .startAt(query)
-                .endAt(query + "\uf8ff")
-                .get()
-                .await()
-                .toObjects(User::class.java)
-            Resource.Success(usersList)
-        }
-    }
+//    override suspend fun firebaseUserSearch(query: String) = withContext(Dispatchers.IO) {
+//        safeCall {
+//            val usersList = usersCollection
+//                .orderBy("username")
+//                .startAt(query)
+//                .endAt(query + "\uf8ff")
+//                .get()
+//                .await()
+//                .toObjects(User::class.java)
+//            Resource.Success(usersList)
+//        }
+//    }
 
     override suspend fun getUserMetaData(uid: String): Resource<UserMetadata> =
         withContext(Dispatchers.IO) {
@@ -551,8 +551,10 @@ class DefaultMainRepository @Inject constructor(
                     val followerDocumentSnapshot = transition.get(followersCollection.document(currentUserUid))
                     if (!followerDocumentSnapshot.exists())
                         transition.set(followersCollection.document(currentUserUid), Followers(uid = currentUserUid))
+
                     transition.update(followingCollection.document(uid), FOLLOWING, FieldValue.arrayUnion(currentUserUid))
                     transition.update(followersCollection.document(currentUserUid), FOLLOWERS, FieldValue.arrayUnion(uid))
+
                     transition.update(usersMetadataCollection.document(uid), FOLLOWING_COUNT, FieldValue.increment(1))
                     transition.update(usersMetadataCollection.document(currentUserUid), FOLLOWERS_COUNT, FieldValue.increment(1))
                 }

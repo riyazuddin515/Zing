@@ -114,7 +114,7 @@ interface MainRepository {
      */
     suspend fun deleteComment(comment: Comment): Resource<Comment>
 
-    suspend fun firebaseUserSearch(query: String): Resource<List<User>>
+//    suspend fun firebaseUserSearch(query: String): Resource<List<User>>
 
     /**
      * @since 26-6-2021

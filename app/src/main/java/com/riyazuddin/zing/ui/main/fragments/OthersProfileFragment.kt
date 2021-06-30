@@ -91,13 +91,13 @@ class OthersProfileFragment : BasePostFragment(R.layout.fragment_others_profile)
                 binding.tvBio.text = user.bio
             }
 
-            if (user.privacy == Constants.PUBLIC) {
+            if (user.privacy == PUBLIC) {
                 binding.btnToggleFollow.isVisible = true
                 setUpToggleFollowButton(user)
                 viewModel.getUserMetaData(user.uid)
                 getFlow()
             }
-            if (user.privacy == Constants.PRIVATE) {
+            if (user.privacy == PRIVATE) {
                 if (user.isFollowing) {
                     binding.btnToggleFollow.isVisible = true
                     setUpToggleFollowButton(user)

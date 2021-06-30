@@ -100,7 +100,7 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
         notificationManager.cancel(args.otherEndUser.uid, NOTIFICATION_ID)
 
 
-        simpleDateFormat = SimpleDateFormat("d MMM yy HH:mm a", Locale.ENGLISH)
+        simpleDateFormat = SimpleDateFormat("d MMM yy hh:mm a", Locale.US)
         mediaPlayer = MediaPlayer.create(requireContext(), R.raw.received_chat)
 
         binding.ivBack.setOnClickListener {
