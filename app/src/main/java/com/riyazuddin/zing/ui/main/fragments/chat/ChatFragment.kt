@@ -105,7 +105,7 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
 
         binding.ivBack.setOnClickListener {
             hideKeyboard(view)
-            findNavController().popBackStack(R.id.recentChatListFragment, false)
+            findNavController().popBackStack()
         }
 
         binding.toolbar.setOnClickListener {

@@ -44,7 +44,9 @@ class FollowingAndFollowersPagingSource(
                     .await()
                     .toObject(Followers::class.java)?.followers ?: listOf()
 
-                list = (following + followers).chunked(10).toMutableList()
+                list = followers.union(following).chunked(10).toMutableList()
+
+//                list = (following + followers).chunked(10).toMutableList()
                 isFirst = false
                 if (list.isEmpty())
                     return LoadResult.Page(result, null, null)

@@ -5,6 +5,10 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
 import android.os.Build
+import android.util.Log
+import com.google.firebase.FirebaseApp
+import com.google.firebase.remoteconfig.FirebaseRemoteConfig
+import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings
 import com.riyazuddin.zing.other.Constants.CHATTING_WITH
 import com.riyazuddin.zing.other.Constants.CHAT_CHANNEL_ID
 import com.riyazuddin.zing.other.Constants.NORMAL_NOTIFICATION_CHANNEL_ID
@@ -15,11 +19,34 @@ import dagger.hilt.android.HiltAndroidApp
 @HiltAndroidApp
 class ZingApplication : Application() {
 
+    companion object{
+        const val TAG = "ZingApplication"
+    }
+
     override fun onCreate() {
         super.onCreate()
 
         setSharedPreference()
         createNotificationChannel()
+        initFirebaseRemoteConfig()
+    }
+
+    private fun initFirebaseRemoteConfig() {
+        FirebaseApp.initializeApp(this)
+        FirebaseRemoteConfig.getInstance().apply {
+            val configSettings = FirebaseRemoteConfigSettings.Builder()
+                .setMinimumFetchIntervalInSeconds(3600)
+                .build()
+            setConfigSettingsAsync(configSettings)
+            setDefaultsAsync(R.xml.remote_config_defaults)
+            fetchAndActivate().addOnCompleteListener {
+                val update = it.result
+                if (it.isSuccessful) {
+                    Log.d(TAG, "initFirebaseRemoteConfig: ${it.result}")
+                }else
+                    Log.d(TAG, "initFirebaseRemoteConfig: $update")
+            }
+        }
     }
 
     private fun setSharedPreference() {

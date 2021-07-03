@@ -15,14 +15,11 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.riyazuddin.zing.R
 import com.riyazuddin.zing.adapters.LastMessageAdapter
 import com.riyazuddin.zing.databinding.FragmentRecentChatListBinding
-import com.riyazuddin.zing.other.Constants
 import com.riyazuddin.zing.other.Constants.SEEN
 import com.riyazuddin.zing.other.EventObserver
-import com.riyazuddin.zing.other.snackBar
 import com.riyazuddin.zing.ui.main.viewmodels.ChatViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -68,6 +65,8 @@ class RecentChatListFragment : Fragment(R.layout.fragment_recent_chat_list) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        Log.i(TAG, "onViewCreated: ")
+        subscribeToObservers()
 
         binding.toolbar.setNavigationOnClickListener {
             findNavController().popBackStack()
@@ -82,8 +81,6 @@ class RecentChatListFragment : Fragment(R.layout.fragment_recent_chat_list) {
                 bundle
             )
         }
-
-        subscribeToObservers()
 
         lastMessageAdapter.setOnItemClickListener { lastMessage, position ->
             lastMessageAdapter.lastMessages[position].message.status = SEEN
@@ -101,6 +98,7 @@ class RecentChatListFragment : Fragment(R.layout.fragment_recent_chat_list) {
 
     private fun subscribeToObservers() {
         viewModel.recentMessagesList.observe(viewLifecycleOwner, {
+            Log.i(TAG, "subscribeToObservers: invoked")
             lastMessageAdapter.lastMessages = it
             binding.progressBar.isVisible = false
             lastMessageAdapter.notifyDataSetChanged()

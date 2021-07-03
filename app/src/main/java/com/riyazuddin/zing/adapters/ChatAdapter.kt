@@ -143,7 +143,8 @@ class ChatAdapter @Inject constructor(
                     root.setOnLongClickListener {
                         if (message.senderAndReceiverUid[0] == Firebase.auth.uid) {
                             onItemLongClickListener?.let {
-                                it(message, position)
+                                if (message.type != "DELETED")
+                                    it(message, position)
                             }
                         }
                         true

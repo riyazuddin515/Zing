@@ -75,7 +75,7 @@ class LastMessageAdapter @Inject constructor(private val glide: RequestManager) 
             }
 
             val date =
-                SimpleDateFormat("hh:mm a", Locale.US).format(lastMessage.message.date!!)
+                SimpleDateFormat("hh:mm a", Locale.US).format(lastMessage.message.date ?: Date())
             tvDate.text = date
             if (lastMessage.message.type == IMAGE) {
                 val s = "🖼 Photo"

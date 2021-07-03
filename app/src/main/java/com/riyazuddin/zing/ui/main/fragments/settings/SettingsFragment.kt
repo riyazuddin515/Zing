@@ -16,8 +16,6 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig
-import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings
-import com.riyazuddin.zing.BuildConfig
 import com.riyazuddin.zing.R
 import com.riyazuddin.zing.data.entities.User
 import com.riyazuddin.zing.databinding.FragmentSettingsBinding
@@ -81,12 +79,16 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
             }
 
         }
-        val version = "Version : ${BuildConfig.VERSION_NAME}"
+        val version = "Version : ${com.riyazuddin.zing.BuildConfig.VERSION_NAME}"
         binding.tvVersion.text = version
     }
 
     private fun subscribeToObservers() {
-        viewModel.userProfileStatus.observe(viewLifecycleOwner, EventObserver() {
+        viewModel.userProfileStatus.observe(viewLifecycleOwner, EventObserver(
+            onError = {
+                Log.e(TAG, "subscribeToObservers: $it")
+            }
+        ) {
             binding.switchPrivateAccount.isClickable = true
             currentUser = it
             binding.switchPrivateAccount.isChecked = it.privacy != PUBLIC
@@ -129,65 +131,72 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
         })
     }
 
-    private fun get() {
-        val mFirebaseRemoteConfig = FirebaseRemoteConfig.getInstance()
-        val configSettings = FirebaseRemoteConfigSettings.Builder()
-            .setMinimumFetchIntervalInSeconds(3600)
-            .build()
-        mFirebaseRemoteConfig.setConfigSettingsAsync(configSettings)
-        mFirebaseRemoteConfig.fetchAndActivate().addOnCompleteListener {
-            if (it.isSuccessful) {
+    private fun checkForUpdate() {
+        val appVersion = getAppVersion()
+        val remoteConfig = FirebaseRemoteConfig.getInstance()
+        val latestVersion = remoteConfig.getString("latest_version_of_app")
+        if (latestVersion.isNotEmpty() && appVersion.isNotEmpty()) {
+            val appVersionWithoutAlphaNumeric = appVersion.replace(".", "")
+            val latestVersionWithoutAlphaNumeric = latestVersion.replace(".", "")
+            try {
+                val appVersionInt = appVersionWithoutAlphaNumeric.toInt()
+                val latestVersionInt = latestVersionWithoutAlphaNumeric.toInt()
+                if (latestVersionInt > appVersionInt) {
+                    MaterialAlertDialogBuilder(
+                        requireContext(),
+                        R.style.MaterialAlertDialog_Round
+                    ).apply {
+                        setIcon(R.drawable.ic_update)
+                        setTitle("New Update Available")
+                        setMessage("Update the app to the latest version for new features and bug fix. Note: UnInstall current app and install new apk from Downloads Directory")
+                        setPositiveButton("Update") { _, _ ->
+                            val newVersionUrl =
+                                remoteConfig.getString("new_version_url")
 
-                try {
-                    val newVersionCode = mFirebaseRemoteConfig.getLong("new_version_code")
-                    val a = requireContext().packageManager.getPackageInfo(
-                        requireContext().packageName,
-                        0
-                    )
-                    if (newVersionCode > a.longVersionCode) {
-                        MaterialAlertDialogBuilder(
-                            requireContext(),
-                            R.style.MaterialAlertDialog_Round
-                        ).apply {
-                            setIcon(R.drawable.ic_update)
-                            setTitle("New Update Available")
-                            setMessage("Update the app to the latest version for new features and bug fix. Note: UnInstall current app and install new apk from Downloads Directory")
-                            setPositiveButton("Update") { _, _ ->
-                                val newVersionUrl =
-                                    mFirebaseRemoteConfig.getString("new_version_url")
+                            val request = DownloadManager.Request(Uri.parse(newVersionUrl))
+                            val title = "Zing-${latestVersionWithoutAlphaNumeric}.apk"
+                            request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
+                            request.setDestinationInExternalPublicDir(
+                                Environment.DIRECTORY_DOWNLOADS,
+                                title
+                            )
 
-                                val request = DownloadManager.Request(Uri.parse(newVersionUrl))
-                                val title = "Zing-${newVersionCode}.apk"
-                                request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
-                                request.setDestinationInExternalPublicDir(
-                                    Environment.DIRECTORY_DOWNLOADS,
-                                    title
-                                )
+                            val manager =
+                                requireContext().getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
+                            manager.enqueue(request)
+                            Toast.makeText(
+                                requireContext(),
+                                "Downloading...",
+                                Toast.LENGTH_SHORT
+                            )
+                                .show()
 
-                                val manager =
-                                    requireContext().getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
-                                manager.enqueue(request)
-                                Toast.makeText(
-                                    requireContext(),
-                                    "Downloading...",
-                                    Toast.LENGTH_SHORT
-                                )
-                                    .show()
-
-                            }
-                            setNegativeButton("Cancel") { dialogInterface, _ ->
-                                dialogInterface.dismiss()
-                            }
-                        }.show()
-                    } else {
-                        Toast.makeText(requireContext(), "App is up-to date", Toast.LENGTH_SHORT)
-                            .show()
-                    }
-                } catch (e: Exception) {
-                    Toast.makeText(requireContext(), e.message, Toast.LENGTH_SHORT).show()
+                        }
+                        setNegativeButton("Cancel") { dialogInterface, _ ->
+                            dialogInterface.dismiss()
+                        }
+                    }.show()
+                } else {
+                    Toast.makeText(requireContext(), "App is up-to date", Toast.LENGTH_SHORT)
+                        .show()
                 }
+            } catch (e: Exception) {
+                Log.e(TAG, "checkForUpdate: ", e)
             }
         }
+    }
+
+    private fun getAppVersion(): String {
+        var result: String? = null
+        try {
+            result = requireContext().packageManager.getPackageInfo(
+                requireContext().packageName,
+                0
+            ).versionName
+        } catch (e: Exception) {
+            Log.e(TAG, "getApVersion: ", e)
+        }
+        return result ?: ""
     }
 
     private fun setClickListeners() {
@@ -198,7 +207,7 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
             findNavController().navigate(R.id.action_settingsFragment_to_currentPasswordVerification)
         }
         binding.tvCheckForUpdates.setOnClickListener {
-            get()
+            checkForUpdate()
         }
         binding.btnLogout.setOnClickListener {
             CustomDialog(getString(R.string.log_out), getString(R.string.log_out_message)).apply {
@@ -223,6 +232,5 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
                 }
             )
         }
-
     }
 }

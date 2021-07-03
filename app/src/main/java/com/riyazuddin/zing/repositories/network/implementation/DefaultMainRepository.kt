@@ -490,26 +490,26 @@ class DefaultMainRepository @Inject constructor(
                 val currentUid = Firebase.auth.uid!!
                 firestore.runTransaction { transition ->
 
-                    val followerRequestDocumentSnapshot = transition.get(followerRequestsCollection.document(uid))
-                    val followingRequestDocumentSnapshot = transition.get(followingRequestsCollection.document(currentUid))
-
-                    if (!followerRequestDocumentSnapshot.exists())
-                        transition.set(followerRequestsCollection.document(uid), FollowerRequest(uid = uid))
-                    if (!followingRequestDocumentSnapshot.exists())
+                    val cur = transition.get(followingRequestsCollection.document(currentUid))
+                    if (!cur.exists())
                         transition.set(followingRequestsCollection.document(currentUid), FollowingRequest(uid = currentUid))
 
-                    val currentUserFollowingRequestList = followingRequestDocumentSnapshot.toObject(FollowingRequest::class.java)
-                        ?.requestedToUids ?: listOf()
-                    sent = uid in currentUserFollowingRequestList
+                    val other = transition.get(followerRequestsCollection.document(uid))
+                    if (!other.exists())
+                        transition.set(followerRequestsCollection.document(uid), FollowerRequest(uid = uid))
+
+
+                    val curList = cur.toObject(FollowingRequest::class.java)?.requestedToUids ?: listOf()
+                    sent = uid in curList
 
                     if (sent) {
-                        //Undo the request
+                        //already sent
                         transition.update(followingRequestsCollection.document(currentUid), REQUESTED_TO_UIDS, FieldValue.arrayRemove(uid))
-                        transition.update(followerRequestsCollection.document(uid), REQUESTED_UIDS, FieldValue.arrayRemove((currentUid)))
+                        transition.update(followerRequestsCollection.document(uid), REQUESTED_UIDS, FieldValue.arrayRemove(currentUid))
                     }else{
-                        //send the request
+                        //sent now
                         transition.update(followingRequestsCollection.document(currentUid), REQUESTED_TO_UIDS, FieldValue.arrayUnion(uid))
-                        transition.update(followerRequestsCollection.document(uid), REQUESTED_UIDS, FieldValue.arrayUnion((currentUid)))
+                        transition.update(followerRequestsCollection.document(uid), REQUESTED_UIDS, FieldValue.arrayUnion(currentUid))
                     }
                 }.await()
                 Resource.Success(!sent)
@@ -558,8 +558,12 @@ class DefaultMainRepository @Inject constructor(
                     transition.update(usersMetadataCollection.document(uid), FOLLOWING_COUNT, FieldValue.increment(1))
                     transition.update(usersMetadataCollection.document(currentUserUid), FOLLOWERS_COUNT, FieldValue.increment(1))
                 }
-                transition.update(followingRequestsCollection.document(uid), REQUESTED_TO_UIDS, FieldValue.arrayRemove(currentUserUid))
-                transition.update(followerRequestsCollection.document(currentUserUid), REQUESTED_UIDS, FieldValue.arrayRemove(uid))
+                val a = transition.get(followingRequestsCollection.document(uid))
+                if (a.exists())
+                    transition.update(followingRequestsCollection.document(uid), REQUESTED_TO_UIDS, FieldValue.arrayRemove(currentUserUid))
+                val b = transition.get(followerRequestsCollection.document(currentUserUid))
+                if (b.exists())
+                    transition.update(followerRequestsCollection.document(currentUserUid), REQUESTED_UIDS, FieldValue.arrayRemove(uid))
 
             }.await()
             Resource.Success(uid)
