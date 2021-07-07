@@ -44,14 +44,14 @@
             android:textColor="@color/white"
             android:textSize="18sp"
             android:visibility="gone"
-            app:layout_constrainedWidth="true"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/tvDate"
             app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/messageImage"
             app:layout_constraintVertical_bias="0.0"
-            tools:text="Hello Message"
+            tools:text="Hello"
             tools:visibility="visible">
 
         </com.google.android.material.textview.MaterialTextView>
@@ -63,18 +63,15 @@
             android:layout_margin="2dp"
             android:textColor="@color/white"
             android:textSize="14sp"
-            app:layout_constraintBottom_toBottomOf="@id/tvMessage"
+            app:layout_constraintBottom_toBottomOf="@+id/tvMessage"
             app:layout_constraintEnd_toStartOf="@+id/ivStatus"
-            app:layout_constraintHorizontal_bias="1.0"
-            app:layout_constraintStart_toEndOf="@+id/tvMessage"
-            app:layout_constraintTop_toBottomOf="@id/tvMessage"
+            app:layout_constraintTop_toBottomOf="@+id/tvMessage"
             tools:text="12:00 am" />
 
         <ImageView
             android:id="@+id/ivStatus"
             android:layout_width="25dp"
             android:layout_height="25dp"
-            android:layout_marginEnd="8dp"
             android:backgroundTint="@color/white"
             android:contentDescription="@string/image"
             android:padding="3dp"

@@ -48,7 +48,7 @@ object AppModule {
     @Provides
     fun provideFirebaseAuth() = run {
         val auth = FirebaseAuth.getInstance()
-        auth.useEmulator("192.168.0.7", 1111)
+//        auth.useEmulator("192.168.0.7", 1111)
         auth
     }
 
@@ -56,12 +56,12 @@ object AppModule {
     @Provides
     fun provideFirestore() = run {
         val instance = FirebaseFirestore.getInstance()
-        val settings = FirebaseFirestoreSettings.Builder()
-            .setHost("192.168.0.7:2222")
-            .setSslEnabled(false)
-            .setPersistenceEnabled(false)
-            .build()
-        instance.firestoreSettings = settings
+//        val settings = FirebaseFirestoreSettings.Builder()
+//            .setHost("192.168.0.7:2222")
+//            .setSslEnabled(false)
+//            .setPersistenceEnabled(false)
+//            .build()
+//        instance.firestoreSettings = settings
         instance
     }
 
@@ -69,7 +69,7 @@ object AppModule {
     @Provides
     fun providesFirebaseDatabase() = run {
         val database = FirebaseDatabase.getInstance()
-        database.useEmulator("192.168.0.7", 3333)
+//        database.useEmulator("192.168.0.7", 3333)
         database
     }
 

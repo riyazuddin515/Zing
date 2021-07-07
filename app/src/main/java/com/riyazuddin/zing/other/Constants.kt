@@ -77,7 +77,6 @@ object Constants {
     const val CHAT_THREAD = "chatThread"
 
     const val CHAT_MESSAGE_PAGE_LIMIT = 10L
-    const val LAST_MESSAGE_PAGE_LIMIT = 10L
     const val POST_PAGE_SIZE = 5
     const val COMMENT_PAGE_SIZE = 10
     const val NEW_CHAT_PAGE_SIZE = 10

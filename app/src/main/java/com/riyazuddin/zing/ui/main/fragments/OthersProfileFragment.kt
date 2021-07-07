@@ -131,13 +131,17 @@ class OthersProfileFragment : BasePostFragment(R.layout.fragment_others_profile)
         })
         viewModel.followStatus.observe(viewLifecycleOwner, EventObserver {
             if (!it) {
-                binding.btnToggleFollow.isVisible = false
-                binding.btnSendFollowRequest.isVisible = true
-                binding.tvPrivateAccountInfo.isVisible = true
-                viewLifecycleOwner.lifecycleScope.launch {
-                    postAdapter.submitData(PagingData.empty())
+                user?.let { user ->
+                    if (user.privacy == PRIVATE) {
+                        binding.btnToggleFollow.isVisible = false
+                        binding.btnSendFollowRequest.isVisible = true
+                        binding.tvPrivateAccountInfo.isVisible = true
+                        viewLifecycleOwner.lifecycleScope.launch {
+                            postAdapter.submitData(PagingData.empty())
+                        }
+                        binding.rvPostList.visibility = View.GONE
+                    }
                 }
-                binding.rvPostList.visibility = View.GONE
             }
             user?.let { user ->
                 user.isFollowing = it

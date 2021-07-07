@@ -59,5 +59,10 @@ interface ChatRepository {
      */
     suspend fun getLastMessages(): Resource<Boolean>
 
+    /**
+     * @since 6-7-2021
+     * @param chatThread to update the other user profile in DB
+     * @param uid for loading lastMessage other user data
+     */
     suspend fun syncLastMessagesOtherUserData(chatThread: String, uid: String)
 }

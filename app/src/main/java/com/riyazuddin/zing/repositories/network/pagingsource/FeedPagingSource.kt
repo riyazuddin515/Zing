@@ -16,7 +16,6 @@ import com.riyazuddin.zing.other.Constants.FOLLOWING_COLLECTION
 import com.riyazuddin.zing.other.Constants.POSTED_BY
 import com.riyazuddin.zing.other.Constants.POSTS_COLLECTION
 import com.riyazuddin.zing.other.Constants.POST_LIKES_COLLECTION
-import com.riyazuddin.zing.other.Constants.POST_PAGE_SIZE
 import com.riyazuddin.zing.other.Constants.USERS_COLLECTION
 import kotlinx.coroutines.tasks.await
 
@@ -29,64 +28,59 @@ class FeedPagingSource(
 ) : PagingSource<QuerySnapshot, Post>() {
 
     private var isFirstLoad = true
-    private lateinit var followingList: List<String>
+    private lateinit var list: MutableList<List<String>>
 
     override suspend fun load(params: LoadParams<QuerySnapshot>): LoadResult<QuerySnapshot, Post> {
-        return try {
+        try {
             val uid =
                 Firebase.auth.uid ?: return LoadResult.Error(IllegalStateException("Auth Error"))
-            val resultList = mutableListOf<Post>()
+            var resultList = mutableListOf<Post>()
             if (isFirstLoad) {
-                followingList = db.collection(FOLLOWING_COLLECTION)
-                    .document(uid).get().await().toObject(Following::class.java)
-                    ?.following ?: listOf()
+
+                list = db.collection(FOLLOWING_COLLECTION).document(uid).get().await()
+                    .toObject(Following::class.java)
+                    ?.following?.chunked(10)?.toMutableList() ?: mutableListOf()
+
                 isFirstLoad = false
-                if (followingList.isEmpty())
+                Log.i(TAG, "load: $list")
+                if (list.isEmpty())
                     return LoadResult.Page(resultList, null, null)
             }
 
-            val chunks = followingList.chunked(10)
-            var currentPage = params.key
-            chunks.forEach { chunk ->
-                currentPage = params.key ?: db.collection(POSTS_COLLECTION)
-                    .whereIn(POSTED_BY, chunk)
-                    .orderBy(DATE, Query.Direction.DESCENDING)
-                    .limit(POST_PAGE_SIZE.toLong())
-                    .get()
-                    .await()
+            val currentPage = params.key ?: db.collection(POSTS_COLLECTION)
+                .whereIn(POSTED_BY, list.removeFirst())
+                .orderBy(DATE, Query.Direction.DESCENDING)
+                .get()
+                .await()
 
-                val parsedPage = currentPage!!.toObjects(Post::class.java)
-                    .onEach { post ->
-                        val user = db.collection(USERS_COLLECTION)
-                            .document(post.postedBy)
-                            .get()
-                            .await().toObject(User::class.java)!!
-                        post.username = user.username
-                        post.userProfilePic = user.profilePicUrl
-
-                        val postLikesDocumentSnapshot = db.collection(POST_LIKES_COLLECTION)
-                            .document(post.postId).get().await()
-                        val likesList = if (!postLikesDocumentSnapshot.exists())
-                            listOf()
-                        else
-                            postLikesDocumentSnapshot.toObject(PostLikes::class.java)?.likedBy
-                                ?: listOf()
-
-                        post.isLiked = Firebase.auth.uid in likesList
-                    }
-                resultList.addAll(parsedPage)
-            }
-
-            if (currentPage?.isEmpty == true)
+            if (currentPage.size() == 0)
                 return LoadResult.Page(resultList, null, null)
 
-            val lastDocumentSnapshot = currentPage!!.documents[currentPage!!.size() - 1]
+            resultList = currentPage.toObjects(Post::class.java).onEach { post ->
+                val user = db.collection(USERS_COLLECTION)
+                    .document(post.postedBy)
+                    .get()
+                    .await().toObject(User::class.java)!!
+                post.username = user.username
+                post.userProfilePic = user.profilePicUrl
+
+                val postLikesDocumentSnapshot = db.collection(POST_LIKES_COLLECTION)
+                    .document(post.postId).get().await()
+                val likesList = if (!postLikesDocumentSnapshot.exists())
+                    listOf()
+                else
+                    postLikesDocumentSnapshot.toObject(PostLikes::class.java)?.likedBy
+                        ?: listOf()
+
+                post.isLiked = uid in likesList
+            }
+
+            if (list.isEmpty())
+                return LoadResult.Page(resultList, null, null)
 
             val nextPage = db.collection(POSTS_COLLECTION)
-                .whereIn(POSTED_BY, if (chunks.isNotEmpty()) chunks[0] else listOf())
+                .whereIn(POSTED_BY, list.removeFirst())
                 .orderBy(DATE, Query.Direction.DESCENDING)
-                .limit(POST_PAGE_SIZE.toLong())
-                .startAfter(lastDocumentSnapshot)
                 .get()
                 .await()
 
@@ -94,7 +88,7 @@ class FeedPagingSource(
 
         } catch (e: Exception) {
             Log.e(TAG, "load: ", e)
-            LoadResult.Error(e)
+            return LoadResult.Error(e)
         }
     }
 

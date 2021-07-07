@@ -52,7 +52,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/messageImage"
             app:layout_constraintVertical_bias="0.0"
-            tools:text="Hello Message"
+            tools:text="Hello Message Hi How are you how do you do"
             tools:visibility="visible">
 
 
@@ -67,7 +67,7 @@
             android:textSize="14sp"
             app:layout_constraintBottom_toBottomOf="@+id/tvMessage"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.92"
+            app:layout_constraintHorizontal_bias="1.50"
             app:layout_constraintStart_toEndOf="@+id/tvMessage"
             app:layout_constraintTop_toBottomOf="@id/tvMessage"
             app:layout_constraintVertical_bias="0.0"
