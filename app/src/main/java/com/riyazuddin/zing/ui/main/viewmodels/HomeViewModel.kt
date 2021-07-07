@@ -39,7 +39,9 @@ class HomeViewModel @ViewModelInject constructor(
     }
 
     fun removeUnSeenMessageListener() {
-        chatRepository.removeUnSeenMessageListener()
+        viewModelScope.launch {
+            chatRepository.removeUnSeenMessageListener()
+        }
     }
 
     fun onlineOfflineToggle(uid: String) {
@@ -57,7 +59,9 @@ class HomeViewModel @ViewModelInject constructor(
     }
 
     private val _doesUserHaveFollowingRequests = MutableLiveData<Event<Resource<Boolean>>>()
-    val doesUserHaveFollowingRequests: LiveData<Event<Resource<Boolean>>> = _doesUserHaveFollowingRequests
+    val doesUserHaveFollowingRequests: LiveData<Event<Resource<Boolean>>> =
+        _doesUserHaveFollowingRequests
+
     fun checkDoesUserHaveFollowerRequests() {
         viewModelScope.launch {
             _doesUserHaveFollowingRequests.postValue(

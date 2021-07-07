@@ -100,6 +100,7 @@ object Constants {
     const val SENT = "SENT"
     const val DELIVERED = "DELIVERED"
     const val SEEN = "SEEN"
+    const val DELETED = "DELETED"
 
     const val NO_MORE_MESSAGES = "NO_MORE_MESSAGES"
 

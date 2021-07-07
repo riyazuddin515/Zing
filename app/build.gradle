@@ -10,8 +10,8 @@ plugins {
 }
 
 def versionMajor = 1
-def versionMinor = 1
-def versionPatch = 3
+def versionMinor = 2
+def versionPatch = 0
 
 android {
     signingConfigs {
@@ -39,6 +39,12 @@ android {
         versionName "$versionMajor.$versionMinor.$versionPatch"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+
+        javaCompileOptions {
+            annotationProcessorOptions {
+                arguments += ["room.schemaLocation": "$projectDir/schemas".toString()]
+            }
+        }
     }
     buildTypes {
         debug {
@@ -138,9 +144,9 @@ dependencies {
 
     def room_version = "2.3.0"
     implementation("androidx.room:room-runtime:$room_version")
-    annotationProcessor "androidx.room:room-compiler:$room_version"
+    kapt "androidx.room:room-compiler:$room_version"
     // optional - Kotlin Extensions and Coroutines support for Room
-    implementation("androidx.room:room-ktx:$room_version")
+    implementation "androidx.room:room-ktx:$room_version"
 
     // Local Unit Tests
     testImplementation "org.hamcrest:hamcrest-all:1.3"

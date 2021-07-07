@@ -18,28 +18,85 @@ import com.riyazuddin.zing.other.Constants.SEEN
 import java.text.SimpleDateFormat
 import java.util.*
 import javax.inject.Inject
+import kotlin.collections.HashMap
 
-class LastMessageAdapter @Inject constructor(private val glide: RequestManager) :
-    RecyclerView.Adapter<LastMessageAdapter.LastMessageViewHolder>() {
+class LastMessageAdapter @Inject constructor(
+    private val glide: RequestManager
+) : RecyclerView.Adapter<LastMessageAdapter.LastMessageViewHolder>() {
+
+    private var simpleDateFormat: SimpleDateFormat = SimpleDateFormat("hh:mm a", Locale.US)
 
     inner class LastMessageViewHolder(val binding: ItemRecentChatBinding) :
-        RecyclerView.ViewHolder(binding.root)
+        RecyclerView.ViewHolder(binding.root) {
+        fun bind(lastMessage: LastMessage) {
+            if (hashMap.containsKey(lastMessage.chatThread) and (hashMap[lastMessage.chatThread] == false)){
+                hashMap[lastMessage.chatThread] = true
+                userSyncListener?.let {
+                    it(lastMessage.chatThread, lastMessage.otherUser.uid)
+                    Log.i(TAG, "bind: ${lastMessage.otherUser.username} Syncing...")
+                }
+            }
+            binding.apply {
+                val isCurrentUserIsSender =
+                    Firebase.auth.uid == lastMessage.message.senderAndReceiverUid[0]
+
+                glide.load(lastMessage.otherUser.profilePicUrl).into(CIVProfilePic)
+                tvName.text = lastMessage.otherUser.name
+
+                if (!isCurrentUserIsSender && lastMessage.message.status != SEEN) {
+                    tvLastMessage.typeface = Typeface.DEFAULT_BOLD
+                    ivUnSeen.isVisible = true
+                } else {
+                    tvLastMessage.typeface = Typeface.DEFAULT
+                    ivUnSeen.isVisible = false
+                }
+
+                tvDate.text = simpleDateFormat.format(lastMessage.message.date ?: Date())
+                if (lastMessage.message.type == IMAGE) {
+                    val s = "🖼 Photo"
+                    tvLastMessage.text = s
+                } else {
+                    tvLastMessage.text = lastMessage.message.message
+                }
+                root.setOnClickListener {
+                    onItemClickListener?.let {
+                        it(lastMessage)
+                    }
+                }
+            }
+        }
+    }
 
     private val differCallback = object : DiffUtil.ItemCallback<LastMessage>() {
         override fun areItemsTheSame(oldItem: LastMessage, newItem: LastMessage): Boolean {
-            return oldItem.hashCode() == newItem.hashCode()
+            return oldItem.chatThread == newItem.chatThread
         }
 
         override fun areContentsTheSame(oldItem: LastMessage, newItem: LastMessage): Boolean {
-            return oldItem.message.messageId == newItem.message.messageId
+            return oldItem == newItem
         }
     }
 
     private val differ = AsyncListDiffer(this, differCallback)
 
+    private val hashMap = HashMap<String,Boolean>()
+
     var lastMessages: List<LastMessage>
         get() = differ.currentList
-        set(value) = differ.submitList(value)
+        set(value){
+            if (hashMap.isEmpty()){
+                for (e in value)
+                    hashMap[e.chatThread] = false
+                differ.submitList(value)
+            }
+            else{
+                for (e in value) {
+                    if (!hashMap.containsKey(e.chatThread))
+                        hashMap[e.chatThread] = true
+                }
+                differ.submitList(value)
+            }
+        }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): LastMessageViewHolder {
         return LastMessageViewHolder(
@@ -52,50 +109,19 @@ class LastMessageAdapter @Inject constructor(private val glide: RequestManager) 
     }
 
     override fun onBindViewHolder(holder: LastMessageViewHolder, position: Int) {
-        val lastMessage = lastMessages[position]
-        holder.binding.apply {
-            val isCurrentUserIsSender =
-                Firebase.auth.uid == lastMessage.message.senderAndReceiverUid[0]
-
-            if (isCurrentUserIsSender) {
-                glide.load(lastMessage.receiver.profilePicUrl).into(CIVProfilePic)
-                tvName.text = lastMessage.receiver.name
-            } else {
-                Log.i(TAG, "onBindViewHolder: else")
-                glide.load(lastMessage.sender.profilePicUrl).into(CIVProfilePic)
-                tvName.text = lastMessage.sender.name
-            }
-
-            if (!isCurrentUserIsSender && lastMessage.message.status != SEEN) {
-                tvLastMessage.typeface = Typeface.DEFAULT_BOLD
-                ivUnSeen.isVisible = true
-            } else {
-                tvLastMessage.typeface = Typeface.DEFAULT
-                ivUnSeen.isVisible = false
-            }
-
-            val date =
-                SimpleDateFormat("hh:mm a", Locale.US).format(lastMessage.message.date ?: Date())
-            tvDate.text = date
-            if (lastMessage.message.type == IMAGE) {
-                val s = "🖼 Photo"
-                tvLastMessage.text = s
-            } else {
-                tvLastMessage.text = lastMessage.message.message
-            }
-            root.setOnClickListener {
-                onItemClickListener?.let {
-                    it(lastMessage, position)
-                }
-            }
-        }
+        holder.bind(lastMessages[position])
     }
 
     override fun getItemCount(): Int = lastMessages.size
 
-    private var onItemClickListener: ((LastMessage, Int) -> Unit)? = null
-    fun setOnItemClickListener(listener: (LastMessage, Int) -> Unit) {
+    private var onItemClickListener: ((LastMessage) -> Unit)? = null
+    fun setOnItemClickListener(listener: (LastMessage) -> Unit) {
         onItemClickListener = listener
+    }
+
+    private var userSyncListener: ((String, String) -> Unit)? = null
+    fun setUserSyncListener(listener: (String, String) -> Unit) {
+        userSyncListener = listener
     }
 
     companion object {

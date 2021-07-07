@@ -55,12 +55,6 @@ class ZingApplication : Application() {
             it.putString(UID, NO_ONE)
             it.apply()
         }
-
-        val sp1 = getSharedPreferences("isFirstLoadOfRecentChat", MODE_PRIVATE)
-        sp1.edit().let {
-            it.putBoolean("isFirstLoadOfRecentChat", true)
-            it.apply()
-        }
     }
 
     private fun createNotificationChannel() {

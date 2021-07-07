@@ -16,7 +16,6 @@ import com.google.firebase.ktx.Firebase
 import com.google.firebase.messaging.FirebaseMessaging
 import com.google.firebase.storage.FirebaseStorage
 import com.riyazuddin.zing.BuildConfig
-import com.riyazuddin.zing.data.entities.UserMetadata
 import com.riyazuddin.zing.data.entities.*
 import com.riyazuddin.zing.other.Constants.ALGOLIA_USER_SEARCH_INDEX
 import com.riyazuddin.zing.other.Constants.BIO
@@ -52,6 +51,7 @@ import com.riyazuddin.zing.other.Constants.USERS_METADATA_COLLECTION
 import com.riyazuddin.zing.other.Constants.USERS_STAT_COLLECTION
 import com.riyazuddin.zing.other.Resource
 import com.riyazuddin.zing.other.safeCall
+import com.riyazuddin.zing.repositories.local.ChatDatabase
 import com.riyazuddin.zing.repositories.network.abstraction.MainRepository
 import io.ktor.client.features.logging.*
 import kotlinx.coroutines.Dispatchers
@@ -66,7 +66,8 @@ import javax.inject.Singleton
 class DefaultMainRepository @Inject constructor(
     private val auth: FirebaseAuth,
     private val firestore: FirebaseFirestore,
-    private val database: FirebaseDatabase
+    private val database: FirebaseDatabase,
+    private val chatDatabase: ChatDatabase
 ) : MainRepository {
 
     companion object {
@@ -136,6 +137,7 @@ class DefaultMainRepository @Inject constructor(
     override suspend fun removeDeviceToken(uid: String) = withContext(Dispatchers.IO) {
         safeCall {
             usersStatCollection.document(uid).update(TOKEN, "").await()
+            chatDatabase.clearAllTables()
             Resource.Success(true)
         }
     }
@@ -492,24 +494,47 @@ class DefaultMainRepository @Inject constructor(
 
                     val cur = transition.get(followingRequestsCollection.document(currentUid))
                     if (!cur.exists())
-                        transition.set(followingRequestsCollection.document(currentUid), FollowingRequest(uid = currentUid))
+                        transition.set(
+                            followingRequestsCollection.document(currentUid),
+                            FollowingRequest(uid = currentUid)
+                        )
 
                     val other = transition.get(followerRequestsCollection.document(uid))
                     if (!other.exists())
-                        transition.set(followerRequestsCollection.document(uid), FollowerRequest(uid = uid))
+                        transition.set(
+                            followerRequestsCollection.document(uid),
+                            FollowerRequest(uid = uid)
+                        )
 
 
-                    val curList = cur.toObject(FollowingRequest::class.java)?.requestedToUids ?: listOf()
+                    val curList =
+                        cur.toObject(FollowingRequest::class.java)?.requestedToUids ?: listOf()
                     sent = uid in curList
 
                     if (sent) {
                         //already sent
-                        transition.update(followingRequestsCollection.document(currentUid), REQUESTED_TO_UIDS, FieldValue.arrayRemove(uid))
-                        transition.update(followerRequestsCollection.document(uid), REQUESTED_UIDS, FieldValue.arrayRemove(currentUid))
-                    }else{
+                        transition.update(
+                            followingRequestsCollection.document(currentUid),
+                            REQUESTED_TO_UIDS,
+                            FieldValue.arrayRemove(uid)
+                        )
+                        transition.update(
+                            followerRequestsCollection.document(uid),
+                            REQUESTED_UIDS,
+                            FieldValue.arrayRemove(currentUid)
+                        )
+                    } else {
                         //sent now
-                        transition.update(followingRequestsCollection.document(currentUid), REQUESTED_TO_UIDS, FieldValue.arrayUnion(uid))
-                        transition.update(followerRequestsCollection.document(uid), REQUESTED_UIDS, FieldValue.arrayUnion(currentUid))
+                        transition.update(
+                            followingRequestsCollection.document(currentUid),
+                            REQUESTED_TO_UIDS,
+                            FieldValue.arrayUnion(uid)
+                        )
+                        transition.update(
+                            followerRequestsCollection.document(uid),
+                            REQUESTED_UIDS,
+                            FieldValue.arrayUnion(currentUid)
+                        )
                     }
                 }.await()
                 Resource.Success(!sent)
@@ -519,51 +544,85 @@ class DefaultMainRepository @Inject constructor(
     override suspend fun checkForPreviousFollowerRequests(uid: String): Resource<Boolean> =
         withContext(Dispatchers.IO) {
             safeCall {
-                val documentSnapshot = followingRequestsCollection.document(Firebase.auth.uid!!).get().await()
+                val documentSnapshot =
+                    followingRequestsCollection.document(Firebase.auth.uid!!).get().await()
                 if (!documentSnapshot.exists())
                     Resource.Success(false)
-                val list = documentSnapshot.toObject(FollowingRequest::class.java)?.requestedToUids ?: listOf()
+                val list = documentSnapshot.toObject(FollowingRequest::class.java)?.requestedToUids
+                    ?: listOf()
                 Resource.Success(uid in list)
             }
         }
 
-    override suspend fun checkDoesUserHaveFollowerRequests(): Resource<Boolean> = withContext(Dispatchers.IO){
-        safeCall {
-            val documentSnapshot = followerRequestsCollection.document(Firebase.auth.uid!!).get().await()
-            if (!documentSnapshot.exists())
-                Resource.Success(false)
-            val list = documentSnapshot.toObject(FollowerRequest::class.java)?.requestedUids ?: listOf()
-            Resource.Success(list.isNotEmpty())
+    override suspend fun checkDoesUserHaveFollowerRequests(): Resource<Boolean> =
+        withContext(Dispatchers.IO) {
+            safeCall {
+                val documentSnapshot =
+                    followerRequestsCollection.document(Firebase.auth.uid!!).get().await()
+                if (!documentSnapshot.exists())
+                    Resource.Success(false)
+                val list = documentSnapshot.toObject(FollowerRequest::class.java)?.requestedUids
+                    ?: listOf()
+                Resource.Success(list.isNotEmpty())
+            }
         }
-    }
 
     override suspend fun acceptOrRejectTheFollowerRequest(
         uid: String,
         action: Boolean
-    ): Resource<String> = withContext(Dispatchers.IO){
+    ): Resource<String> = withContext(Dispatchers.IO) {
         safeCall {
             val currentUserUid = Firebase.auth.uid!!
-            firestore.runTransaction{ transition ->
+            firestore.runTransaction { transition ->
                 if (action) {
-                    val followingDocumentSnapshot = transition.get(followingCollection.document(uid))
+                    val followingDocumentSnapshot =
+                        transition.get(followingCollection.document(uid))
                     if (!followingDocumentSnapshot.exists())
                         transition.set(followingCollection.document(uid), Following(uid = uid))
-                    val followerDocumentSnapshot = transition.get(followersCollection.document(currentUserUid))
+                    val followerDocumentSnapshot =
+                        transition.get(followersCollection.document(currentUserUid))
                     if (!followerDocumentSnapshot.exists())
-                        transition.set(followersCollection.document(currentUserUid), Followers(uid = currentUserUid))
+                        transition.set(
+                            followersCollection.document(currentUserUid),
+                            Followers(uid = currentUserUid)
+                        )
 
-                    transition.update(followingCollection.document(uid), FOLLOWING, FieldValue.arrayUnion(currentUserUid))
-                    transition.update(followersCollection.document(currentUserUid), FOLLOWERS, FieldValue.arrayUnion(uid))
+                    transition.update(
+                        followingCollection.document(uid),
+                        FOLLOWING,
+                        FieldValue.arrayUnion(currentUserUid)
+                    )
+                    transition.update(
+                        followersCollection.document(currentUserUid),
+                        FOLLOWERS,
+                        FieldValue.arrayUnion(uid)
+                    )
 
-                    transition.update(usersMetadataCollection.document(uid), FOLLOWING_COUNT, FieldValue.increment(1))
-                    transition.update(usersMetadataCollection.document(currentUserUid), FOLLOWERS_COUNT, FieldValue.increment(1))
+                    transition.update(
+                        usersMetadataCollection.document(uid),
+                        FOLLOWING_COUNT,
+                        FieldValue.increment(1)
+                    )
+                    transition.update(
+                        usersMetadataCollection.document(currentUserUid),
+                        FOLLOWERS_COUNT,
+                        FieldValue.increment(1)
+                    )
                 }
                 val a = transition.get(followingRequestsCollection.document(uid))
                 if (a.exists())
-                    transition.update(followingRequestsCollection.document(uid), REQUESTED_TO_UIDS, FieldValue.arrayRemove(currentUserUid))
+                    transition.update(
+                        followingRequestsCollection.document(uid),
+                        REQUESTED_TO_UIDS,
+                        FieldValue.arrayRemove(currentUserUid)
+                    )
                 val b = transition.get(followerRequestsCollection.document(currentUserUid))
                 if (b.exists())
-                    transition.update(followerRequestsCollection.document(currentUserUid), REQUESTED_UIDS, FieldValue.arrayRemove(uid))
+                    transition.update(
+                        followerRequestsCollection.document(currentUserUid),
+                        REQUESTED_UIDS,
+                        FieldValue.arrayRemove(uid)
+                    )
 
             }.await()
             Resource.Success(uid)

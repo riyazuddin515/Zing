@@ -1,6 +1,7 @@
 package com.riyazuddin.zing.di
 
 import com.google.firebase.firestore.FirebaseFirestore
+import com.riyazuddin.zing.repositories.local.LastMessageDao
 import com.riyazuddin.zing.repositories.network.abstraction.ChatRepository
 import com.riyazuddin.zing.repositories.network.implementation.DefaultChatRepository
 import com.riyazuddin.zing.ui.main.viewmodels.ChatViewModel
@@ -16,8 +17,8 @@ object ChatModule {
 
     @ActivityScoped
     @Provides
-    fun provideChatRepository(firestore: FirebaseFirestore) =
-        DefaultChatRepository(firestore) as ChatRepository
+    fun provideChatRepository(firestore: FirebaseFirestore, lastMessageDao: LastMessageDao) =
+        DefaultChatRepository(firestore, lastMessageDao) as ChatRepository
 
     /**
      * Providing ChatViewModel for ChatAdapter

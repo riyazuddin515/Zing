@@ -14,8 +14,8 @@ import com.riyazuddin.zing.data.entities.UserStat
 import com.riyazuddin.zing.other.Constants.CHATS_COLLECTION
 import com.riyazuddin.zing.other.Constants.CHAT_MESSAGE_PAGE_LIMIT
 import com.riyazuddin.zing.other.Constants.DATE
+import com.riyazuddin.zing.other.Constants.DELETED
 import com.riyazuddin.zing.other.Constants.FAILURE
-import com.riyazuddin.zing.other.Constants.LAST_MESSAGE_PAGE_LIMIT
 import com.riyazuddin.zing.other.Constants.MESSAGE
 import com.riyazuddin.zing.other.Constants.MESSAGES_COLLECTION
 import com.riyazuddin.zing.other.Constants.NO_MORE_MESSAGES
@@ -32,6 +32,7 @@ import com.riyazuddin.zing.other.Constants.USERS_STAT_COLLECTION
 import com.riyazuddin.zing.other.Event
 import com.riyazuddin.zing.other.Resource
 import com.riyazuddin.zing.other.safeCall
+import com.riyazuddin.zing.repositories.local.LastMessageDao
 import com.riyazuddin.zing.repositories.network.abstraction.ChatRepository
 import kotlinx.coroutines.*
 import kotlinx.coroutines.tasks.await
@@ -42,7 +43,8 @@ import javax.inject.Singleton
 
 @Singleton
 class DefaultChatRepository @Inject constructor(
-    private val firestore: FirebaseFirestore
+    private val firestore: FirebaseFirestore,
+    private val lastMessageDao: LastMessageDao
 ) : ChatRepository {
 
     private val usersCollection = firestore.collection(USERS_COLLECTION)
@@ -59,8 +61,6 @@ class DefaultChatRepository @Inject constructor(
     private var noMoreChatMessages = false
 
     private var lastMessageListener: ListenerRegistration? = null
-    private var lastMessageLocalRepo = mutableListOf<LastMessage>()
-    val lastMessageList = MutableLiveData<List<LastMessage>>()
     private var lastMessageLastVisible: DocumentSnapshot? = null
 
     val haveUnSeenMessages = MutableLiveData<Event<Resource<Boolean>>>()
@@ -131,20 +131,14 @@ class DefaultChatRepository @Inject constructor(
                             "$MESSAGE.$STATUS",
                             SEEN
                         )
+                        GlobalScope.launch {
+                            lastMessageDao.updateLastMessageAsSeen(chatThread, SEEN)
+                        }
                     }
                 }.await()
                 Resource.Success(SUCCESS)
             }
         }
-
-    override fun updateChatListOnMessageSent(message: Message) {
-//        val m = chatListLocalToRepo.filter {
-//            it.messageId == message.messageId
-//        }[0]
-//        val index = chatListLocalToRepo.indexOf(m)
-//        chatListLocalToRepo[index] = message
-//        chatList.postValue(Event(Resource.Success(chatListLocalToRepo)))
-    }
 
     override suspend fun getChatLoadFirstQuery(currentUid: String, otherEndUserUid: String) {
         withContext(Dispatchers.IO) {
@@ -248,14 +242,6 @@ class DefaultChatRepository @Inject constructor(
         chatList.postValue(Event(Resource.Success(chatListLocalToRepo)))
     }
 
-    override fun clearRecentMessagesList() {
-        lastMessageLastVisible = null
-        lastMessageListener?.remove()
-        lastMessageListener = null
-        lastMessageLocalRepo.clear()
-        lastMessageList.postValue(lastMessageLocalRepo)
-    }
-
     override suspend fun lastMessageListener(currentUser: User) {
         val querySnapshot = chatsCollection
             .whereArrayContains("$MESSAGE.$SENDER_AND_RECEIVER_UID", Firebase.auth.uid!!)
@@ -274,114 +260,70 @@ class DefaultChatRepository @Inject constructor(
                     Log.i(TAG, "lastMessageListener: invoked")
                     for (e in it.documentChanges) {
                         val lastMessage = e.document.toObject(LastMessage::class.java)
-                        val list = lastMessageLocalRepo.filter { existingLastMessages ->
-                            existingLastMessages.chatThread == lastMessage.chatThread
-                        }
-                        if (list.isEmpty()) {
-                            GlobalScope.launch {
-                                val l = getOtherUserForRecentChat(lastMessage, currentUser)
-                                lastMessageLocalRepo.add(0, l)
-                                lastMessageList.postValue(lastMessageLocalRepo)
-                            }
-                        } else {
-                            for (each in list) {
-                                val index = lastMessageLocalRepo.indexOf(each)
-                                val existing = lastMessageLocalRepo.removeAt(index)
-                                if (lastMessage.message.senderAndReceiverUid[0] == existing.sender.uid) {
-                                    lastMessage.sender = existing.sender
-                                    lastMessage.receiver = existing.receiver
-                                } else {
-                                    lastMessage.receiver = existing.sender
-                                    lastMessage.sender = existing.receiver
-                                }
-
-                                if (each.message != lastMessage.message) {
-                                    lastMessageLocalRepo.add(0, lastMessage)
-                                } else {
-                                    lastMessageLocalRepo.add(index, lastMessage)
-
-                                }
-                                lastMessageList.postValue(lastMessageLocalRepo)
+                        GlobalScope.launch {
+                            val a =
+                                lastMessageDao.checkChatThreadAlreadyExists(lastMessage.chatThread)
+                            if (a == 0) {
+                                lastMessageDao.insertLastMessage(
+                                    getOtherUserForRecentChat(
+                                        lastMessage
+                                    )
+                                )
+                            } else {
+                                lastMessage.otherUser =
+                                    lastMessageDao.getLastMessage(lastMessage.chatThread).otherUser
+                                lastMessageDao.insertLastMessage(lastMessage)
                             }
                         }
                     }
                 }
             }
+
     }
 
-    override suspend fun getLastMessageFirstQuery(currentUser: User): Resource<Boolean> =
-        withContext(Dispatchers.IO) {
-            safeCall {
-                val querySnapshot = chatsCollection
-                    .whereArrayContains("$MESSAGE.$SENDER_AND_RECEIVER_UID", Firebase.auth.uid!!)
-                    .orderBy("$MESSAGE.$DATE", Query.Direction.DESCENDING)
-                    .limit(LAST_MESSAGE_PAGE_LIMIT)
-                    .get().await()
-                Log.i(TAG, "getLastMessageFirstQuery: ${querySnapshot.size()}")
-                if (querySnapshot.documents.size <= 0) {
-                    lastMessageList.postValue(lastMessageLocalRepo)
-                    return@withContext Resource.Success(true)
-                }
-
-                lastMessageLastVisible = querySnapshot.documents[querySnapshot.size() - 1]
-                querySnapshot.forEach {
-                    val documentSnapshot =
-                        getOtherUserForRecentChat(it.toObject(LastMessage::class.java), currentUser)
-                    Log.i(TAG, "getLastMessageFirstQuery: ${documentSnapshot.message.message}")
-                    lastMessageLocalRepo.add(documentSnapshot)
-                }
-                lastMessageList.postValue(lastMessageLocalRepo)
-                Resource.Success(true)
-            }
-
-        }
-
-    override suspend fun getLastMessageLoadMore(currentUser: User) {
-        withContext(Dispatchers.IO) {
-            safeCall {
-                val querySnapshot = chatsCollection
-                    .whereArrayContains("$MESSAGE.$SENDER_AND_RECEIVER_UID", Firebase.auth.uid!!)
-                    .orderBy("$MESSAGE.$DATE", Query.Direction.DESCENDING)
-                    .startAfter(lastMessageLastVisible ?: return@withContext)
-                    .limit(LAST_MESSAGE_PAGE_LIMIT)
-                    .get().await()
-                if (querySnapshot.isEmpty || lastMessageLastVisible == querySnapshot.documents[querySnapshot.size() - 1]) {
-                    return@withContext
-                }
-                lastMessageLastVisible = querySnapshot.documents[querySnapshot.size() - 1]
-                querySnapshot.forEach {
-                    val documentSnapshot = getOtherUserForRecentChat(
-                        it.toObject(LastMessage::class.java),
-                        currentUser
-                    )
-                    lastMessageLocalRepo.add(documentSnapshot)
-                }
-                lastMessageList.postValue(lastMessageLocalRepo)
-                Resource.Success(true) // No use
-            }
-        }
+    override fun removeLastMessageListener() {
+        lastMessageListener?.remove()
     }
 
     override suspend fun deleteChatMessage(
         currentUid: String,
         otherEndUserUid: String,
         message: Message
-    ): Resource<Message> = withContext(Dispatchers.IO) {
-        safeCall {
-            val map = mutableMapOf(
-                MESSAGE to "This message was Deleted",
-                URL to "",
-                TYPE to "DELETED"
-            )
+    ) {
+        withContext(Dispatchers.IO) {
+            safeCall {
+                val map = mutableMapOf(
+                    MESSAGE to "This message was Deleted",
+                    URL to "",
+                    TYPE to DELETED
+                )
 
-            chatsCollection
-                .document(getChatThread(currentUid, otherEndUserUid))
-                .collection(MESSAGES_COLLECTION)
-                .document(message.messageId)
-                .update(map.toMap()).await()
+                chatsCollection
+                    .document(getChatThread(currentUid, otherEndUserUid))
+                    .collection(MESSAGES_COLLECTION)
+                    .document(message.messageId)
+                    .update(map.toMap()).await()
 
-            Log.i(TAG, "deleteChatMessage: MessageDeleted")
-            Resource.Success(message)
+                message.apply {
+                    this.message = "This message was Deleted"
+                    url = ""
+                    type = DELETED
+                }
+
+                val list = chatListLocalToRepo.filter {
+                    it.messageId == message.messageId
+                }
+                if (list.isNotEmpty()) {
+                    for (e in list) {
+                        val index = chatListLocalToRepo.indexOf(e)
+                        chatListLocalToRepo.removeAt(index)
+                        chatListLocalToRepo.add(index, message)
+                    }
+                    chatList.postValue(Event(Resource.Success(chatListLocalToRepo)))
+                }
+
+                Resource.Success(message)
+            }
         }
     }
 
@@ -451,34 +393,81 @@ class DefaultChatRepository @Inject constructor(
         }
     }
 
-    private suspend fun getOtherUserForRecentChat(
-        lastMessage: LastMessage,
-        currentUser: User
-    ): LastMessage = run {
-        val docId = if (lastMessage.message.senderAndReceiverUid[0] == currentUser.uid)
+    private suspend fun getOtherUserForRecentChat(lastMessage: LastMessage): LastMessage = run {
+        val otherUserUid = if (Firebase.auth.uid!! == lastMessage.message.senderAndReceiverUid[0])
             lastMessage.message.senderAndReceiverUid[1]
         else
             lastMessage.message.senderAndReceiverUid[0]
 
-        val it = usersCollection.document(docId).get().await()
-
-        val user = it.toObject(User::class.java)!!
-        if (lastMessage.message.senderAndReceiverUid[0] == currentUser.uid) {
-            lastMessage.receiver = user
-            lastMessage.sender = currentUser
-        } else {
-            lastMessage.receiver = currentUser
-            lastMessage.sender = user
-        }
+        val doc = usersCollection.document(otherUserUid).get().await()
+        lastMessage.otherUser = doc.toObject(User::class.java)!!
 
         lastMessage
     }
 
-    override fun removeUnSeenMessageListener() {
+    override suspend fun removeUnSeenMessageListener() {
         unSeenMessagesListener?.remove()
     }
 
-    override fun removeCheckOnlineListener() {
+    override suspend fun removeCheckOnlineListener() {
         checkOnlineListener?.remove()
+    }
+
+    override fun getLastMessagesFromRoom() = lastMessageDao.getAllLastMessages()
+
+    override suspend fun getLastMessages(): Resource<Boolean> = withContext(Dispatchers.IO) {
+        safeCall {
+            val last = lastMessageDao.getLastLastMessage()
+
+            if (last == null) {
+                val querySnapshot = chatsCollection
+                    .whereArrayContains("$MESSAGE.$SENDER_AND_RECEIVER_UID", Firebase.auth.uid!!)
+                    .orderBy("$MESSAGE.$DATE", Query.Direction.DESCENDING)
+                    .get().await()
+                if (!querySnapshot.isEmpty) {
+                    val list = mutableListOf<LastMessage>()
+                    querySnapshot.forEach {
+                        val l = it.toObject(LastMessage::class.java)
+                        list.add(getOtherUserForRecentChat(l))
+                        Log.e(TAG, "getLastMessages IF: list -> ${l.otherUser.name}")
+                    }
+                    lastMessageDao.insertLastMessages(list)
+                }
+            } else {
+                val querySnapshot = chatsCollection
+                    .whereArrayContains("$MESSAGE.$SENDER_AND_RECEIVER_UID", Firebase.auth.uid!!)
+                    .whereGreaterThan("$MESSAGE.$DATE", last.message.date!!)
+                    .orderBy("$MESSAGE.$DATE", Query.Direction.DESCENDING)
+                    .get().await()
+                if (!querySnapshot.isEmpty) {
+                    val list = mutableListOf<LastMessage>()
+                    querySnapshot.forEach {
+                        val l = it.toObject(LastMessage::class.java)
+                        list.add(getOtherUserForRecentChat(l))
+                        Log.e(TAG, "getLastMessages ELSE: list -> ${l.otherUser.name}")
+                    }
+                    lastMessageDao.insertLastMessages(list)
+                } else
+                    Log.d(TAG, "getLastMessages: empty")
+            }
+
+            Resource.Success(true)
+        }
+    }
+
+    override suspend fun syncLastMessagesOtherUserData(chatThread: String, uid: String) {
+        withContext(Dispatchers.IO) {
+            safeCall {
+                val user = usersCollection.document(uid).get().await().toObject(User::class.java)!!
+                val lastMessage = lastMessageDao.getLastMessage(chatThread)
+                if (user.name != lastMessage.otherUser.name || user.profilePicUrl != lastMessage.otherUser.profilePicUrl || user.username != lastMessage.otherUser.username) {
+                    lastMessage.otherUser.name = user.name
+                    lastMessage.otherUser.profilePicUrl = user.profilePicUrl
+                    lastMessage.otherUser.username = user.username
+                    lastMessageDao.insertLastMessage(lastMessage)
+                }
+                Resource.Success(true)
+            }
+        }
     }
 }

@@ -2,6 +2,7 @@ package com.riyazuddin.zing.other
 
 import androidx.room.TypeConverter
 import com.google.gson.Gson
+import com.riyazuddin.zing.data.entities.User
 import java.util.*
 
 class Converter {
@@ -19,4 +20,10 @@ class Converter {
 
     @TypeConverter
     fun jsonToList(value: String) = Gson().fromJson(value, Array<String>::class.java).toList()
+
+    @TypeConverter
+    fun userToJson(user: User): String = Gson().toJson(user)
+
+    @TypeConverter
+    fun jsonToUser(user: String) = Gson().fromJson(user, User::class.java)
 }

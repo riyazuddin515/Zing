@@ -1,6 +1,7 @@
 package com.riyazuddin.zing.di
 
 import android.content.Context
+import androidx.room.Room
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.request.RequestOptions
@@ -9,6 +10,7 @@ import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreSettings
 import com.riyazuddin.zing.R
+import com.riyazuddin.zing.repositories.local.ChatDatabase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -71,4 +73,17 @@ object AppModule {
         database
     }
 
+    @Provides
+    @Singleton
+    fun providesChatDatabase(
+        @ApplicationContext context: Context
+    ) = Room.databaseBuilder(
+        context,
+        ChatDatabase::class.java,
+        "chat_db"
+    ).build()
+
+    @Provides
+    @Singleton
+    fun provideLastMessagesDao(chatDatabase: ChatDatabase) = chatDatabase.getLastMessagesDao()
 }

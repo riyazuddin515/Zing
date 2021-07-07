@@ -1,6 +1,8 @@
 package com.riyazuddin.zing.repositories.network.abstraction
 
 import android.net.Uri
+import androidx.lifecycle.LiveData
+import com.riyazuddin.zing.data.entities.LastMessage
 import com.riyazuddin.zing.data.entities.Message
 import com.riyazuddin.zing.data.entities.User
 import com.riyazuddin.zing.other.Resource
@@ -15,8 +17,6 @@ interface ChatRepository {
         uri: Uri?
     ): Resource<Message>
 
-    fun updateChatListOnMessageSent(message: Message)
-
     suspend fun updateMessageStatusAsSeen(message: Message): Resource<String>
 
     suspend fun getChatLoadFirstQuery(currentUid: String, otherEndUserUid: String)
@@ -25,15 +25,9 @@ interface ChatRepository {
 
     fun clearChatList()
 
-    fun clearRecentMessagesList()
-
     suspend fun lastMessageListener(currentUser: User)
 
-    suspend fun getLastMessageFirstQuery(currentUser: User): Resource<Boolean>
-
-    suspend fun getLastMessageLoadMore(currentUser: User)
-
-    suspend fun deleteChatMessage(currentUid: String, otherEndUserUid: String, message: Message): Resource<Message>
+    suspend fun deleteChatMessage(currentUid: String, otherEndUserUid: String, message: Message)
 
     suspend fun getUser(uid: String): Resource<User>
 
@@ -41,6 +35,29 @@ interface ChatRepository {
 
     suspend fun checkForUnSeenMessage(uid: String)
 
-    fun removeUnSeenMessageListener()
-    fun removeCheckOnlineListener()
+    suspend fun removeUnSeenMessageListener()
+
+    suspend fun removeCheckOnlineListener()
+
+    /**
+     * @since 4-7-2021
+     * Remove the LastMessageListener
+     */
+    fun removeLastMessageListener()
+
+    /**
+     * @since 3-7-2021
+     * @return LiveData<List<LastMessages>>
+     */
+    fun getLastMessagesFromRoom(): LiveData<List<LastMessage>>
+
+    /**
+     * @since 4-7-2021
+     * @return Resource<Boolean>
+     *     Boolean true indicates the load is successful
+     *     and the LastMessage Listener can be attached
+     */
+    suspend fun getLastMessages(): Resource<Boolean>
+
+    suspend fun syncLastMessagesOtherUserData(chatThread: String, uid: String)
 }
