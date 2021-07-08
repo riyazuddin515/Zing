@@ -112,6 +112,7 @@ object Constants {
     const val PUBLIC = "public"
     const val PRIVATE = "private"
 
+    const val NO_USER_DOCUMENT = "NO_USER_DOCUMENT"
 
     //For Following Request
     const val REQUESTED_TO_UIDS = "requestedToUids"

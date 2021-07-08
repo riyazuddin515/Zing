@@ -53,7 +53,10 @@
             app:exitAnim="@anim/slide_out_to_right"
             app:popEnterAnim="@anim/slide_in_from_right"
             app:popExitAnim="@anim/slide_out_to_left" />
-<!--        <action-->
+        <action
+            android:id="@+id/action_homeFragment_to_profileInfo"
+            app:destination="@id/profileInfo" />
+        <!--        <action-->
 <!--            android:id="@+id/action_homeFragment_to_chatFragment2"-->
 <!--            app:destination="@id/chatFragment" />-->
     </fragment>

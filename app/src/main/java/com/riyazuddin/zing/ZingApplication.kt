@@ -3,7 +3,10 @@ package com.riyazuddin.zing
 import android.app.Application
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.content.ContentResolver
 import android.content.Context
+import android.media.AudioAttributes
+import android.net.Uri
 import android.os.Build
 import android.util.Log
 import com.google.firebase.FirebaseApp
@@ -60,6 +63,11 @@ class ZingApplication : Application() {
     private fun createNotificationChannel() {
         // Create the NotificationChannel, but only on API 26+ because
         // the NotificationChannel class is new and not in the support library
+        val soundUri = Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://" + applicationContext.packageName + "/" + R.raw.notification)
+        val audioAttributes = AudioAttributes.Builder()
+            .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+            .setUsage(AudioAttributes.USAGE_NOTIFICATION)
+            .build()
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val name = "Chat"
             val descriptionText = "This channel used for chat messages, it cam make sound and show pop up notification"
@@ -67,6 +75,7 @@ class ZingApplication : Application() {
 
             val channel = NotificationChannel(CHAT_CHANNEL_ID, name, importance).apply {
                 description = descriptionText
+                setSound(soundUri, audioAttributes)
             }
             // Register the channel with the system
             val notificationManager: NotificationManager =
@@ -80,6 +89,7 @@ class ZingApplication : Application() {
 
             val channel = NotificationChannel(NORMAL_NOTIFICATION_CHANNEL_ID, name, importance).apply {
                 description = descriptionText
+                setSound(soundUri, audioAttributes)
             }
             // Register the channel with the system
             val notificationManager: NotificationManager =

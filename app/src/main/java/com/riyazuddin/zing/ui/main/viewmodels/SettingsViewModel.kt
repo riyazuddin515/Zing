@@ -1,6 +1,7 @@
 package com.riyazuddin.zing.ui.main.viewmodels
 
 import android.net.Uri
+import android.util.Log
 import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -83,6 +84,32 @@ class SettingsViewModel @ViewModelInject constructor(
             _togglePrivacyStatus.postValue(
                 Event(repository.toggleAccountPrivacy(uid, privacy))
             )
+        }
+    }
+
+    private val _isUsernameAvailable = MutableLiveData<Event<Resource<Boolean>>>()
+    val isUsernameAvailable: LiveData<Event<Resource<Boolean>>> = _isUsernameAvailable
+    fun checkUserNameAvailability(query: String) {
+        var exists = false
+        _isUsernameAvailable.postValue(Event(Resource.Loading()))
+        viewModelScope.launch {
+            val result = repository.algoliaSearch(query)
+            result.data?.hits.let { hits ->
+                hits?.forEach { hit ->
+                    val username = hit.json.getValue("username").toString().replace("\"", "")
+                    Log.i("AuthViewModel", "checkUserNameAvailability: $username")
+                    if (username.equals(query, true)) {
+                        exists = true
+                        Log.i("AuthViewModel", "checkUserNameAvailability: Matched")
+                        return@let
+                    }
+                }
+            }
+            if (exists) {
+                _isUsernameAvailable.postValue(Event(Resource.Error("Already taken")))
+            } else {
+                _isUsernameAvailable.postValue(Event(Resource.Success(true)))
+            }
         }
     }
 }

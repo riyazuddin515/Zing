@@ -185,14 +185,13 @@ class DefaultChatRepository @Inject constructor(
                             }
                         }
                     }
-                    chatList.postValue(Event(Resource.Success(chatListLocalToRepo)))
                     isFirstPageFirstLoad = false
                     if (chatListLocalToRepo.isNotEmpty()) {
                         val lastMessage = chatListLocalToRepo[0]
                         if (lastMessage.senderAndReceiverUid[0] != currentUid && lastMessage.status != SEEN)
                             playTone.postValue(Event(Resource.Success(true)))
                     }
-
+                    chatList.postValue(Event(Resource.Success(chatListLocalToRepo)))
                 }
             }
             Log.i(TAG, "getChatLoadFirstQuery: Completed")

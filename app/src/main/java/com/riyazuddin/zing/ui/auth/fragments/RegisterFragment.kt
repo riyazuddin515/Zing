@@ -46,42 +46,12 @@ class RegisterFragment : Fragment(R.layout.fragment_register) {
                 findNavController().navigate(R.id.action_registerFragment_to_loginFragment)
         }
 
-        var job: Job? = null
-        binding.TIEUsername.addTextChangedListener { editable ->
-            binding.TILUsername.endIconMode = TextInputLayout.END_ICON_NONE
-            binding.TILUsername.error = null
-            job?.cancel()
-            job = lifecycleScope.launch {
-                delay(SEARCH_TIME_DELAY)
-                editable?.let {
-                    validator.validateUsername(it.toString()).apply {
-                        if (this != VALID) {
-                            binding.TILUsername.error = this
-                        } else {
-                            viewModel.checkUserNameAvailability(it.toString())
-                        }
-                    }
-                }
-            }
-        }
-
-        binding.TIEName.addTextChangedListener {
-            validator.validateName(it.toString()).apply {
-                if (this != VALID)
-                    binding.TILName.error = this
-                else
-                    binding.TILName.error = null
-            }
-        }
-
         binding.TIEEmail.addTextChangedListener {
             validator.validateEmail(it.toString()).apply {
                 if (this != VALID)
                     binding.TILEmail.error = this
                 else
                     binding.TILEmail.error = null
-
-                binding.TILName.error
             }
         }
         binding.TIEPassword.addTextChangedListener {
@@ -102,25 +72,9 @@ class RegisterFragment : Fragment(R.layout.fragment_register) {
 
         binding.btnRegister.setOnClickListener {
 
-            val name = binding.TIEName.text.toString().trim()
-            val username = binding.TIEUsername.text.toString().trim()
             val email = binding.TIEEmail.text.toString().trim()
             val password = binding.TIEPassword.text.toString().trim()
             val repeatPassword = binding.TIERepeatPassword.text.toString().trim()
-
-            validator.validateName(name).apply {
-                if (this != VALID) {
-                    binding.TILName.error = this
-                    return@setOnClickListener
-                }
-            }
-
-            validator.validateUsername(username).apply {
-                if (this != VALID) {
-                    binding.TILUsername.error = this
-                    return@setOnClickListener
-                }
-            }
 
             validator.validateEmail(email).apply {
                 if (this != VALID) {
@@ -142,7 +96,7 @@ class RegisterFragment : Fragment(R.layout.fragment_register) {
             }
 
             it.isVisible = false
-            viewModel.register(name, username, email, password)
+            viewModel.register(email, password)
         }
     }
 
@@ -161,21 +115,6 @@ class RegisterFragment : Fragment(R.layout.fragment_register) {
             snackBar(getString(R.string.registration_success))
             Firebase.auth.signOut()
             findNavController().navigate(R.id.action_registerFragment_to_checkMailFragment)
-        })
-
-        viewModel.isUsernameAvailable.observe(viewLifecycleOwner, EventObserver(
-            onError = {
-                binding.TILUsername.endIconMode = TextInputLayout.END_ICON_NONE
-                binding.TILUsername.error = it
-            },
-            onLoading = {
-                binding.TILUsername.error = null
-                binding.TILUsername.endIconMode = TextInputLayout.END_ICON_NONE
-            }
-        ) {
-            binding.TILUsername.endIconMode = TextInputLayout.END_ICON_CUSTOM
-            binding.TILUsername.endIconDrawable =
-                ResourcesCompat.getDrawable(resources, R.drawable.ic_outline_check_circle, null)
         })
     }
 

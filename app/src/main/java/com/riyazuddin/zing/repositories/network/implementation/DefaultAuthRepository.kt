@@ -11,14 +11,7 @@ import com.algolia.search.model.search.Query
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.riyazuddin.zing.BuildConfig
-import com.riyazuddin.zing.data.entities.Followers
-import com.riyazuddin.zing.data.entities.Following
-import com.riyazuddin.zing.data.entities.User
-import com.riyazuddin.zing.data.entities.UserMetadata
-import com.riyazuddin.zing.other.Constants.FOLLOWERS_COLLECTION
-import com.riyazuddin.zing.other.Constants.FOLLOWING_COLLECTION
 import com.riyazuddin.zing.other.Constants.USERS_COLLECTION
-import com.riyazuddin.zing.other.Constants.USERS_METADATA_COLLECTION
 import com.riyazuddin.zing.other.Resource
 import com.riyazuddin.zing.other.safeCall
 import com.riyazuddin.zing.repositories.network.abstraction.AuthRepository
@@ -35,26 +28,11 @@ class DefaultAuthRepository @Inject constructor(
     private val firestore: FirebaseFirestore
 ) : AuthRepository {
 
-    override suspend fun register(
-        name: String,
-        username: String,
-        email: String,
-        password: String
-    ): Resource<Boolean> {
+    override suspend fun register(email: String, password: String): Resource<Boolean> {
         return withContext(Dispatchers.IO) {
             safeCall {
                 val result = auth.createUserWithEmailAndPassword(email, password).await()
                 result.user!!.sendEmailVerification()
-                val uid = result.user!!.uid
-                val user = User(name, uid, username)
-                firestore.collection(USERS_COLLECTION).document(uid).set(user).await()
-                firestore.collection(USERS_METADATA_COLLECTION).document(uid).set(UserMetadata(uid))
-                    .await()
-                firestore.collection(FOLLOWING_COLLECTION).document(uid).set(Following(uid = uid))
-                    .await()
-                firestore.collection(FOLLOWERS_COLLECTION).document(uid).set(Followers(uid = uid))
-                    .await()
-
                 Resource.Success(true)
             }
         }
@@ -92,27 +70,4 @@ class DefaultAuthRepository @Inject constructor(
         }
 
     }
-
-    override suspend fun algoliaUsernameSearch(searchQuery: String): Resource<ResponseSearch> =
-        withContext(Dispatchers.IO) {
-            safeCall {
-                val client = ClientSearch(
-                    ApplicationID(BuildConfig.ALGOLIA_APP_ID),
-                    APIKey(BuildConfig.ALGOLIA_SEARCH_KEY),
-                    LogLevel.ALL
-                )
-                val settings = settings {
-                    attributesForFaceting {
-                        +"username" // or FilterOnly(username) for filtering purposes only
-                    }
-                }
-
-                val index = client.initIndex(IndexName("user_search"))
-                index.setSettings(settings)
-
-                val queryObj = Query(searchQuery)
-                val result = index.search(queryObj)
-                Resource.Success(result)
-            }
-        }
 }

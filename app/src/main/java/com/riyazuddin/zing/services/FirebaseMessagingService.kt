@@ -4,9 +4,12 @@ import android.app.NotificationManager
 import android.content.ContentResolver
 import android.content.Context
 import android.net.Uri
+import android.os.Build
 import android.util.Log
 import android.widget.RemoteViews
+import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
+import androidx.core.content.ContextCompat
 import androidx.navigation.NavDeepLinkBuilder
 import com.bumptech.glide.Glide
 import com.google.firebase.auth.ktx.auth
@@ -83,11 +86,13 @@ class FirebaseMessagingService : FirebaseMessagingService() {
         val notificationLayout = RemoteViews(packageName, R.layout.notification_layout)
         notificationLayout.setTextViewText(R.id.title, notificationDataObj.title)
         notificationLayout.setTextViewText(R.id.body, notificationDataObj.body)
-        val bitmap = Glide.with(this).asBitmap().load(notificationDataObj.image).submit().get()
+
+        val bitmap = Glide.with(this).asBitmap().load(notificationDataObj.image).circleCrop().submit().get()
         notificationLayout.setImageViewBitmap(R.id.imageView, bitmap)
 
         val notification = NotificationCompat.Builder(this, notificationDataObj.channel_id)
-            .setSmallIcon(R.drawable.ic_chat)
+            .setSmallIcon(R.drawable.ic_notification_icon)
+            .setColor(ContextCompat.getColor(applicationContext, R.color.colorPrimary))
             .setStyle(NotificationCompat.DecoratedCustomViewStyle())
             .setCustomContentView(notificationLayout)
             .setPriority(NotificationCompat.PRIORITY_HIGH)

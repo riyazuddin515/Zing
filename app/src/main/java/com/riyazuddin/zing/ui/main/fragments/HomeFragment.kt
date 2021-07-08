@@ -19,12 +19,14 @@ import androidx.navigation.fragment.findNavController
 import androidx.paging.LoadState
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.ktx.Firebase
 import com.riyazuddin.zing.R
 import com.riyazuddin.zing.data.entities.User
 import com.riyazuddin.zing.databinding.FragmentHomeBinding
+import com.riyazuddin.zing.other.Constants.NO_USER_DOCUMENT
 import com.riyazuddin.zing.other.Constants.PRIVATE
 import com.riyazuddin.zing.other.EventObserver
 import com.riyazuddin.zing.other.snackBar
@@ -105,6 +107,8 @@ class HomeFragment : BasePostFragment(R.layout.fragment_home) {
 
         if (currentUser != null) {
             binding.ibRecentChat.isVisible = true
+        }else{
+            viewModel.getCurrentUser(currentUserUid ?: return)
         }
 
     }
@@ -112,8 +116,21 @@ class HomeFragment : BasePostFragment(R.layout.fragment_home) {
     private fun subscribeToObservers() {
         viewModel.loadCurrentUserStatus.observe(viewLifecycleOwner, EventObserver(
             onError = {
-                snackBar(it)
-                Log.e(TAG, "subscribeToObservers: $it")
+                if (it == NO_USER_DOCUMENT) {
+                    MaterialAlertDialogBuilder(requireContext(), R.style.MaterialAlertDialog_Round).apply {
+                        setTitle("Setup Your Account")
+                        setMessage("Complete your account setup process to start using the app")
+                        setCancelable(false)
+                        setPositiveButton("Setup"){ dialogInterface, _ ->
+                            currentUser = null
+                            findNavController().navigate(R.id.action_homeFragment_to_profileInfo)
+                            dialogInterface.dismiss()
+                        }
+                    }.show()
+                }else{
+                    snackBar(it)
+                    Log.e(TAG, "subscribeToObservers: $it")
+                }
             },
             onLoading = { Log.i(TAG, "subscribeToObservers: loading current user") }
         ) {

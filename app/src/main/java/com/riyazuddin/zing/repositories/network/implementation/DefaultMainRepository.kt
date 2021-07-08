@@ -3,10 +3,13 @@ package com.riyazuddin.zing.repositories.network.implementation
 import android.net.Uri
 import android.util.Log
 import com.algolia.search.client.ClientSearch
+import com.algolia.search.dsl.attributesForFaceting
+import com.algolia.search.dsl.settings
 import com.algolia.search.model.APIKey
 import com.algolia.search.model.ApplicationID
 import com.algolia.search.model.IndexName
 import com.algolia.search.model.response.ResponseSearch
+import com.algolia.search.model.search.Query
 import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
@@ -33,6 +36,7 @@ import com.riyazuddin.zing.other.Constants.LAST_SEEN
 import com.riyazuddin.zing.other.Constants.LIKED_BY
 import com.riyazuddin.zing.other.Constants.LIKE_COUNT
 import com.riyazuddin.zing.other.Constants.NAME
+import com.riyazuddin.zing.other.Constants.NO_USER_DOCUMENT
 import com.riyazuddin.zing.other.Constants.OFFLINE
 import com.riyazuddin.zing.other.Constants.ONLINE
 import com.riyazuddin.zing.other.Constants.POSTS_COLLECTION
@@ -177,17 +181,19 @@ class DefaultMainRepository @Inject constructor(
 
     override suspend fun getUserProfile(uid: String) = withContext(Dispatchers.IO) {
         safeCall {
-            val user = usersCollection.document(uid).get().await().toObject(User::class.java)!!
-            val currentUid = auth.uid!!
-            if (uid != currentUid) {
-                val currentUserFollowing =
-                    followingCollection.document(currentUid).get().await()
-                        .toObject(Following::class.java)
-                        ?: Following()
+            val user = usersCollection.document(uid).get().await().toObject(User::class.java)
+            user?.let {
+                val currentUid = auth.uid!!
+                if (uid != currentUid) {
+                    val currentUserFollowing =
+                        followingCollection.document(currentUid).get().await()
+                            .toObject(Following::class.java)
+                            ?: Following()
 
-                user.isFollowing = uid in currentUserFollowing.following
-            }
-            Resource.Success(user)
+                    user.isFollowing = uid in currentUserFollowing.following
+                }
+                Resource.Success(user)
+            } ?: Resource.Error(NO_USER_DOCUMENT)
         }
     }
 
@@ -373,16 +379,29 @@ class DefaultMainRepository @Inject constructor(
                         .toString()
                 }
 
-                val map = mutableMapOf(
-                    NAME to updateProfile.name,
-                    USERNAME to updateProfile.username,
-                    BIO to updateProfile.bio
-                )
-                imageDownloadUrl?.let {
-                    map[PROFILE_PIC_URL] = it
-                }
+                val existing = usersCollection.document(updateProfile.uidToUpdate).get().await()
+                if (!existing.exists()) {
+                    val uid = updateProfile.uidToUpdate
+                    val user = User(name = updateProfile.name, uid, updateProfile.username)
+                    imageDownloadUrl?.let {
+                        user.profilePicUrl = it
+                    }
+                    usersCollection.document(updateProfile.uidToUpdate).set(user).await()
+                    usersMetadataCollection.document(uid).set(UserMetadata(uid)).await()
+                    followingCollection.document(uid).set(Following(uid = uid)).await()
+                    followersCollection.document(uid).set(Followers(uid = uid)).await()
 
-                usersCollection.document(updateProfile.uidToUpdate).update(map.toMap()).await()
+                }else{
+                    val map = mutableMapOf(
+                        NAME to updateProfile.name,
+                        USERNAME to updateProfile.username,
+                        BIO to updateProfile.bio
+                    )
+                    imageDownloadUrl?.let {
+                        map[PROFILE_PIC_URL] = it
+                    }
+                    usersCollection.document(updateProfile.uidToUpdate).update(map.toMap()).await()
+                }
                 Resource.Success(Any())
             }
         }
@@ -614,4 +633,27 @@ class DefaultMainRepository @Inject constructor(
             Resource.Success(uid)
         }
     }
+
+    override suspend fun algoliaUsernameSearch(searchQuery: String): Resource<ResponseSearch> =
+        withContext(Dispatchers.IO) {
+            safeCall {
+                val client = ClientSearch(
+                    ApplicationID(BuildConfig.ALGOLIA_APP_ID),
+                    APIKey(BuildConfig.ALGOLIA_SEARCH_KEY),
+                    LogLevel.ALL
+                )
+                val settings = settings {
+                    attributesForFaceting {
+                        +"username" // or FilterOnly(username) for filtering purposes only
+                    }
+                }
+
+                val index = client.initIndex(IndexName("user_search"))
+                index.setSettings(settings)
+
+                val queryObj = Query(searchQuery)
+                val result = index.search(queryObj)
+                Resource.Success(result)
+            }
+        }
 }

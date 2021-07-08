@@ -163,4 +163,11 @@ interface MainRepository {
      * @return Resource<String> string holds the uid of Requested user
      */
     suspend fun acceptOrRejectTheFollowerRequest(uid: String, action: Boolean): Resource<String>
+
+    /**
+     * @since 8-7-2021
+     * @param searchQuery
+     * @return Resource<ResponseSearch>
+     */
+    suspend fun algoliaUsernameSearch(searchQuery: String): Resource<ResponseSearch>
 }

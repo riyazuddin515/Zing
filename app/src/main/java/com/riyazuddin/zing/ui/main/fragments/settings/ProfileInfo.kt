@@ -23,12 +23,11 @@ import com.riyazuddin.zing.data.entities.UpdateProfile
 import com.riyazuddin.zing.data.entities.User
 import com.riyazuddin.zing.databinding.FragmentProfileInfoBinding
 import com.riyazuddin.zing.other.Constants
-import com.riyazuddin.zing.other.Constants.DEFAULT_PROFILE_PICTURE_URL
+import com.riyazuddin.zing.other.Constants.NO_USER_DOCUMENT
 import com.riyazuddin.zing.other.Constants.SEARCH_TIME_DELAY
 import com.riyazuddin.zing.other.EventObserver
 import com.riyazuddin.zing.other.Validator
 import com.riyazuddin.zing.other.snackBar
-import com.riyazuddin.zing.ui.auth.viewmodels.AuthViewModel
 import com.riyazuddin.zing.ui.main.viewmodels.SettingsViewModel
 import com.theartofdev.edmodo.cropper.CropImage
 import com.theartofdev.edmodo.cropper.CropImageView
@@ -49,7 +48,6 @@ class ProfileInfo : Fragment(R.layout.fragment_profile_info) {
 
     private lateinit var binding: FragmentProfileInfoBinding
     private val viewModel: SettingsViewModel by viewModels()
-    private val authViewModel: AuthViewModel by viewModels()
 
     private var imageUri: Uri? = null
     private lateinit var cropContent: ActivityResultLauncher<String>
@@ -107,7 +105,7 @@ class ProfileInfo : Fragment(R.layout.fragment_profile_info) {
                             if (this != Constants.VALID) {
                                 binding.TILUsername.error = this
                             } else {
-                                authViewModel.checkUserNameAvailability(it.toString())
+                                viewModel.checkUserNameAvailability(it.toString())
                             }
                         }
                     }
@@ -166,7 +164,12 @@ class ProfileInfo : Fragment(R.layout.fragment_profile_info) {
 
         viewModel.userProfileStatus.observe(viewLifecycleOwner, EventObserver(
             onError = {
-                snackBar(it)
+                if (it == NO_USER_DOCUMENT){
+                    user = User()
+                    glide.load(R.drawable.default_profile_pic).into(binding.CIVProfilePic)
+                }
+                else
+                    snackBar(it)
                 binding.progressBar.isVisible = false
             },
             onLoading = { binding.progressBar.isVisible = true }
@@ -192,7 +195,7 @@ class ProfileInfo : Fragment(R.layout.fragment_profile_info) {
             snackBar("Profile successfully updated")
         })
 
-        authViewModel.isUsernameAvailable.observe(viewLifecycleOwner, EventObserver(
+        viewModel.isUsernameAvailable.observe(viewLifecycleOwner, EventObserver(
             onError = {
                 binding.TILUsername.endIconMode = TextInputLayout.END_ICON_NONE
                 binding.TILUsername.error = it
