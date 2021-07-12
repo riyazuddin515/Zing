@@ -40,7 +40,7 @@ class CreatePostFragment : Fragment(R.layout.fragment_create_post) {
             return CropImage.activity()
                 .setGuidelines(CropImageView.Guidelines.ON)
                 .setOutputCompressQuality(50)
-                .setActivityTitle("Crop Image")
+                .setActivityTitle(getString(R.string.crop_image))
                 .getIntent(requireContext())
         }
 
@@ -100,6 +100,8 @@ class CreatePostFragment : Fragment(R.layout.fragment_create_post) {
 
         viewModel.createPostStatus.observe(viewLifecycleOwner, EventObserver(
             onError = {
+                binding.btnPost.isEnabled = true
+                binding.btnPost.isClickable = true
                 binding.progressBar.isVisible = false
                 snackBar(it)
             },

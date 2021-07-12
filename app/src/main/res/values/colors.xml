@@ -7,6 +7,8 @@
 
     <color name="blue">#1565c0</color>
 
+    <color name="replyBg">#c4c4c4</color>
+
     <color name="black">#000000</color>
     <color name="white">#FFFFFF</color>
 
@@ -14,5 +16,13 @@
 
     <color name="mtrl_textinput_default_box_stroke_color" tools:override="true">#000000</color>
 
+    <color name="pride1">#FF69B4</color>
+    <color name="pride2">#FF0000</color>
+    <color name="pride3">#FF8E00</color>
+    <color name="pride4">#FFFF00</color>
+    <color name="pride5">#008E00</color>
+    <color name="pride6">#00C0C0</color>
+    <color name="pride7">#400098</color>
+    <color name="pride8">#8E008E</color>
 
 </resources>

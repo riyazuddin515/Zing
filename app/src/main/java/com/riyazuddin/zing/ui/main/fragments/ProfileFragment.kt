@@ -7,7 +7,6 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
@@ -15,7 +14,6 @@ import androidx.navigation.fragment.findNavController
 import androidx.paging.LoadState
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.algolia.search.dsl.ruleQuery
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
@@ -121,21 +119,18 @@ open class ProfileFragment : BasePostFragment(R.layout.fragment_profile) {
                 binding.tvBio.text = user.bio
             }
             if (user.privacy == PRIVATE) {
-                bottomSheetBinding.tvFollowingRequests.isVisible = true
-                sharedPreferences = requireContext().getSharedPreferences("haveFollowingRequests", MODE_PRIVATE)
+                bottomSheetBinding.tvFollowersRequests.isVisible = true
+                sharedPreferences =
+                    requireContext().getSharedPreferences("haveFollowingRequests", MODE_PRIVATE)
                 val bool = sharedPreferences?.getBoolean("haveFollowingRequests", false) ?: false
                 if (bool) {
                     binding.ivMoreBadge.isVisible = true
-                    bottomSheetBinding.tvFollowingRequests.setCompoundDrawablesWithIntrinsicBounds(0,0,R.drawable.ic_circle_primary_color, 0)
-//                    bottomSheetBinding.tvFollowingRequests.setOnClickListener {
-//                        bottomSheetBinding.tvFollowingRequests.setCompoundDrawablesWithIntrinsicBounds(0,0,0, 0)
-//                        sp.edit().let {
-//                            it.putBoolean("haveFollowingRequests", false)
-//                            it.apply()
-//                        }
-//                        bottomSheetDialog.dismiss()
-//                        findNavController().navigate(R.id.action_profileFragment_to_followersRequestFragment)
-//                    }
+                    bottomSheetBinding.tvFollowersRequests.setCompoundDrawablesWithIntrinsicBounds(
+                        0,
+                        0,
+                        R.drawable.ic_circle_primary_color,
+                        0
+                    )
                 }
             }
         })
@@ -156,7 +151,7 @@ open class ProfileFragment : BasePostFragment(R.layout.fragment_profile) {
                 Log.e(TAG, "subscribeToObservers: $it")
             }
         ) { deletedPost ->
-            snackBar("Post Deleted.")
+            snackBar(getString(R.string.post_deleted))
             binding.tvPostCount.text = (binding.tvPostCount.text.toString().toInt() - 1).toString()
             viewModel.removeFromLiveData(deletedPost)
         })
@@ -200,14 +195,12 @@ open class ProfileFragment : BasePostFragment(R.layout.fragment_profile) {
                 findNavController().navigate(
                     ProfileFragmentDirections.globalActionToCommentsFragment(post.postId, it)
                 )
-            } ?: snackBar("Please wait")
+            } ?: snackBar(getString(R.string.please_wait))
         }
     }
 
     private fun setUpRecyclerView() {
         binding.rvPostList.apply {
-//            adapter = postAdapterStaggered
-//            layoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
             adapter = postAdapter
             adapter?.stateRestorationPolicy =
                 RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
@@ -223,8 +216,13 @@ open class ProfileFragment : BasePostFragment(R.layout.fragment_profile) {
                 findNavController().navigate(ProfileFragmentDirections.actionProfileFragmentToProfileInfo())
                 bottomSheetDialog.dismiss()
             }
-            tvFollowingRequests.setOnClickListener {
-                bottomSheetBinding.tvFollowingRequests.setCompoundDrawablesWithIntrinsicBounds(0,0,0, 0)
+            tvFollowersRequests.setOnClickListener {
+                bottomSheetBinding.tvFollowersRequests.setCompoundDrawablesWithIntrinsicBounds(
+                    0,
+                    0,
+                    0,
+                    0
+                )
                 sharedPreferences?.edit()?.let {
                     it.putBoolean("haveFollowingRequests", false)
                     it.apply()

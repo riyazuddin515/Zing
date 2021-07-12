@@ -56,7 +56,7 @@ class ProfileInfo : Fragment(R.layout.fragment_profile_info) {
             return CropImage.activity()
                 .setAspectRatio(1, 1)
                 .setOutputCompressQuality(40)
-                .setActivityTitle("Crop Image")
+                .setActivityTitle(getString(R.string.crop_image))
                 .setGuidelines(CropImageView.Guidelines.ON)
                 .getIntent(requireContext())
         }
@@ -192,7 +192,7 @@ class ProfileInfo : Fragment(R.layout.fragment_profile_info) {
         ) {
             binding.progressBar.isVisible = false
             binding.btnUpdate.isVisible = true
-            snackBar("Profile successfully updated")
+            snackBar(getString(R.string.profile_successfully_updated))
         })
 
         viewModel.isUsernameAvailable.observe(viewLifecycleOwner, EventObserver(

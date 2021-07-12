@@ -1,0 +1,100 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 2,
+    "identityHash": "6534edc1d528fd3ba95ed637e2cd56fd",
+    "entities": [
+      {
+        "tableName": "lastMessages",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`chatThread` TEXT NOT NULL, `receiverUid` TEXT NOT NULL, `otherUser` TEXT NOT NULL, `messageId` TEXT NOT NULL, `message` TEXT NOT NULL, `url` TEXT NOT NULL, `type` TEXT NOT NULL, `date` INTEGER, `senderAndReceiverUid` TEXT NOT NULL, `status` TEXT NOT NULL, `replyToMessageId` TEXT NOT NULL, `replyToMessage` TEXT NOT NULL, PRIMARY KEY(`chatThread`))",
+        "fields": [
+          {
+            "fieldPath": "chatThread",
+            "columnName": "chatThread",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "receiverUid",
+            "columnName": "receiverUid",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "otherUser",
+            "columnName": "otherUser",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "message.messageId",
+            "columnName": "messageId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "message.message",
+            "columnName": "message",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "message.url",
+            "columnName": "url",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "message.type",
+            "columnName": "type",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "message.date",
+            "columnName": "date",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "message.senderAndReceiverUid",
+            "columnName": "senderAndReceiverUid",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "message.status",
+            "columnName": "status",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "message.replyToMessageId",
+            "columnName": "replyToMessageId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "message.replyToMessage",
+            "columnName": "replyToMessage",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "chatThread"
+          ],
+          "autoGenerate": false
+        },
+        "indices": [],
+        "foreignKeys": []
+      }
+    ],
+    "views": [],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '6534edc1d528fd3ba95ed637e2cd56fd')"
+    ]
+  }
+}

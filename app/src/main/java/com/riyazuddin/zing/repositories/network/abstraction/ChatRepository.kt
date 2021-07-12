@@ -14,14 +14,23 @@ interface ChatRepository {
         receiverUid: String,
         message: String,
         type: String,
-        uri: Uri?
+        uri: Uri?,
+        replyToMessageId: String?
     ): Resource<Message>
 
     suspend fun updateMessageStatusAsSeen(message: Message): Resource<String>
 
-    suspend fun getChatLoadFirstQuery(currentUid: String, otherEndUserUid: String)
+    suspend fun getChatLoadFirstQuery(
+        currentUid: String,
+        otherEndUserUid: String,
+        otherEndUsername: String
+    )
 
-    suspend fun getChatLoadMore(currentUid: String, otherEndUserUid: String)
+    suspend fun getChatLoadMore(
+        currentUid: String,
+        otherEndUserUid: String,
+        otherEndUsername: String
+    )
 
     fun clearChatList()
 

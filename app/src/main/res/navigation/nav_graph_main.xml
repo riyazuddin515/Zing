@@ -198,6 +198,12 @@
         <argument
             android:name="currentUser"
             app:argType="com.riyazuddin.zing.data.entities.User" />
+        <action
+            android:id="@+id/action_chatFragment_to_imagePreviewFragment"
+            app:destination="@id/imagePreviewFragment" />
+        <action
+            android:id="@+id/action_chatFragment_to_viewChatMediaFragment"
+            app:destination="@id/viewChatMediaFragment" />
     </fragment>
     <fragment
         android:id="@+id/newChatFragment"
@@ -259,6 +265,42 @@
         tools:layout="@layout/fragment_privacy_policy_and_terms_and_conditions" >
         <argument
             android:name="type"
+            app:argType="string" />
+    </fragment>
+    <fragment
+        android:id="@+id/imagePreviewFragment"
+        android:name="com.riyazuddin.zing.ui.main.fragments.ImagePreviewFragment"
+        android:label="fragment_image_preview"
+        tools:layout="@layout/fragment_image_preview" >
+        <argument
+            android:name="stringUri"
+            app:argType="string" />
+        <argument
+            android:name="otherEndUserUid"
+            app:argType="string" />
+        <argument
+            android:name="replyToMessageId"
+            app:argType="string"
+            app:nullable="true"
+            android:defaultValue="null" />
+    </fragment>
+    <fragment
+        android:id="@+id/viewChatMediaFragment"
+        android:name="com.riyazuddin.zing.ui.main.fragments.chat.ViewChatMediaFragment"
+        android:label="fragment_view_chat_media"
+        tools:layout="@layout/fragment_view_chat_media" >
+        <argument
+            android:name="url"
+            app:argType="string" />
+        <argument
+            android:name="username"
+            app:argType="string" />
+        <argument
+            android:name="time"
+            app:argType="string"
+            app:nullable="true" />
+        <argument
+            android:name="id"
             app:argType="string" />
     </fragment>
 

@@ -106,8 +106,8 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
                     }
                 } else {
                     Firebase.auth.signOut()
-                    Snackbar.make(requireView(), "Verify Email", Snackbar.LENGTH_LONG)
-                        .setAction("Send Email") {
+                    Snackbar.make(requireView(), getString(R.string.verify_your_email), Snackbar.LENGTH_LONG)
+                        .setAction(getString(R.string.send_email)) {
                             user.sendEmailVerification()
                         }.show()
                     binding.btnLogin.isVisible = true

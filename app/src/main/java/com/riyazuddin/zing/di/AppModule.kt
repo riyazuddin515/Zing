@@ -9,6 +9,8 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreSettings
+import com.google.firebase.storage.FirebaseStorage
+import com.riyazuddin.zing.BuildConfig
 import com.riyazuddin.zing.R
 import com.riyazuddin.zing.repositories.local.ChatDatabase
 import dagger.Module
@@ -48,7 +50,9 @@ object AppModule {
     @Provides
     fun provideFirebaseAuth() = run {
         val auth = FirebaseAuth.getInstance()
-//        auth.useEmulator("192.168.0.7", 1111)
+//        if (BuildConfig.DEBUG) {
+//            auth.useEmulator("192.168.0.7", 1111)
+//        }
         auth
     }
 
@@ -56,12 +60,14 @@ object AppModule {
     @Provides
     fun provideFirestore() = run {
         val instance = FirebaseFirestore.getInstance()
-//        val settings = FirebaseFirestoreSettings.Builder()
-//            .setHost("192.168.0.7:2222")
-//            .setSslEnabled(false)
-//            .setPersistenceEnabled(false)
-//            .build()
-//        instance.firestoreSettings = settings
+//        if (BuildConfig.DEBUG) {
+//            val settings = FirebaseFirestoreSettings.Builder()
+//                .setHost("192.168.0.7:2222")
+//                .setSslEnabled(false)
+//                .setPersistenceEnabled(false)
+//                .build()
+//            instance.firestoreSettings = settings
+//        }
         instance
     }
 
@@ -69,8 +75,20 @@ object AppModule {
     @Provides
     fun providesFirebaseDatabase() = run {
         val database = FirebaseDatabase.getInstance()
-//        database.useEmulator("192.168.0.7", 3333)
+//        if (BuildConfig.DEBUG) {
+//            database.useEmulator("192.168.0.7", 3333)
+//        }
         database
+    }
+
+    @Provides
+    @Singleton
+    fun provideCloudStorage() = run {
+        val storage = FirebaseStorage.getInstance()
+//        if (BuildConfig.DEBUG) {
+//            storage.useEmulator("192.168.0.7", 5555)
+//        }
+        storage
     }
 
     @Provides
@@ -81,7 +99,8 @@ object AppModule {
         context,
         ChatDatabase::class.java,
         "chat_db"
-    ).build()
+    ).fallbackToDestructiveMigration()
+        .build()
 
     @Provides
     @Singleton

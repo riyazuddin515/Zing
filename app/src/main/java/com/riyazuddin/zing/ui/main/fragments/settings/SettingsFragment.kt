@@ -22,6 +22,9 @@ import com.riyazuddin.zing.databinding.FragmentSettingsBinding
 import com.riyazuddin.zing.other.Constants.PRIVATE
 import com.riyazuddin.zing.other.Constants.PUBLIC
 import com.riyazuddin.zing.other.EventObserver
+import com.riyazuddin.zing.other.NavGraphArgsConstants.PRIVACY_POLICY_ARG
+import com.riyazuddin.zing.other.NavGraphArgsConstants.TERMS_AND_CONDITIONS_ARG
+import com.riyazuddin.zing.other.NavGraphArgsConstants.TYPE_ARG
 import com.riyazuddin.zing.other.snackBar
 import com.riyazuddin.zing.ui.auth.AuthActivity
 import com.riyazuddin.zing.ui.bottomsheet.AccountPrivacyBottomSheetFragment
@@ -45,7 +48,6 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Firebase.auth.uid?.let {
-            Log.i(TAG, "onCreate: Calling")
             viewModel.getUserProfile(it)
         }
     }
@@ -134,7 +136,7 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
     private fun checkForUpdate() {
         val appVersion = getAppVersion()
         val remoteConfig = FirebaseRemoteConfig.getInstance()
-        val latestVersion = remoteConfig.getString("latest_version_of_app")
+        val latestVersion = remoteConfig.getString(getString(R.string.latest_version_of_app))
         if (latestVersion.isNotEmpty() && appVersion.isNotEmpty()) {
             val appVersionWithoutAlphaNumeric = appVersion.replace(".", "")
             val latestVersionWithoutAlphaNumeric = latestVersion.replace(".", "")
@@ -147,38 +149,38 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
                         R.style.MaterialAlertDialog_Round
                     ).apply {
                         setIcon(R.drawable.ic_update)
-                        setTitle("New Update Available")
-                        setMessage("Update the app to the latest version for new features and bug fix. Note: UnInstall current app and install new apk from Downloads Directory")
-                        setPositiveButton("Update") { _, _ ->
+                        setTitle(getString(R.string.new_update_available))
+                        setMessage(getString(R.string.update_message))
+                        setPositiveButton(getString(R.string.download)) { _, _ ->
                             val newVersionUrl =
-                                remoteConfig.getString("new_version_url")
-
+                                remoteConfig.getString(getString(R.string.new_version_url))
                             val request = DownloadManager.Request(Uri.parse(newVersionUrl))
                             val title = "Zing-${latestVersionWithoutAlphaNumeric}.apk"
                             request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
+                            request.setMimeType("application/vnd.android.package-archive")
                             request.setDestinationInExternalPublicDir(
                                 Environment.DIRECTORY_DOWNLOADS,
                                 title
                             )
-
                             val manager =
                                 requireContext().getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
                             manager.enqueue(request)
                             Toast.makeText(
                                 requireContext(),
-                                "Downloading...",
+                                resources.getString(R.string.downloading),
                                 Toast.LENGTH_SHORT
-                            )
-                                .show()
-
+                            ).show()
                         }
-                        setNegativeButton("Cancel") { dialogInterface, _ ->
+                        setNegativeButton(getString(R.string.cancel)) { dialogInterface, _ ->
                             dialogInterface.dismiss()
                         }
                     }.show()
                 } else {
-                    Toast.makeText(requireContext(), "App is up-to date", Toast.LENGTH_SHORT)
-                        .show()
+                    Toast.makeText(
+                        requireContext(),
+                        getString(R.string.app_up_to_data),
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "checkForUpdate: ", e)
@@ -220,7 +222,7 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
             findNavController().navigate(
                 R.id.action_settingsFragment_to_privacyPolicyAndTermsAndConditionsFragment,
                 Bundle().apply {
-                    putString("type", "PRIVACY_POLICY")
+                    putString(TYPE_ARG, PRIVACY_POLICY_ARG)
                 }
             )
         }
@@ -228,7 +230,7 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
             findNavController().navigate(
                 R.id.action_settingsFragment_to_privacyPolicyAndTermsAndConditionsFragment,
                 Bundle().apply {
-                    putString("type", "TERMS_AND_CONDITIONS")
+                    putString(TYPE_ARG, TERMS_AND_CONDITIONS_ARG)
                 }
             )
         }

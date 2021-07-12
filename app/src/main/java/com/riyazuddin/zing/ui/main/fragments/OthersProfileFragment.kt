@@ -19,7 +19,6 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.riyazuddin.zing.R
 import com.riyazuddin.zing.data.entities.User
 import com.riyazuddin.zing.databinding.FragmentOthersProfileBinding
-import com.riyazuddin.zing.other.Constants
 import com.riyazuddin.zing.other.Constants.PRIVATE
 import com.riyazuddin.zing.other.Constants.PUBLIC
 import com.riyazuddin.zing.other.EventObserver
@@ -107,6 +106,7 @@ class OthersProfileFragment : BasePostFragment(R.layout.fragment_others_profile)
                     binding.tvPostCount.text = "-"
                     binding.tvFollowingCount.text = "-"
                     binding.tvFollowersCount.text = "-"
+                    removeClickListener()
                     viewModel.checkForPreviousFollowerRequests(args.uid)
                 }
             }
@@ -140,6 +140,7 @@ class OthersProfileFragment : BasePostFragment(R.layout.fragment_others_profile)
                             postAdapter.submitData(PagingData.empty())
                         }
                         binding.rvPostList.visibility = View.GONE
+                        removeClickListener()
                     }
                 }
             }
@@ -192,13 +193,13 @@ class OthersProfileFragment : BasePostFragment(R.layout.fragment_others_profile)
                         R.style.MaterialAlertDialog_Round
                     ).apply {
                         setIcon(R.drawable.ic_warning)
-                        setTitle("Warning")
-                        setMessage("Note: This account is private. If you UnFollow now, you will have to send a request again to Follow")
-                        setPositiveButton("UnFollow") { dialogInterface, _ ->
+                        setTitle(getString(R.string.warning))
+                        setMessage(getString(R.string.unfollow_warning_message))
+                        setPositiveButton(resources.getString(R.string.unfollow)) { dialogInterface, _ ->
                             dialogInterface.dismiss()
                             viewModel.toggleFollowForUser(args.uid)
                         }
-                        setNegativeButton("Cancel") { dialogInterface, _ ->
+                        setNegativeButton(resources.getString(R.string.cancel)) { dialogInterface, _ ->
                             dialogInterface.dismiss()
                         }
                     }.show()
@@ -207,35 +208,40 @@ class OthersProfileFragment : BasePostFragment(R.layout.fragment_others_profile)
         }
         binding.tvFollowersCount.setOnClickListener {
             findNavController().navigate(
-                ProfileFragmentDirections.globalActionToUserListFragment(args.uid,
+                ProfileFragmentDirections.globalActionToUserListFragment(
+                    args.uid,
                     NavGraphArgsConstants.FOLLOWERS_ARG
                 )
             )
         }
         binding.tvFollowingCount.setOnClickListener {
             findNavController().navigate(
-                ProfileFragmentDirections.globalActionToUserListFragment(args.uid,
+                ProfileFragmentDirections.globalActionToUserListFragment(
+                    args.uid,
                     NavGraphArgsConstants.FOLLOWING_ARG
                 )
             )
         }
         binding.tvFollowers.setOnClickListener {
             findNavController().navigate(
-                ProfileFragmentDirections.globalActionToUserListFragment(args.uid,
+                ProfileFragmentDirections.globalActionToUserListFragment(
+                    args.uid,
                     NavGraphArgsConstants.FOLLOWERS_ARG
                 )
             )
         }
         binding.tvFollowing.setOnClickListener {
             findNavController().navigate(
-                ProfileFragmentDirections.globalActionToUserListFragment(args.uid,
+                ProfileFragmentDirections.globalActionToUserListFragment(
+                    args.uid,
                     NavGraphArgsConstants.FOLLOWING_ARG
                 )
             )
         }
         postAdapter.setOnLikedByClickListener {
             findNavController().navigate(
-                ProfileFragmentDirections.globalActionToUserListFragment(it.postId,
+                ProfileFragmentDirections.globalActionToUserListFragment(
+                    it.postId,
                     NavGraphArgsConstants.LIKED_BY_ARG
                 )
             )
@@ -245,8 +251,15 @@ class OthersProfileFragment : BasePostFragment(R.layout.fragment_others_profile)
                 findNavController().navigate(
                     ProfileFragmentDirections.globalActionToCommentsFragment(post.postId, it)
                 )
-            } ?: snackBar("Please wait")
+            } ?: snackBar(getString(R.string.please_wait))
         }
+    }
+
+    private fun removeClickListener() {
+        binding.tvFollowingCount.setOnClickListener(null)
+        binding.tvFollowersCount.setOnClickListener(null)
+        binding.tvFollowers.setOnClickListener(null)
+        binding.tvFollowing.setOnClickListener(null)
     }
 
     private fun setUpToggleFollowButton(user: User) {

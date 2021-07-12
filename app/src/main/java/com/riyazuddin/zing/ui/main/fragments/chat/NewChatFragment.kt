@@ -16,6 +16,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.riyazuddin.zing.R
 import com.riyazuddin.zing.adapters.UserAdapterPagingData
 import com.riyazuddin.zing.databinding.FragmentNewChatBinding
+import com.riyazuddin.zing.other.NavGraphArgsConstants.CURRENT_USER_ARG
+import com.riyazuddin.zing.other.NavGraphArgsConstants.OTHER_END_USER_ARG
 import com.riyazuddin.zing.ui.main.viewmodels.ChatViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collect
@@ -69,8 +71,8 @@ class NewChatFragment : Fragment(R.layout.fragment_new_chat) {
         }
         usersAdapterPagingData.setOnUserClickListener { user ->
             val bundle = Bundle().apply {
-                putSerializable("otherEndUser", user)
-                putSerializable("currentUser", args.currentUser)
+                putSerializable(OTHER_END_USER_ARG, user)
+                putSerializable(CURRENT_USER_ARG, args.currentUser)
             }
             findNavController().navigate(R.id.action_newChatFragment_to_chatFragment, bundle)
         }

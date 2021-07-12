@@ -19,9 +19,12 @@ import com.riyazuddin.zing.other.Resource
 import com.riyazuddin.zing.repositories.network.abstraction.ChatRepository
 import com.riyazuddin.zing.repositories.network.implementation.DefaultChatRepository
 import com.riyazuddin.zing.repositories.network.pagingsource.FollowingAndFollowersPagingSource
+import dagger.hilt.android.scopes.ActivityScoped
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.launch
 import javax.inject.Singleton
 
+@ActivityScoped
 @Singleton
 class ChatViewModel @ViewModelInject constructor(
     private val repository: ChatRepository
@@ -45,17 +48,21 @@ class ChatViewModel @ViewModelInject constructor(
     val isLastMessagesFirstLoadDone: LiveData<Event<Resource<Boolean>>> =
         _isLastMessagesFirstLoadDone
 
-    fun getChatLoadFirstQuery(currentUid: String, otherEndUserUid: String) {
+    fun getChatLoadFirstQuery(
+        currentUid: String,
+        otherEndUserUid: String,
+        otherEndUsername: String
+    ) {
         _chatList.postValue(Event(Resource.Loading()))
         viewModelScope.launch {
-            repository.getChatLoadFirstQuery(currentUid, otherEndUserUid)
+            repository.getChatLoadFirstQuery(currentUid, otherEndUserUid, otherEndUsername)
         }
     }
 
-    fun getChatLoadMore(currentUid: String, otherEndUserUid: String) {
+    fun getChatLoadMore(currentUid: String, otherEndUserUid: String, otherEndUsername: String) {
         _chatList.postValue(Event(Resource.Loading()))
         viewModelScope.launch {
-            repository.getChatLoadMore(currentUid, otherEndUserUid)
+            repository.getChatLoadMore(currentUid, otherEndUserUid, otherEndUsername)
         }
     }
 
@@ -72,14 +79,21 @@ class ChatViewModel @ViewModelInject constructor(
     val sendMessageStatus: LiveData<Event<Resource<Message>>> = _sendMessageStatus
     fun sendMessage(
         currentUid: String, receiverUid: String,
-        message: String, type: String,
-        uri: Uri?,
+        message: String, type: String, uri: Uri?,
+        replyToMessageId: String?
     ) {
         if (message.isEmpty() && uri == null)
             return
         _sendMessageStatus.postValue(Event(Resource.Loading()))
         viewModelScope.launch {
-            val result = repository.sendMessage(currentUid, receiverUid, message, type, uri)
+            val result = repository.sendMessage(
+                currentUid,
+                receiverUid,
+                message,
+                type,
+                uri,
+                replyToMessageId
+            )
             _sendMessageStatus.postValue(Event(result))
         }
     }
@@ -97,7 +111,7 @@ class ChatViewModel @ViewModelInject constructor(
     }
 
     fun deleteMessage(currentUid: String, otherEndUserUid: String, message: Message) {
-        viewModelScope.launch {
+        viewModelScope.launch(NonCancellable) {
             repository.deleteChatMessage(currentUid, otherEndUserUid, message)
         }
     }

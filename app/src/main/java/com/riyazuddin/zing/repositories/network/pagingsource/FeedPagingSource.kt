@@ -39,7 +39,7 @@ class FeedPagingSource(
 
                 list = db.collection(FOLLOWING_COLLECTION).document(uid).get().await()
                     .toObject(Following::class.java)
-                    ?.following?.chunked(10)?.toMutableList() ?: mutableListOf()
+                    ?.following?.plus(uid)?.chunked(10)?.toMutableList() ?: mutableListOf()
 
                 isFirstLoad = false
                 Log.i(TAG, "load: $list")

@@ -117,7 +117,7 @@ class CommentsFragment : Fragment(R.layout.fragment_comments) {
         binding.btnSend.setOnClickListener {
             currentUser?.let {
                 viewModel.createComment(binding.TIEComment.text.toString(), args.postId)
-            } ?: snackBar("Please wait...")
+            } ?: snackBar(getString(R.string.please_wait))
         }
     }
 
@@ -153,10 +153,10 @@ class CommentsFragment : Fragment(R.layout.fragment_comments) {
                 snackBar(it)
             },
             onLoading = {
-                snackBar("Deleting...")
+                snackBar(getString(R.string.deleting))
             }
         ) {
-            snackBar("Comment Deleted!")
+            snackBar(getString(R.string.comment_deleted))
             viewModel.deleteCommentInLiveData(it)
         })
     }

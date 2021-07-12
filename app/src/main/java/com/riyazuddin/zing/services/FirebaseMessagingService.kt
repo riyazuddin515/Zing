@@ -4,10 +4,8 @@ import android.app.NotificationManager
 import android.content.ContentResolver
 import android.content.Context
 import android.net.Uri
-import android.os.Build
 import android.util.Log
 import android.widget.RemoteViews
-import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import androidx.navigation.NavDeepLinkBuilder
@@ -87,7 +85,8 @@ class FirebaseMessagingService : FirebaseMessagingService() {
         notificationLayout.setTextViewText(R.id.title, notificationDataObj.title)
         notificationLayout.setTextViewText(R.id.body, notificationDataObj.body)
 
-        val bitmap = Glide.with(this).asBitmap().load(notificationDataObj.image).circleCrop().submit().get()
+        val bitmap =
+            Glide.with(this).asBitmap().load(notificationDataObj.image).circleCrop().submit().get()
         notificationLayout.setImageViewBitmap(R.id.imageView, bitmap)
 
         val notification = NotificationCompat.Builder(this, notificationDataObj.channel_id)
@@ -105,27 +104,27 @@ class FirebaseMessagingService : FirebaseMessagingService() {
                 GlobalScope.launch {
                     val chatThread = remoteMessage.data[CHAT_THREAD]!!
                     val messageId = remoteMessage.data[MESSAGE_ID]!!
-                    val chatCollection =
-                        FirebaseFirestore.getInstance().collection(CHATS_COLLECTION)
-                    val message = chatCollection
-                        .document(chatThread).collection(MESSAGES_COLLECTION).document(messageId)
+                    val threadRef = FirebaseFirestore.getInstance().collection(CHATS_COLLECTION)
+                        .document(chatThread)
+                    val message = threadRef.collection(MESSAGES_COLLECTION).document(messageId)
                         .get().await().toObject(Message::class.java)!!
                     if (message.status != SEEN) {
-                        chatCollection
-                            .document(chatThread).collection(MESSAGES_COLLECTION)
+                        threadRef.collection(MESSAGES_COLLECTION)
                             .document(messageId)
                             .update(STATUS, DELIVERED).await()
-                        val c = User()
-                        val o = Gson().fromJson(remoteMessage.data["ou"], User::class.java)
                         val pi = NavDeepLinkBuilder(baseContext)
                             .setGraph(R.navigation.nav_graph_main)
                             .setDestination(R.id.chatFragment)
-                            .setArguments(ChatFragmentArgs(o, c).toBundle())
+                            .setArguments(
+                                ChatFragmentArgs(
+                                    Gson().fromJson(remoteMessage.data["ou"], User::class.java),
+                                    User()
+                                ).toBundle()
+                            )
                             .createPendingIntent()
                         notification.setContentIntent(pi)
                         notifyNotification(notificationDataObj.tag, notification.build())
-                    } else
-                        Log.i(TAG, "onMessageReceived: seen")
+                    }
                 }
             }
             FOLLOW_TYPE -> {

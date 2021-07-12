@@ -15,6 +15,8 @@ import com.riyazuddin.zing.R
 import com.riyazuddin.zing.adapters.LastMessageAdapter
 import com.riyazuddin.zing.databinding.FragmentRecentChatListBinding
 import com.riyazuddin.zing.other.EventObserver
+import com.riyazuddin.zing.other.NavGraphArgsConstants.CURRENT_USER_ARG
+import com.riyazuddin.zing.other.NavGraphArgsConstants.OTHER_END_USER_ARG
 import com.riyazuddin.zing.ui.main.viewmodels.ChatViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -74,7 +76,7 @@ class RecentChatListFragment : Fragment(R.layout.fragment_recent_chat_list) {
 
         binding.ibNewChat.setOnClickListener {
             val bundle = Bundle().apply {
-                putSerializable("currentUser", args.currentUser)
+                putSerializable(CURRENT_USER_ARG, args.currentUser)
             }
             findNavController().navigate(
                 R.id.action_recentChatListFragment_to_newChatFragment,
@@ -84,8 +86,8 @@ class RecentChatListFragment : Fragment(R.layout.fragment_recent_chat_list) {
 
         lastMessageAdapter.setOnItemClickListener { lastMessage ->
             val bundle = Bundle().apply {
-                putSerializable("currentUser", args.currentUser)
-                putSerializable("otherEndUser", lastMessage.otherUser)
+                putSerializable(CURRENT_USER_ARG, args.currentUser)
+                putSerializable(OTHER_END_USER_ARG, lastMessage.otherUser)
             }
             findNavController().navigate(R.id.action_recentChatListFragment_to_chatFragment, bundle)
         }

@@ -1,5 +1,6 @@
 package com.riyazuddin.zing.data.entities
 
+import com.google.firebase.firestore.Exclude
 import com.google.firebase.firestore.IgnoreExtraProperties
 import com.google.firebase.firestore.ServerTimestamp
 import com.riyazuddin.zing.other.Constants.SENT
@@ -15,4 +16,8 @@ data class Message(
     var date: Date? = null,
     val senderAndReceiverUid: List<String> = listOf(),
     var status: String = SENT,
+    var replyToMessageId: String = "",
+
+    @get:Exclude
+    var replyToMessage: ReplyToMessage = ReplyToMessage()
 )

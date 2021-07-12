@@ -1,11 +1,10 @@
 package com.riyazuddin.zing.ui.main.viewmodels
 
 import androidx.hilt.lifecycle.ViewModelInject
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.*
 import androidx.paging.*
 import com.google.firebase.firestore.FirebaseFirestore
+import com.riyazuddin.zing.data.entities.Post
 import com.riyazuddin.zing.data.entities.User
 import com.riyazuddin.zing.other.Constants.POST_PAGE_SIZE
 import com.riyazuddin.zing.other.Event
@@ -26,9 +25,20 @@ class HomeViewModel @ViewModelInject constructor(
     private val _loadCurrentUserStatus = MutableLiveData<Event<Resource<User>>>()
     val loadCurrentUserStatus: LiveData<Event<Resource<User>>> = _loadCurrentUserStatus
 
-    val feed = Pager(PagingConfig(POST_PAGE_SIZE)) {
+    private val _feedPagingFlow = Pager(PagingConfig(POST_PAGE_SIZE)) {
         FeedPagingSource(FirebaseFirestore.getInstance())
-    }.flow.cachedIn(viewModelScope)
+    }.flow.cachedIn(viewModelScope).asLiveData().let {
+        it as MutableLiveData<PagingData<Post>>
+    }
+    val feedPagingFlow: LiveData<PagingData<Post>> = _feedPagingFlow
+
+    fun removePostFromLiveData(post: Post) {
+        feedPagingFlow.value?.filter {
+            it.postId != post.postId
+        }.let {
+            _feedPagingFlow.postValue(it)
+        }
+    }
 
     val haveUnSeenMessages = (chatRepository as DefaultChatRepository).haveUnSeenMessages
 

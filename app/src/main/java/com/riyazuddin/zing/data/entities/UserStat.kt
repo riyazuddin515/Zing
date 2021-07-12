@@ -7,5 +7,6 @@ data class UserStat(
     @ServerTimestamp
     val lastSeen: Date? = null,
     val state: String = "",
-    val token: String = ""
+    val token: String = "",
+    val uid: String = ""
 )

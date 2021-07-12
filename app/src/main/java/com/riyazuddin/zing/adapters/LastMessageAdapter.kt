@@ -1,5 +1,7 @@
 package com.riyazuddin.zing.adapters
 
+import android.content.Context
+import android.graphics.Paint
 import android.graphics.Typeface
 import android.util.Log
 import android.view.LayoutInflater
@@ -11,16 +13,20 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.RequestManager
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
+import com.riyazuddin.zing.R
 import com.riyazuddin.zing.data.entities.LastMessage
 import com.riyazuddin.zing.databinding.ItemRecentChatBinding
+import com.riyazuddin.zing.other.Constants
 import com.riyazuddin.zing.other.Constants.IMAGE
 import com.riyazuddin.zing.other.Constants.SEEN
+import dagger.hilt.android.qualifiers.ApplicationContext
 import java.text.SimpleDateFormat
 import java.util.*
 import javax.inject.Inject
 import kotlin.collections.HashMap
 
 class LastMessageAdapter @Inject constructor(
+    @ApplicationContext private val context: Context,
     private val glide: RequestManager
 ) : RecyclerView.Adapter<LastMessageAdapter.LastMessageViewHolder>() {
 
@@ -29,7 +35,7 @@ class LastMessageAdapter @Inject constructor(
     inner class LastMessageViewHolder(val binding: ItemRecentChatBinding) :
         RecyclerView.ViewHolder(binding.root) {
         fun bind(lastMessage: LastMessage) {
-            if (hashMap.containsKey(lastMessage.chatThread) and (hashMap[lastMessage.chatThread] == false)){
+            if (hashMap.containsKey(lastMessage.chatThread) and (hashMap[lastMessage.chatThread] == false)) {
                 hashMap[lastMessage.chatThread] = true
                 userSyncListener?.let {
                     it(lastMessage.chatThread, lastMessage.otherUser.uid)
@@ -53,11 +59,18 @@ class LastMessageAdapter @Inject constructor(
 
                 tvDate.text = simpleDateFormat.format(lastMessage.message.date ?: Date())
                 if (lastMessage.message.type == IMAGE) {
-                    val s = "🖼 Photo"
+                    val s = context.getString(R.string.photo_emoji_with_text)
                     tvLastMessage.text = s
                 } else {
                     tvLastMessage.text = lastMessage.message.message
                 }
+                if (lastMessage.message.type == Constants.DELETED) {
+                    tvLastMessage.setTypeface(null, Typeface.ITALIC)
+                    tvLastMessage.paintFlags =
+                        tvLastMessage.paintFlags or Paint.STRIKE_THRU_TEXT_FLAG
+                } else
+                    tvLastMessage.paintFlags = 0
+
                 root.setOnClickListener {
                     onItemClickListener?.let {
                         it(lastMessage)
@@ -79,17 +92,16 @@ class LastMessageAdapter @Inject constructor(
 
     private val differ = AsyncListDiffer(this, differCallback)
 
-    private val hashMap = HashMap<String,Boolean>()
+    private val hashMap = HashMap<String, Boolean>()
 
     var lastMessages: List<LastMessage>
         get() = differ.currentList
-        set(value){
-            if (hashMap.isEmpty()){
+        set(value) {
+            if (hashMap.isEmpty()) {
                 for (e in value)
                     hashMap[e.chatThread] = false
                 differ.submitList(value)
-            }
-            else{
+            } else {
                 for (e in value) {
                     if (!hashMap.containsKey(e.chatThread))
                         hashMap[e.chatThread] = true

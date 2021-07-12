@@ -18,6 +18,7 @@ import com.riyazuddin.zing.adapters.PostAdapter
 import com.riyazuddin.zing.data.entities.Post
 import com.riyazuddin.zing.databinding.FragmentPostBinding
 import com.riyazuddin.zing.other.EventObserver
+import com.riyazuddin.zing.other.NavGraphArgsConstants.LIKED_BY_ARG
 import com.riyazuddin.zing.other.Utils.Companion.getTimeAgo
 import com.riyazuddin.zing.other.snackBar
 import com.riyazuddin.zing.ui.dialogs.CustomDialog
@@ -81,7 +82,7 @@ class PostFragment : Fragment(R.layout.fragment_post) {
         binding.postLayout.tvLikeCount.setOnClickListener {
             post?.let {
                 findNavController().navigate(
-                    PostFragmentDirections.globalActionToUserListFragment(it.postId, "LikedBy")
+                    PostFragmentDirections.globalActionToUserListFragment(it.postId, LIKED_BY_ARG)
                 )
             }
         }
@@ -139,10 +140,10 @@ class PostFragment : Fragment(R.layout.fragment_post) {
                 Log.e(TAG, "subscribeToObservers: $it")
             },
             onLoading = {
-                snackBar("Deleting...")
+                snackBar(getString(R.string.deleting))
             }
         ) {
-            snackBar("Post Deleted.")
+            snackBar(getString(R.string.post_deleted))
             findNavController().popBackStack()
         })
 

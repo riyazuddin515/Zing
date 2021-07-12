@@ -10,8 +10,8 @@ plugins {
 }
 
 def versionMajor = 1
-def versionMinor = 3
-def versionPatch = 0
+def versionMinor = 4
+def versionPatch = 1
 
 android {
     signingConfigs {
@@ -48,6 +48,7 @@ android {
     }
     buildTypes {
         debug {
+            applicationIdSuffix ".debug"
             versionNameSuffix ".debug"
             resValue "string", "app_version", "${defaultConfig.versionName}${versionNameSuffix}"
         }
@@ -125,7 +126,7 @@ dependencies {
     implementation 'com.google.firebase:firebase-analytics-ktx'
     implementation 'com.google.firebase:firebase-auth-ktx'
     implementation 'com.google.firebase:firebase-firestore-ktx'
-    implementation 'com.google.firebase:firebase-storage-ktx'
+    implementation 'com.google.firebase:firebase-storage-ktx:20.0.0'
     implementation 'com.google.firebase:firebase-database-ktx'
     implementation 'com.google.firebase:firebase-messaging-ktx'
     implementation 'com.google.firebase:firebase-config-ktx'
@@ -162,7 +163,5 @@ dependencies {
     // Optional -- truth
     testImplementation 'androidx.test.ext:truth:1.3.0'
     testImplementation 'com.google.truth:truth:1.1.2'
-
-    implementation 'com.makeramen:roundedimageview:2.3.0'
 
 }

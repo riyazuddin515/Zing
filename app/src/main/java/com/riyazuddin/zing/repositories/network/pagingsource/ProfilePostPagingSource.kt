@@ -10,6 +10,8 @@ import com.google.firebase.ktx.Firebase
 import com.riyazuddin.zing.data.entities.Post
 import com.riyazuddin.zing.data.entities.PostLikes
 import com.riyazuddin.zing.data.entities.User
+import com.riyazuddin.zing.other.Constants.DATE
+import com.riyazuddin.zing.other.Constants.POSTED_BY
 import com.riyazuddin.zing.other.Constants.POSTS_COLLECTION
 import com.riyazuddin.zing.other.Constants.POST_LIKES_COLLECTION
 import com.riyazuddin.zing.other.Constants.POST_PAGE_SIZE
@@ -25,8 +27,8 @@ class ProfilePostPagingSource(
         return try {
             var result = mutableListOf<Post>()
             val currentPage = params.key ?: db.collection(POSTS_COLLECTION)
-                .whereEqualTo("postedBy", uid)
-                .orderBy("date", Query.Direction.DESCENDING)
+                .whereEqualTo(POSTED_BY, uid)
+                .orderBy(DATE, Query.Direction.DESCENDING)
                 .limit(POST_PAGE_SIZE.toLong())
                 .get()
                 .await()
@@ -53,8 +55,8 @@ class ProfilePostPagingSource(
 
             val lastDocumentSnapshot = currentPage.documents[currentPage.size() - 1]
             val nextPage = db.collection(POSTS_COLLECTION)
-                .whereEqualTo("postedBy", uid)
-                .orderBy("date", Query.Direction.DESCENDING)
+                .whereEqualTo(POSTED_BY, uid)
+                .orderBy(DATE, Query.Direction.DESCENDING)
                 .limit(POST_PAGE_SIZE.toLong())
                 .startAfter(lastDocumentSnapshot)
                 .get()

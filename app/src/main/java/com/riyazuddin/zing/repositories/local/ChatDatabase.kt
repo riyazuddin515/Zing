@@ -6,9 +6,9 @@ import androidx.room.TypeConverters
 import com.riyazuddin.zing.data.entities.LastMessage
 import com.riyazuddin.zing.other.Converter
 
-@Database(entities = [LastMessage::class], version = 1)
+@Database(entities = [LastMessage::class], version = 2)
 @TypeConverters(Converter::class)
-abstract class ChatDatabase: RoomDatabase() {
+abstract class ChatDatabase : RoomDatabase() {
 
     abstract fun getLastMessagesDao(): LastMessageDao
 

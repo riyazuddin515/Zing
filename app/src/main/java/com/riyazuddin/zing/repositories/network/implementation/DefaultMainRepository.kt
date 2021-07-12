@@ -71,7 +71,8 @@ class DefaultMainRepository @Inject constructor(
     private val auth: FirebaseAuth,
     private val firestore: FirebaseFirestore,
     private val database: FirebaseDatabase,
-    private val chatDatabase: ChatDatabase
+    private val chatDatabase: ChatDatabase,
+    private val cloudStorage: FirebaseStorage
 ) : MainRepository {
 
     companion object {
@@ -88,7 +89,6 @@ class DefaultMainRepository @Inject constructor(
     private val postLikesCollection = firestore.collection(POST_LIKES_COLLECTION)
     private val followingRequestsCollection = firestore.collection(FOLLOWING_REQUESTS_COLLECTION)
     private val followerRequestsCollection = firestore.collection(FOLLOWER_REQUESTS_COLLECTION)
-    private val storage = FirebaseStorage.getInstance()
 
     override suspend fun onlineOfflineToggleWithDeviceToken(uid: String) {
         withContext(Dispatchers.IO) {
@@ -108,8 +108,8 @@ class DefaultMainRepository @Inject constructor(
                     LAST_SEEN to ServerValue.TIMESTAMP
                 )
 
-                val isOfflineForFirestore = UserStat(state = OFFLINE, token = token)
-                val isOnlineForFirestore = UserStat(state = ONLINE, token = token)
+                val isOfflineForFirestore = UserStat(state = OFFLINE, token = token, uid = uid)
+                val isOnlineForFirestore = UserStat(state = ONLINE, token = token, uid = uid)
 
                 database.getReference(Date().toString()).keepSynced(true)
                 database.getReference(".info/connected").addValueEventListener(
@@ -150,7 +150,7 @@ class DefaultMainRepository @Inject constructor(
         safeCall {
             val uid = auth.uid!!
             val postID = UUID.randomUUID().toString()
-            val postDownloadUrl = storage.reference.child("posts/$uid/$postID").putFile(imageUri)
+            val postDownloadUrl = cloudStorage.reference.child("posts/$uid/$postID").putFile(imageUri)
                 .await().metadata?.reference?.downloadUrl?.await().toString()
             firestore.runBatch { batch ->
                 val post = Post(postID, uid, postDownloadUrl, caption)
@@ -266,16 +266,12 @@ class DefaultMainRepository @Inject constructor(
     override suspend fun deletePost(post: Post) = withContext(Dispatchers.IO) {
         safeCall {
             firestore.runTransaction { transition ->
-                transition.delete(postsCollection.document(post.postId))
-                transition.update(
-                    usersMetadataCollection.document(post.postedBy),
-                    POST_COUNT,
-                    FieldValue.increment(-1)
-                )
-                transition.delete(postLikesCollection.document(post.postId))
                 transition.delete(commentsCollection.document(post.postId))
+                transition.delete(postsCollection.document(post.postId))
+                transition.update(usersMetadataCollection.document(post.postedBy), POST_COUNT, FieldValue.increment(-1))
+                transition.delete(postLikesCollection.document(post.postId))
             }.await()
-            storage.getReferenceFromUrl(post.imageUrl).delete().await()
+            cloudStorage.getReferenceFromUrl(post.imageUrl).delete().await()
             Resource.Success(post)
         }
     }
@@ -295,12 +291,8 @@ class DefaultMainRepository @Inject constructor(
                 if (!currentUserFollowingDocumentSnapshot.exists())
                     transition.set(followingCollection.document(currentUserUid), Following(uid = currentUserUid))
 
-//                val otherUserFollowersList = otherUserFollowersDocumentSnapshot
-//                    .toObject(Followers::class.java) ?: Followers(uid = uid)
-
                 val currentFollowingList = currentUserFollowingDocumentSnapshot.toObject(Following::class.java) ?: Following(uid = currentUserUid)
 
-//                isFollowing = currentUserUid in otherUserFollowersList.followers
                 isFollowing = uid in currentFollowingList.following
 
                 if (isFollowing) {
@@ -371,9 +363,9 @@ class DefaultMainRepository @Inject constructor(
             safeCall {
                 val imageDownloadUrl = imageUri?.let {
                     val storageRef =
-                        storage.reference.child("profilePics/${updateProfile.uidToUpdate}")
+                        cloudStorage.reference.child("profilePics/${updateProfile.uidToUpdate}")
                     if (updateProfile.profilePicUrl != DEFAULT_PROFILE_PICTURE_URL) {
-                        storage.getReferenceFromUrl(updateProfile.profilePicUrl).delete().await()
+                        cloudStorage.getReferenceFromUrl(updateProfile.profilePicUrl).delete().await()
                     }
                     storageRef.putFile(imageUri).await().metadata?.reference?.downloadUrl?.await()
                         .toString()
@@ -438,7 +430,7 @@ class DefaultMainRepository @Inject constructor(
                 )
                 val index = client.initIndex(IndexName(ALGOLIA_USER_SEARCH_INDEX))
 
-                val queryObj = com.algolia.search.model.search.Query(searchQuery)
+                val queryObj = Query(searchQuery)
                 val result = index.search(queryObj)
                 Resource.Success(result)
             }
@@ -512,20 +504,13 @@ class DefaultMainRepository @Inject constructor(
                     val other = transition.get(followerRequestsCollection.document(uid))
 
                     if (!cur.exists())
-                        transition.set(
-                            followingRequestsCollection.document(currentUid),
-                            FollowingRequest(uid = currentUid)
-                        )
+                        transition.set(followingRequestsCollection.document(currentUid), FollowingRequest(uid = currentUid))
 
                     if (!other.exists())
-                        transition.set(
-                            followerRequestsCollection.document(uid),
-                            FollowerRequest(uid = uid)
-                        )
+                        transition.set(followerRequestsCollection.document(uid), FollowerRequest(uid = uid))
 
 
-                    val curList =
-                        cur.toObject(FollowingRequest::class.java)?.requestedToUids ?: listOf()
+                    val curList = cur.toObject(FollowingRequest::class.java)?.requestedToUids ?: listOf()
                     sent = uid in curList
 
                     if (sent) {

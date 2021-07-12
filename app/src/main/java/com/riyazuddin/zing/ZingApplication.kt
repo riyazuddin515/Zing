@@ -10,6 +10,9 @@ import android.net.Uri
 import android.os.Build
 import android.util.Log
 import com.google.firebase.FirebaseApp
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.crashlytics.FirebaseCrashlytics
+import com.google.firebase.ktx.Firebase
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig
 import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings
 import com.riyazuddin.zing.other.Constants.CHATTING_WITH
@@ -32,24 +35,36 @@ class ZingApplication : Application() {
         setSharedPreference()
         createNotificationChannel()
         initFirebaseRemoteConfig()
+
+        Firebase.auth.uid?.let {
+            FirebaseCrashlytics.getInstance().setUserId(it)
+        }?: FirebaseCrashlytics.getInstance().setUserId("")
     }
 
     private fun initFirebaseRemoteConfig() {
-        FirebaseApp.initializeApp(this)
-        FirebaseRemoteConfig.getInstance().apply {
-            val configSettings = FirebaseRemoteConfigSettings.Builder()
-                .setMinimumFetchIntervalInSeconds(3600)
-                .build()
-            setConfigSettingsAsync(configSettings)
-            setDefaultsAsync(R.xml.remote_config_defaults)
-            fetchAndActivate().addOnCompleteListener {
-                val update = it.result
-                if (it.isSuccessful) {
-                    Log.d(TAG, "initFirebaseRemoteConfig: ${it.result}")
-                }else
-                    Log.d(TAG, "initFirebaseRemoteConfig: $update")
+        try {
+            FirebaseApp.initializeApp(this)
+            FirebaseRemoteConfig.getInstance().apply {
+                val configSettings = FirebaseRemoteConfigSettings.Builder()
+                    .setMinimumFetchIntervalInSeconds(3600)
+                    .build()
+                setConfigSettingsAsync(configSettings)
+                setDefaultsAsync(R.xml.remote_config_defaults)
+                fetchAndActivate().addOnCompleteListener {
+                    val update = it.result
+                    if (it.isSuccessful) {
+                        Log.d(TAG, "initFirebaseRemoteConfig: ${it.result}")
+                    }else
+                        Log.d(TAG, "initFirebaseRemoteConfig: $update")
+                }.addOnFailureListener {
+                    throw it
+                }
             }
+        }catch (e: Exception){
+            Log.e(TAG, "initFirebaseRemoteConfig: ", e)
+            FirebaseCrashlytics.getInstance().recordException(e)
         }
+        
     }
 
     private fun setSharedPreference() {
