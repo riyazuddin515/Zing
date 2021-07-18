@@ -4,6 +4,7 @@ import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.*
 import androidx.paging.*
 import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.riyazuddin.zing.data.entities.Comment
@@ -21,7 +22,8 @@ import kotlinx.coroutines.launch
 
 class CommentViewModel @ViewModelInject constructor(
     private val repository: MainRepository,
-    private val dispatcher: CoroutineDispatcher = Dispatchers.Main
+    private val dispatcher: CoroutineDispatcher = Dispatchers.Main,
+    private val firestore: FirebaseFirestore
 ) : ViewModel() {
 
 
@@ -35,14 +37,19 @@ class CommentViewModel @ViewModelInject constructor(
     val userProfileStatus: LiveData<Event<Resource<User>>> = _userProfileStatus
 
     private lateinit var postId: String
+    /**
+     * Just Store the postId in global postId variable
+     * From which pager load comments
+     */
+    fun getComments(postId: String) {
+        this.postId = postId
+    }
 
     private var _postComments: MutableLiveData<PagingData<Comment>> =
         Pager(PagingConfig(COMMENT_PAGE_SIZE)) {
             PostCommentsPagingSource(
-                Firebase.firestore.collection(COMMENTS_COLLECTION).document(postId).collection(
-                    COMMENTS_COLLECTION
-                ),
-                Firebase.firestore.collection(USERS_COLLECTION)
+                firestore.collection(COMMENTS_COLLECTION).document(postId).collection(COMMENTS_COLLECTION),
+                firestore.collection(USERS_COLLECTION)
             )
         }.flow.cachedIn(viewModelScope).asLiveData().let {
             it as MutableLiveData<PagingData<Comment>>
@@ -63,14 +70,6 @@ class CommentViewModel @ViewModelInject constructor(
         viewModelScope.launch {
             _deleteCommentStatus.postValue(Event(repository.deleteComment(comment)))
         }
-    }
-
-    /**
-     * Just Store the postId in global postId variable
-     * From which pager load comments
-     */
-    fun getComments(postId: String) {
-        this.postId = postId
     }
 
     fun insertCommentInLiveData(comment: Comment) {

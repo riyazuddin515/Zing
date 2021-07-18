@@ -19,6 +19,7 @@ import com.riyazuddin.zing.other.Resource
 import com.riyazuddin.zing.repositories.network.abstraction.ChatRepository
 import com.riyazuddin.zing.repositories.network.implementation.DefaultChatRepository
 import com.riyazuddin.zing.repositories.network.pagingsource.FollowingAndFollowersPagingSource
+import com.riyazuddin.zing.repositories.network.pagingsource.NewChatPagingSource
 import dagger.hilt.android.scopes.ActivityScoped
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.launch
@@ -72,7 +73,7 @@ class ChatViewModel @ViewModelInject constructor(
     }
 
     val flow = Pager(PagingConfig(Constants.NEW_CHAT_PAGE_SIZE)) {
-        FollowingAndFollowersPagingSource(uid, FirebaseFirestore.getInstance())
+        NewChatPagingSource(uid, FirebaseFirestore.getInstance())
     }.flow.cachedIn(viewModelScope)
 
     private val _sendMessageStatus = MutableLiveData<Event<Resource<Message>>>()

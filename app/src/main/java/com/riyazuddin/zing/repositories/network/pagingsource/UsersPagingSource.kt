@@ -32,17 +32,8 @@ class UsersPagingSource(
         return try {
             val result = mutableListOf<User>()
             if (isFirstLoad) {
+                list = mutableListOf()
                 list = when (title) {
-                    FOLLOWERS_ARG -> {
-                        firestore.collection(FOLLOWERS_COLLECTION)
-                            .document(uid).get().await().toObject(Followers::class.java)
-                            ?.followers?.chunked(USER_PAGE_SIZE)?.toMutableList() ?: mutableListOf()
-                    }
-                    FOLLOWING_ARG -> {
-                        firestore.collection(FOLLOWING_COLLECTION)
-                            .document(uid).get().await().toObject(Following::class.java)
-                            ?.following?.chunked(USER_PAGE_SIZE)?.toMutableList() ?: mutableListOf()
-                    }
                     LIKED_BY_ARG -> {
                         firestore.collection(POST_LIKES_COLLECTION)
                             .document(uid).get().await().toObject(PostLikes::class.java)

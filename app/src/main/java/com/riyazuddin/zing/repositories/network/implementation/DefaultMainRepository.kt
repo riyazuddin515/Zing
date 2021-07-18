@@ -84,9 +84,12 @@ class DefaultMainRepository @Inject constructor(
     private val usersStatCollection = firestore.collection(USERS_STAT_COLLECTION)
     private val postsCollection = firestore.collection(POSTS_COLLECTION)
     private val commentsCollection = firestore.collection(COMMENTS_COLLECTION)
-    private val followingCollection = firestore.collection(FOLLOWING_COLLECTION)
-    private val followersCollection = firestore.collection(FOLLOWERS_COLLECTION)
+
+//    private val followingCollection = firestore.collection(FOLLOWING_COLLECTION)
+//    private val followersCollection = firestore.collection(FOLLOWERS_COLLECTION)
+
     private val postLikesCollection = firestore.collection(POST_LIKES_COLLECTION)
+
     private val followingRequestsCollection = firestore.collection(FOLLOWING_REQUESTS_COLLECTION)
     private val followerRequestsCollection = firestore.collection(FOLLOWER_REQUESTS_COLLECTION)
 
@@ -116,7 +119,7 @@ class DefaultMainRepository @Inject constructor(
                     object : ValueEventListener {
                         override fun onDataChange(snapshot: DataSnapshot) {
                             if (snapshot.value == false) {
-                                usersStatCollection.document(uid).set(isOfflineForFirestore)
+                                usersStatCollection.document(uid).set(isOfflineForFirestore, SetOptions.merge())
                                 return
                             }
 
@@ -185,12 +188,10 @@ class DefaultMainRepository @Inject constructor(
             user?.let {
                 val currentUid = auth.uid!!
                 if (uid != currentUid) {
-                    val currentUserFollowing =
-                        followingCollection.document(currentUid).get().await()
-                            .toObject(Following::class.java)
-                            ?: Following()
+                    val currentUserFollowing = usersCollection.document(currentUid).collection(
+                        FOLLOWING_COLLECTION).document(uid).get().await()
 
-                    user.isFollowing = uid in currentUserFollowing.following
+                    user.isFollowing = currentUserFollowing.exists()
                 }
                 Resource.Success(user)
             } ?: Resource.Error(NO_USER_DOCUMENT)
@@ -226,6 +227,9 @@ class DefaultMainRepository @Inject constructor(
             var isLiked = false
             firestore.runTransaction { transition ->
                 val uid = auth.uid!!
+                val postDocumentSnapshot = transition.get(postsCollection.document(post.postId))
+                if (!postDocumentSnapshot.exists())
+                    Resource.Error("Can't access the Post", null)
                 val documentSnapshot = transition.get(postLikesCollection.document(post.postId))
                 if (!documentSnapshot.exists()) {
                     transition.set(
@@ -283,30 +287,14 @@ class DefaultMainRepository @Inject constructor(
 
             firestore.runTransaction { transition ->
 
-                val otherUserFollowersDocumentSnapshot = transition.get(followersCollection.document(uid))
-                val currentUserFollowingDocumentSnapshot = transition.get(followingCollection.document(currentUserUid))
+                val currentUserFollowingDocumentSnapshot =
+                    transition.get(usersCollection.document(currentUserUid).collection(FOLLOWING_COLLECTION).document(uid))
 
-                if (!otherUserFollowersDocumentSnapshot.exists())
-                    transition.set(followersCollection.document(uid), Followers(uid = uid))
-                if (!currentUserFollowingDocumentSnapshot.exists())
-                    transition.set(followingCollection.document(currentUserUid), Following(uid = currentUserUid))
-
-                val currentFollowingList = currentUserFollowingDocumentSnapshot.toObject(Following::class.java) ?: Following(uid = currentUserUid)
-
-                isFollowing = uid in currentFollowingList.following
+                isFollowing = currentUserFollowingDocumentSnapshot.exists()
 
                 if (isFollowing) {
-                    //unfollow
-                    transition.update(
-                        followingCollection.document(currentUserUid),
-                        FOLLOWING,
-                        FieldValue.arrayRemove(uid)
-                    )
-                    transition.update(
-                        followersCollection.document(uid),
-                        FOLLOWERS,
-                        FieldValue.arrayRemove(currentUserUid)
-                    )
+                    transition.delete(usersCollection.document(currentUserUid).collection(FOLLOWING_COLLECTION).document(uid))
+                    transition.delete(usersCollection.document(uid).collection(FOLLOWERS_COLLECTION).document(currentUserUid))
                     transition.update(
                         usersMetadataCollection.document(currentUserUid),
                         FOLLOWING_COUNT,
@@ -317,18 +305,10 @@ class DefaultMainRepository @Inject constructor(
                         FOLLOWERS_COUNT,
                         FieldValue.increment(-1)
                     )
-                } else {
-                    //follow
-                    transition.update(
-                        followingCollection.document(currentUserUid),
-                        FOLLOWING,
-                        FieldValue.arrayUnion(uid)
-                    )
-                    transition.update(
-                        followersCollection.document(uid),
-                        FOLLOWERS,
-                        FieldValue.arrayUnion(currentUserUid)
-                    )
+                    Log.i(TAG, "toggleFollowForUser: UnFollow Success")
+                }else{
+                    transition.set(usersCollection.document(currentUserUid).collection(FOLLOWING_COLLECTION).document(uid), Following(uid))
+                    transition.set(usersCollection.document(uid).collection(FOLLOWERS_COLLECTION).document(currentUserUid), Followers(currentUserUid))
                     transition.update(
                         usersMetadataCollection.document(currentUserUid),
                         FOLLOWING_COUNT,
@@ -339,7 +319,10 @@ class DefaultMainRepository @Inject constructor(
                         FOLLOWERS_COUNT,
                         FieldValue.increment(1)
                     )
+
+                    Log.i(TAG, "toggleFollowForUser: Follow Success")
                 }
+                null
             }.await()
             Resource.Success(!isFollowing)
         }
@@ -380,8 +363,6 @@ class DefaultMainRepository @Inject constructor(
                     }
                     usersCollection.document(updateProfile.uidToUpdate).set(user).await()
                     usersMetadataCollection.document(uid).set(UserMetadata(uid)).await()
-                    followingCollection.document(uid).set(Following(uid = uid)).await()
-                    followersCollection.document(uid).set(Followers(uid = uid)).await()
 
                 }else{
                     val map = mutableMapOf(
@@ -525,6 +506,7 @@ class DefaultMainRepository @Inject constructor(
                             REQUESTED_UIDS,
                             FieldValue.arrayRemove(currentUid)
                         )
+                        Log.i(TAG, "toggleSendFollowerRequest: UndoRequest")
                     } else {
                         //sent now
                         transition.update(
@@ -537,7 +519,9 @@ class DefaultMainRepository @Inject constructor(
                             REQUESTED_UIDS,
                             FieldValue.arrayUnion(currentUid)
                         )
+                        Log.i(TAG, "toggleSendFollowerRequest: sendingRequest")
                     }
+                    null
                 }.await()
                 Resource.Success(!sent)
             }
@@ -576,26 +560,18 @@ class DefaultMainRepository @Inject constructor(
         safeCall {
             val currentUserUid = Firebase.auth.uid!!
             firestore.runTransaction { transition ->
+
                 val a = transition.get(followingRequestsCollection.document(uid))
                 val b = transition.get(followerRequestsCollection.document(currentUserUid))
 
-                val followingDocumentSnapshot = transition.get(followingCollection.document(uid))
-                val followerDocumentSnapshot = transition.get(followersCollection.document(currentUserUid))
-
                 if (action) {
-
-                    if (!followingDocumentSnapshot.exists())
-                        transition.set(followingCollection.document(uid), Following(uid = uid))
-                    if (!followerDocumentSnapshot.exists())
-                        transition.set(followersCollection.document(currentUserUid), Followers(uid = currentUserUid))
-
-                    transition.update(
-                        followingCollection.document(uid),
-                        FOLLOWING,FieldValue.arrayUnion(currentUserUid)
+                    transition.set(
+                        usersCollection.document(uid).collection(FOLLOWING_COLLECTION).document(currentUserUid),
+                        Following(currentUserUid)
                     )
-                    transition.update(
-                        followersCollection.document(currentUserUid),
-                        FOLLOWERS,FieldValue.arrayUnion(uid)
+                    transition.set(
+                        usersCollection.document(currentUserUid).collection(FOLLOWERS_COLLECTION).document(uid),
+                        Followers(uid)
                     )
 
                     transition.update(

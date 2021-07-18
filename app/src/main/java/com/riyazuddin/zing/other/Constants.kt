@@ -25,6 +25,8 @@ object Constants {
     const val USERS_METADATA_COLLECTION = "usersMetadata"
     const val USERS_STAT_COLLECTION = "usersStat"
     const val POSTS_COLLECTION = "posts"
+    const val FEEDS_COLLECTION = "feeds"
+    const val FEED_COLLECTION = "feed"
     const val COMMENTS_COLLECTION = "comments"
     const val FOLLOWING_COLLECTION = "following"
     const val FOLLOWERS_COLLECTION = "followers"

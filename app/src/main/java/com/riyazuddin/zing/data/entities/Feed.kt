@@ -3,8 +3,8 @@ package com.riyazuddin.zing.data.entities
 import com.google.firebase.firestore.ServerTimestamp
 import java.util.*
 
-data class Followers(
-    val followedByUid: String = "",
+data class Feed(
+    val postId: String = "",
     @ServerTimestamp
-    val since: Date? = null
+    val date: Date? = null
 )

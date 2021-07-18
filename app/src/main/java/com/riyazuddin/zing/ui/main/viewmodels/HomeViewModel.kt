@@ -12,7 +12,7 @@ import com.riyazuddin.zing.other.Resource
 import com.riyazuddin.zing.repositories.network.abstraction.ChatRepository
 import com.riyazuddin.zing.repositories.network.abstraction.MainRepository
 import com.riyazuddin.zing.repositories.network.implementation.DefaultChatRepository
-import com.riyazuddin.zing.repositories.network.pagingsource.FeedPagingSource
+import com.riyazuddin.zing.repositories.network.pagingsource.FeedPagingSourceNew
 import kotlinx.coroutines.launch
 import javax.inject.Singleton
 
@@ -26,7 +26,7 @@ class HomeViewModel @ViewModelInject constructor(
     val loadCurrentUserStatus: LiveData<Event<Resource<User>>> = _loadCurrentUserStatus
 
     private val _feedPagingFlow = Pager(PagingConfig(POST_PAGE_SIZE)) {
-        FeedPagingSource(FirebaseFirestore.getInstance())
+        FeedPagingSourceNew(FirebaseFirestore.getInstance())
     }.flow.cachedIn(viewModelScope).asLiveData().let {
         it as MutableLiveData<PagingData<Post>>
     }

@@ -12,5 +12,5 @@ data class Comment(
     @ServerTimestamp
     val date: Date? = null,
     @get:Exclude var username: String? = null,
-    @get:Exclude var userProfilePic: String? = null,
+    @get:Exclude var userProfilePic: String? = null
 )

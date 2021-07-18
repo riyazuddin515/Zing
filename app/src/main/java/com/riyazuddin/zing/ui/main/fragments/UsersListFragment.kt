@@ -20,6 +20,8 @@ import com.riyazuddin.zing.R
 import com.riyazuddin.zing.adapters.UserAdapterPagingData
 import com.riyazuddin.zing.databinding.FragmentUsersBinding
 import com.riyazuddin.zing.other.EventObserver
+import com.riyazuddin.zing.other.NavGraphArgsConstants.FOLLOWERS_ARG
+import com.riyazuddin.zing.other.NavGraphArgsConstants.FOLLOWING_ARG
 import com.riyazuddin.zing.other.snackBar
 import com.riyazuddin.zing.ui.main.viewmodels.UsersViewModel
 import dagger.hilt.android.AndroidEntryPoint
@@ -47,7 +49,6 @@ class UsersListFragment : Fragment(R.layout.fragment_users) {
         binding = FragmentUsersBinding.inflate(layoutInflater)
 
         setupRecyclerView()
-        viewModel.setupTitle(args.id, args.title)
     }
 
     override fun onCreateView(
@@ -67,11 +68,20 @@ class UsersListFragment : Fragment(R.layout.fragment_users) {
             findNavController().popBackStack()
         }
 
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.flowOfUsers(args.id, args.title).collect {
-                userAdapterPagingData.submitData(it)
+        if (args.title == FOLLOWING_ARG || args.title == FOLLOWERS_ARG) {
+            viewLifecycleOwner.lifecycleScope.launch {
+                viewModel.flowOfUsersForFollowingAndFollowers(args.id, args.title).collect {
+                    userAdapterPagingData.submitData(it)
+                }
+            }
+        }else{
+            viewLifecycleOwner.lifecycleScope.launch {
+                viewModel.flowOfUsersForLikesAndFollowerRequest(args.id, args.title).collect {
+                    userAdapterPagingData.submitData(it)
+                }
             }
         }
+
         viewLifecycleOwner.lifecycleScope.launch {
             userAdapterPagingData.loadStateFlow.collect {
                 binding.linearProgressIndicatorFirstLoad.isVisible =

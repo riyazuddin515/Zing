@@ -18,6 +18,8 @@ import javax.inject.Inject
 class CommentAdapter @Inject constructor(private val glide: RequestManager) :
     PagingDataAdapter<Comment, CommentAdapter.CommentViewHolder>(Companion) {
 
+    private val currentUserUid: String = Firebase.auth.uid!!
+
     inner class CommentViewHolder(val binding: ItemCommentBinding) :
         RecyclerView.ViewHolder(binding.root)
 
@@ -62,7 +64,7 @@ class CommentAdapter @Inject constructor(private val glide: RequestManager) :
                 }
             }
 
-            if (comment.commentedBy == Firebase.auth.uid!!) {
+            if (comment.commentedBy == currentUserUid) {
                 btnDelete.isVisible = true
                 btnDelete.setOnClickListener {
                     onCommentDeleteClickListener?.let {
