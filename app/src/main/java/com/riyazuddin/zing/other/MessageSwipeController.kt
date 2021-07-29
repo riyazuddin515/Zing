@@ -49,8 +49,8 @@ class MessageSwipeController @Inject constructor(
         viewHolder: RecyclerView.ViewHolder
     ): Int {
         mView = viewHolder.itemView
-        imageDrawable = ContextCompat.getDrawable(context, R.drawable.ic_reply_black_24dp)!!
-        shareRound = ContextCompat.getDrawable(context, R.drawable.ic_round_shape)!!
+        imageDrawable = ContextCompat.getDrawable(context, R.drawable.ic_reply)!!
+        shareRound = ContextCompat.getDrawable(context, R.drawable.ic_circle_white)!!
         return makeMovementFlags(ACTION_STATE_IDLE, RIGHT)
     }
 

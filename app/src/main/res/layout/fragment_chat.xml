@@ -222,7 +222,7 @@
             android:background="@android:color/transparent"
             android:contentDescription="@string/image"
             android:padding="5dp"
-            android:src="@drawable/ic__attach_file"
+            android:src="@drawable/ic_attach_file"
             android:visibility="visible"
             app:layout_constraintBottom_toBottomOf="@+id/TILMessage"
             app:layout_constraintEnd_toStartOf="@+id/btnSend"

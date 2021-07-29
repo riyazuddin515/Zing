@@ -129,7 +129,7 @@ class PostFragment : Fragment(R.layout.fragment_post) {
                 ibDelete.isVisible = (post.postedBy == Firebase.auth.uid!!)
                 ibLike.setImageResource(
                     if (post.isLiked) R.drawable.ic_like_red
-                    else R.drawable.ic_outline_like
+                    else R.drawable.ic_like
                 )
             }
         })
@@ -174,7 +174,7 @@ class PostFragment : Fragment(R.layout.fragment_post) {
     private fun update() {
         binding.postLayout.ibLike.setImageResource(
             if (post!!.isLiked) R.drawable.ic_like_red
-            else R.drawable.ic_outline_like
+            else R.drawable.ic_like
         )
         val likeCount = post!!.likeCount
         binding.postLayout.tvLikeCount.isVisible = likeCount != 0

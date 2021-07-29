@@ -50,9 +50,9 @@ object AppModule {
     @Provides
     fun provideFirebaseAuth() = run {
         val auth = FirebaseAuth.getInstance()
-//        if (BuildConfig.DEBUG) {
-//            auth.useEmulator("192.168.0.7", 1111)
-//        }
+        if (BuildConfig.DEBUG) {
+            auth.useEmulator("192.168.0.7", 1111)
+        }
         auth
     }
 
@@ -60,14 +60,14 @@ object AppModule {
     @Provides
     fun provideFirestore() = run {
         val instance = FirebaseFirestore.getInstance()
-//        if (BuildConfig.DEBUG) {
-//            val settings = FirebaseFirestoreSettings.Builder()
-//                .setHost("192.168.0.7:2222")
-//                .setSslEnabled(false)
-//                .setPersistenceEnabled(false)
-//                .build()
-//            instance.firestoreSettings = settings
-//        }
+        if (BuildConfig.DEBUG) {
+            val settings = FirebaseFirestoreSettings.Builder()
+                .setHost("192.168.0.7:2222")
+                .setSslEnabled(false)
+                .setPersistenceEnabled(false)
+                .build()
+            instance.firestoreSettings = settings
+        }
         instance
     }
 
@@ -75,9 +75,9 @@ object AppModule {
     @Provides
     fun providesFirebaseDatabase() = run {
         val database = FirebaseDatabase.getInstance()
-//        if (BuildConfig.DEBUG) {
-//            database.useEmulator("192.168.0.7", 3333)
-//        }
+        if (BuildConfig.DEBUG) {
+            database.useEmulator("192.168.0.7", 3333)
+        }
         database
     }
 
@@ -85,9 +85,9 @@ object AppModule {
     @Singleton
     fun provideCloudStorage() = run {
         val storage = FirebaseStorage.getInstance()
-//        if (BuildConfig.DEBUG) {
-//            storage.useEmulator("192.168.0.7", 5555)
-//        }
+        if (BuildConfig.DEBUG) {
+            storage.useEmulator("192.168.0.7", 5555)
+        }
         storage
     }
 

@@ -72,6 +72,9 @@ android {
 }
 
 dependencies {
+
+    implementation project(":get_stream_chat")
+
     implementation fileTree(dir: "libs", include: ["*.jar"])
     implementation 'androidx.core:core-ktx:1.5.0'
     implementation 'androidx.appcompat:appcompat:1.3.0'

@@ -170,7 +170,7 @@ class ChatAdapter @Inject constructor(
                         ivStatus.isVisible = true
                     }
                     SEEN -> {
-                        glide.load(R.drawable.ic_seen_ticks).into(ivStatus)
+                        glide.load(R.drawable.ic_seen).into(ivStatus)
                         ivStatus.isVisible = true
                     }
                 }

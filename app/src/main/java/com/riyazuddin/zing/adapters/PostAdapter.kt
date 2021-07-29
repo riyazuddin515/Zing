@@ -61,7 +61,7 @@ class PostAdapter @Inject constructor(
             ibDelete.isVisible = (post.postedBy == Firebase.auth.uid!!)
             ibLike.setImageResource(
                 if (post.isLiked) R.drawable.ic_like_red
-                else R.drawable.ic_outline_like
+                else R.drawable.ic_like
             )
             rootLayout.isVisible = true
             ibLike.setOnClickListener {
