@@ -54,7 +54,7 @@ class ChannelFragment : BindingFragment<FragmentChannelBinding>() {
             ChannelListViewModelFactory(filter, ChannelListViewModel.DEFAULT_SORT)
         val viewModel: ChannelListViewModel by viewModels { viewModelFactory }
 
-        viewModel.bindView(binding.channelListView, this)
+        viewModel.bindView(binding.channelListView, viewLifecycleOwner)
     }
 
     private fun subscribeTOObservers() {

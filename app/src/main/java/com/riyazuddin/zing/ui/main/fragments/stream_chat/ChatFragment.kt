@@ -1,5 +1,7 @@
 package com.riyazuddin.zing.ui.main.fragments.stream_chat
 
+import android.app.NotificationManager
+import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -14,6 +16,7 @@ import com.getstream.sdk.chat.viewmodel.messages.MessageListViewModel
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import com.riyazuddin.zing.databinding.FragmentChatBinding
+import com.riyazuddin.zing.other.Constants.NOTIFICATION_ID
 import com.riyazuddin.zing.other.EventObserver
 import com.riyazuddin.zing.other.snackBar
 import com.riyazuddin.zing.ui.main.fragments.BindingFragment
@@ -42,6 +45,8 @@ class ChatFragment : BindingFragment<FragmentChatBinding>() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        clearNotifications()
 
         subscribeToObservers()
         Firebase.auth.uid?.let {
@@ -110,5 +115,12 @@ class ChatFragment : BindingFragment<FragmentChatBinding>() {
         requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) {
             backHandler()
         }
+    }
+
+    private fun clearNotifications() {
+        //Removing all existing notification as soon as activity starts
+        val notificationManager: NotificationManager =
+            requireActivity().getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.cancel(NOTIFICATION_ID)
     }
 }

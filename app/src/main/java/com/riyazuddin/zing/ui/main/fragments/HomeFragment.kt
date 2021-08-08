@@ -1,5 +1,7 @@
 package com.riyazuddin.zing.ui.main.fragments
 
+import android.app.NotificationManager
+import android.content.Context
 import android.content.Context.MODE_PRIVATE
 import android.os.Bundle
 import android.util.Log
@@ -23,6 +25,7 @@ import com.google.firebase.ktx.Firebase
 import com.riyazuddin.zing.R
 import com.riyazuddin.zing.data.entities.User
 import com.riyazuddin.zing.databinding.FragmentHomeBinding
+import com.riyazuddin.zing.other.Constants
 import com.riyazuddin.zing.other.Constants.NO_USER_DOCUMENT
 import com.riyazuddin.zing.other.Constants.PRIVATE
 import com.riyazuddin.zing.other.EventObserver
@@ -46,6 +49,10 @@ import javax.inject.Inject
 
 @AndroidEntryPoint
 class HomeFragment : BasePostFragment(R.layout.fragment_home) {
+
+    companion object {
+        const val TAG = "HomeFragment"
+    }
 
     @Inject
     lateinit var firestore: FirebaseFirestore
@@ -92,6 +99,7 @@ class HomeFragment : BasePostFragment(R.layout.fragment_home) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        clearNotifications()
         subscribeToObservers()
         setupClickListeners()
 
@@ -111,6 +119,9 @@ class HomeFragment : BasePostFragment(R.layout.fragment_home) {
             viewModel.getCurrentUser(currentUserUid ?: return)
         }
 
+    }
+
+    private fun listenForNewMessages() {
         chatClient.subscribeFor(
             NewMessageEvent::class,
             NotificationMessageNewEvent::class,
@@ -187,6 +198,7 @@ class HomeFragment : BasePostFragment(R.layout.fragment_home) {
                 }
             }
         ) {
+            listenForNewMessages()
             binding.ibRecentChat.isVisible = true
             updateHaveUnSeenMessages(it.unreadChannels)
             Log.i(TAG, "subscribeToObservers: stream connection succeed")
@@ -263,8 +275,11 @@ class HomeFragment : BasePostFragment(R.layout.fragment_home) {
         })
     }
 
-    companion object {
-        const val TAG = "HomeFragment"
+    private fun clearNotifications() {
+        //Removing all existing notification as soon as activity starts
+        val notificationManager: NotificationManager =
+            requireActivity().getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.cancelAll()
     }
 
 }
