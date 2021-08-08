@@ -6,5 +6,6 @@ import java.util.*
 data class Feed(
     val postId: String = "",
     @ServerTimestamp
-    val date: Date? = null
+    val date: Date? = null,
+    val postedBy: String = ""
 )

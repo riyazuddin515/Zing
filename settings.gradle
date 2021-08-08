@@ -1,4 +1,2 @@
 include ':app'
 rootProject.name = "Zing"
-include ':firebase_chat'
-include ':get_stream_chat'

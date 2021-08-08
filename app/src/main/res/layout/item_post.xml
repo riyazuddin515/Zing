@@ -5,9 +5,10 @@
     android:id="@+id/cardViewImage"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginTop="5dp"
-    android:layout_marginStart="5dp"
-    android:layout_marginEnd="5dp"
+    android:layout_marginTop="2dp"
+    android:layout_marginBottom="3dp"
+    android:layout_marginStart="3dp"
+    android:layout_marginEnd="3dp"
     app:cardBackgroundColor="@color/white"
     app:cardCornerRadius="15dp">
 
@@ -23,7 +24,7 @@
             android:layout_marginStart="8dp"
             android:layout_marginTop="5dp"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/postCard"
+            app:layout_constraintTop_toTopOf="parent"
             tools:src="@drawable/default_profile_pic" />
 
         <com.google.android.material.textview.MaterialTextView
@@ -48,7 +49,7 @@
             android:layout_height="wrap_content"
             android:layout_marginEnd="8dp"
             android:background="@android:color/transparent"
-            android:contentDescription="@string/trashimage"
+            android:contentDescription="@string/trashImage"
             android:src="@drawable/ic_delete"
             app:layout_constraintBottom_toBottomOf="@+id/tvUsername"
             app:layout_constraintEnd_toEndOf="parent"
@@ -58,19 +59,22 @@
             android:id="@+id/postCard"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="5dp"
+            android:layout_marginEnd="8dp"
             app:cardCornerRadius="8dp"
-            app:cardElevation="10dp"
+            app:cardElevation="5dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
+            app:layout_constraintTop_toBottomOf="@+id/CIVProfilePic">
 
             <ImageView
                 android:id="@+id/ivPostImage"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:adjustViewBounds="true"
-                android:contentDescription="@string/postimage"
+                android:contentDescription="@string/postImage"
                 android:maxHeight="400dp"
                 android:scaleType="fitCenter"
                 tools:src="@drawable/default_profile_pic" />
@@ -94,14 +98,14 @@
             android:id="@+id/ibComment"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="5dp"
+            android:layout_marginTop="8dp"
             android:layout_marginBottom="5dp"
             android:background="@android:color/transparent"
             android:contentDescription="@string/comment"
             android:src="@drawable/ic_comment"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="@+id/CIVProfilePic"
-            app:layout_constraintTop_toBottomOf="@+id/CIVProfilePic"
+            app:layout_constraintTop_toBottomOf="@+id/postCard"
             app:layout_constraintVertical_bias="0.0" />
 
         <com.google.android.material.textview.MaterialTextView
@@ -132,6 +136,7 @@
             android:id="@+id/tvCaption"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
             android:layout_marginBottom="5dp"
             android:textColor="@color/black"
             app:layout_constraintBottom_toBottomOf="parent"

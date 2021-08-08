@@ -3,7 +3,6 @@ package com.riyazuddin.zing.ui.main.fragments
 import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.Fragment
-import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.RequestManager
 import com.riyazuddin.zing.R
 import com.riyazuddin.zing.adapters.PostAdapter
@@ -42,7 +41,9 @@ abstract class BasePostFragment(layoutId: Int) : Fragment(layoutId) {
         postAdapter.setOnDeleteClickListener { post ->
             CustomDialog(
                 getString(R.string.delete_post_dialog_title),
-                getString(R.string.delete_post_dialog_message)
+                getString(R.string.delete_post_dialog_message),
+                getString(R.string.delete),
+                getString(R.string.cancel)
             ).apply {
                 setPositiveListener {
                     basePostViewModel.deletePost(post)

@@ -90,7 +90,9 @@ class PostFragment : Fragment(R.layout.fragment_post) {
             post?.let {
                 CustomDialog(
                     getString(R.string.delete_post_dialog_title),
-                    getString(R.string.delete_post_dialog_message)
+                    getString(R.string.delete_post_dialog_message),
+                    getString(R.string.delete),
+                    getString(R.string.cancel)
                 ).apply {
                     setPositiveListener {
                         homeViewModel.deletePost(it)

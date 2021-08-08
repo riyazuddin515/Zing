@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:background="@color/colorPrimary">
+    android:background="@drawable/auth_background">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/appBarLayout"
@@ -21,7 +21,8 @@
             android:id="@+id/toolbar"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:background="@drawable/top_menu_background"
+            android:background="@android:color/transparent"
+            android:elevation="0dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/ibRecentChat"
             app:layout_constraintStart_toStartOf="parent"
@@ -43,13 +44,17 @@
             android:layout_marginEnd="8dp"
             tools:visibility="visible" />
 
-        <ImageView
+        <com.google.android.material.textview.MaterialTextView
             android:id="@+id/tvHaveUnseenMessages"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="@drawable/ic_circle_primary_color"
-            android:padding="3dp"
+            android:padding="5dp"
             android:visibility="gone"
+            tools:text="9"
+            android:textAlignment="center"
+            android:textColor="@color/white"
+            android:textSize="12sp"
             app:layout_constraintBottom_toTopOf="@id/ibRecentChat"
             app:layout_constraintEnd_toEndOf="@id/ibRecentChat"
             app:layout_constraintTop_toTopOf="@id/ibRecentChat"

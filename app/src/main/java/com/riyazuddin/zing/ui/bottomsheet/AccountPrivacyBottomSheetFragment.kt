@@ -2,7 +2,6 @@ package com.riyazuddin.zing.ui.bottomsheet
 
 import android.os.Bundle
 import android.view.LayoutInflater
-import android.view.OrientationEventListener
 import android.view.View
 import android.view.ViewGroup
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment

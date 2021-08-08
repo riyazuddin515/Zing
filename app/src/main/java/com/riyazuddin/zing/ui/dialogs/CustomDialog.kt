@@ -8,7 +8,9 @@ import com.riyazuddin.zing.R
 
 class CustomDialog(
     private val title: String,
-    private val message: String
+    private val message: String,
+    private val positiveButtonText: String,
+    private val negativeButtonText: String
 ) : DialogFragment() {
 
     private var positiveListener: (() -> Unit)? = null
@@ -20,12 +22,12 @@ class CustomDialog(
         return MaterialAlertDialogBuilder(requireContext(), R.style.MaterialAlertDialog_Round)
             .setTitle(title)
             .setMessage(message)
-            .setPositiveButton(R.string.delete_post_dialog_positive) { _, _ ->
+            .setPositiveButton(positiveButtonText) { _, _ ->
                 positiveListener?.let { click ->
                     click()
                 }
             }
-            .setNegativeButton(R.string.delete_post_dialog_negative) { dialogInterface, _ ->
+            .setNegativeButton(negativeButtonText) { dialogInterface, _ ->
                 dialogInterface.cancel()
             }
             .create()

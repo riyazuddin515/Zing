@@ -35,6 +35,11 @@
             android:theme="@style/CropTheme" />
 
         <activity
+            android:name="io.getstream.chat.android.ui.gallery.AttachmentGalleryActivity"
+            android:theme="@style/CustomStreamUiTheme"
+            tools:replace="android:theme" />
+
+        <activity
             android:name=".ui.main.MainActivity"
             android:configChanges="orientation|screenSize"
             android:screenOrientation="portrait">

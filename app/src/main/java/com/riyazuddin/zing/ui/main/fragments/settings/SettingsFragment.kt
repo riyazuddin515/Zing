@@ -2,13 +2,18 @@ package com.riyazuddin.zing.ui.main.fragments.settings
 
 import android.app.DownloadManager
 import android.content.Context
+import android.content.Context.POWER_SERVICE
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.os.Environment
+import android.os.PowerManager
+import android.provider.Settings
 import android.util.Log
 import android.view.View
 import android.widget.Toast
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
@@ -32,6 +37,8 @@ import com.riyazuddin.zing.ui.dialogs.CustomDialog
 import com.riyazuddin.zing.ui.main.fragments.HomeFragment
 import com.riyazuddin.zing.ui.main.viewmodels.SettingsViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import io.getstream.chat.android.client.ChatClient
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class SettingsFragment : Fragment(R.layout.fragment_settings) {
@@ -44,6 +51,9 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
     private val viewModel: SettingsViewModel by viewModels()
 
     private var currentUser: User? = null
+
+    @Inject
+    lateinit var chatClient: ChatClient
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -58,29 +68,11 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
 
         binding.switchPrivateAccount.isClickable = currentUser != null
 
+        powerOptimization()
         subscribeToObservers()
         setClickListeners()
 
 
-        binding.switchPrivateAccount.setOnClickListener {
-            binding.switchPrivateAccount.isChecked = !binding.switchPrivateAccount.isChecked
-            currentUser?.let {
-                AccountPrivacyBottomSheetFragment(
-                    if (it.privacy == PUBLIC) PRIVATE
-                    else PUBLIC
-                ).apply {
-                    onClickListener {
-                        viewModel.toggleAccountPrivacy(
-                            it.uid,
-                            if (it.privacy == PUBLIC) PRIVATE
-                            else PUBLIC
-                        )
-                        dismiss()
-                    }
-                }.show(parentFragmentManager, tag)
-            }
-
-        }
         val version = "Version : ${com.riyazuddin.zing.BuildConfig.VERSION_NAME}"
         binding.tvVersion.text = version
     }
@@ -115,13 +107,15 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
         viewModel.removeDeviceTokeStatus.observe(viewLifecycleOwner, EventObserver(
             onError = {
                 snackBar(it)
-                Log.e(HomeFragment.TAG, "subscribeToObservers: $it")
+                Log.e(TAG, "subscribeToObservers: $it")
             },
             onLoading = {
                 Toast.makeText(requireContext(), "Logging Out", Toast.LENGTH_SHORT).show()
             }
         ) {
             if (it) {
+
+                chatClient.disconnect()
                 Firebase.auth.signOut()
                 Intent(requireActivity(), AuthActivity::class.java).apply {
                     startActivity(this)
@@ -212,11 +206,34 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
             checkForUpdate()
         }
         binding.btnLogout.setOnClickListener {
-            CustomDialog(getString(R.string.log_out), getString(R.string.log_out_message)).apply {
+            CustomDialog(
+                getString(R.string.log_out),
+                getString(R.string.log_out_message),
+                getString(R.string.logOut),
+                getString(R.string.cancel)
+            ).apply {
                 setPositiveListener {
                     viewModel.removeDeviceToken(Firebase.auth.uid!!)
                 }
             }.show(parentFragmentManager, null)
+        }
+        binding.switchPrivateAccount.setOnClickListener {
+            binding.switchPrivateAccount.isChecked = !binding.switchPrivateAccount.isChecked
+            currentUser?.let {
+                AccountPrivacyBottomSheetFragment(
+                    if (it.privacy == PUBLIC) PRIVATE
+                    else PUBLIC
+                ).apply {
+                    onClickListener {
+                        viewModel.toggleAccountPrivacy(
+                            it.uid,
+                            if (it.privacy == PUBLIC) PRIVATE
+                            else PUBLIC
+                        )
+                        dismiss()
+                    }
+                }.show(parentFragmentManager, tag)
+            }
         }
         binding.tvPrivacyPolicy.setOnClickListener {
             findNavController().navigate(
@@ -234,5 +251,37 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
                 }
             )
         }
+    }
+
+    private fun powerOptimization() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            val powerManager = requireContext().getSystemService(POWER_SERVICE) as PowerManager
+            if (!powerManager.isIgnoringBatteryOptimizations(requireContext().packageName)) {
+                binding.switchBatteryOptimization.isVisible = true
+                binding.switchBatteryOptimization.isChecked = false
+                binding.switchBatteryOptimization.setOnClickListener {
+                    binding.switchBatteryOptimization.isChecked =
+                        !binding.switchBatteryOptimization.isChecked
+                    CustomDialog(
+                        getString(R.string.warning),
+                        getString(R.string.battery_optimization_message),
+                        getString(R.string.turn_off),
+                        getString(R.string.cancel)
+                    ).apply {
+                        setPositiveListener {
+                            val intent =
+                                Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS)
+                            startActivity(intent)
+                        }
+                    }.show(childFragmentManager, null)
+                }
+            } else
+                binding.switchBatteryOptimization.isVisible = false
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        powerOptimization()
     }
 }

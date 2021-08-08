@@ -1,8 +1,6 @@
 package com.riyazuddin.zing.repositories.network.pagingsource
 
-import android.util.Log
 import androidx.paging.PagingSource
-import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.QuerySnapshot
@@ -12,8 +10,6 @@ import com.riyazuddin.zing.data.entities.User
 import com.riyazuddin.zing.other.Constants.CHAT_MESSAGE_PAGE_LIMIT
 import com.riyazuddin.zing.other.Constants.FOLLOWERS_COLLECTION
 import com.riyazuddin.zing.other.Constants.FOLLOWING_COLLECTION
-import com.riyazuddin.zing.other.Constants.NAME
-import com.riyazuddin.zing.other.Constants.UID
 import com.riyazuddin.zing.other.Constants.USERS_COLLECTION
 import kotlinx.coroutines.tasks.await
 

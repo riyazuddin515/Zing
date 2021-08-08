@@ -5,7 +5,6 @@ import androidx.lifecycle.*
 import androidx.paging.*
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.riyazuddin.zing.data.entities.Comment
 import com.riyazuddin.zing.data.entities.User

@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     app:layoutDescription="@xml/scene"
-    tools:background="@color/colorPrimary">
+    android:background="@drawable/auth_background">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/appBarLayout"
@@ -271,10 +271,6 @@
         android:id="@+id/rvPostList"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:clipToPadding="false"
-        android:paddingStart="0dp"
-        android:paddingEnd="5dp"
-        android:paddingBottom="5dp"
         app:layout_constraintBottom_toTopOf="@+id/linearProgressIndicatorLoadMore"
         app:layout_constraintEnd_toEndOf="@+id/profileDataCardView"
         app:layout_constraintStart_toStartOf="@+id/profileDataCardView"

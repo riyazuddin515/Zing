@@ -1,7 +1,6 @@
 package com.riyazuddin.zing.di
 
 import android.content.Context
-import androidx.room.Room
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.request.RequestOptions
@@ -12,14 +11,18 @@ import com.google.firebase.firestore.FirebaseFirestoreSettings
 import com.google.firebase.storage.FirebaseStorage
 import com.riyazuddin.zing.BuildConfig
 import com.riyazuddin.zing.R
-import com.riyazuddin.zing.repositories.local.ChatDatabase
+import com.riyazuddin.zing.other.Constants.STREAM_TOKEN_API_URL
+import com.riyazuddin.zing.repositories.network.abstraction.GetStreamTokenApi
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ApplicationComponent
 import dagger.hilt.android.qualifiers.ApplicationContext
+import io.getstream.chat.android.client.ChatClient
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 import javax.inject.Singleton
 
 @Module
@@ -39,7 +42,7 @@ object AppModule {
     @Singleton
     @Provides
     fun provideGlideInstance(
-        @ApplicationContext context: Context
+        context: Context
     ) = Glide.with(context).setDefaultRequestOptions(
         RequestOptions()
             .error(R.drawable.ic_outline_error)
@@ -50,9 +53,9 @@ object AppModule {
     @Provides
     fun provideFirebaseAuth() = run {
         val auth = FirebaseAuth.getInstance()
-        if (BuildConfig.DEBUG) {
-            auth.useEmulator("192.168.0.7", 1111)
-        }
+//        if (BuildConfig.DEBUG) {
+//            auth.useEmulator("192.168.0.7", 1111)
+//        }
         auth
     }
 
@@ -60,14 +63,14 @@ object AppModule {
     @Provides
     fun provideFirestore() = run {
         val instance = FirebaseFirestore.getInstance()
-        if (BuildConfig.DEBUG) {
-            val settings = FirebaseFirestoreSettings.Builder()
-                .setHost("192.168.0.7:2222")
-                .setSslEnabled(false)
-                .setPersistenceEnabled(false)
-                .build()
-            instance.firestoreSettings = settings
-        }
+//        if (BuildConfig.DEBUG) {
+//            val settings = FirebaseFirestoreSettings.Builder()
+//                .setHost("192.168.0.7:2221")
+//                .setSslEnabled(false)
+//                .setPersistenceEnabled(false)
+//                .build()
+//            instance.firestoreSettings = settings
+//        }
         instance
     }
 
@@ -75,9 +78,9 @@ object AppModule {
     @Provides
     fun providesFirebaseDatabase() = run {
         val database = FirebaseDatabase.getInstance()
-        if (BuildConfig.DEBUG) {
-            database.useEmulator("192.168.0.7", 3333)
-        }
+//        if (BuildConfig.DEBUG) {
+//            database.useEmulator("192.168.0.7", 3331)
+//        }
         database
     }
 
@@ -85,24 +88,23 @@ object AppModule {
     @Singleton
     fun provideCloudStorage() = run {
         val storage = FirebaseStorage.getInstance()
-        if (BuildConfig.DEBUG) {
-            storage.useEmulator("192.168.0.7", 5555)
-        }
+//        if (BuildConfig.DEBUG) {
+//            storage.useEmulator("192.168.0.7", 5555)
+//        }
         storage
     }
 
     @Provides
     @Singleton
-    fun providesChatDatabase(
-        @ApplicationContext context: Context
-    ) = Room.databaseBuilder(
-        context,
-        ChatDatabase::class.java,
-        "chat_db"
-    ).fallbackToDestructiveMigration()
-        .build()
+    fun provideChatClient(context: Context) =
+        ChatClient.Builder(BuildConfig.STREAM_KEY, context).build()
 
     @Provides
     @Singleton
-    fun provideLastMessagesDao(chatDatabase: ChatDatabase) = chatDatabase.getLastMessagesDao()
+    fun provideGetStreamTokenApi(): GetStreamTokenApi = Retrofit.Builder()
+        .baseUrl(STREAM_TOKEN_API_URL)
+        .addConverterFactory(GsonConverterFactory.create())
+        .build()
+        .create(GetStreamTokenApi::class.java)
+
 }

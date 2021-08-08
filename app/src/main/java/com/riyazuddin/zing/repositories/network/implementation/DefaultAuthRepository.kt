@@ -1,21 +1,11 @@
 package com.riyazuddin.zing.repositories.network.implementation
 
-import com.algolia.search.client.ClientSearch
-import com.algolia.search.dsl.attributesForFaceting
-import com.algolia.search.dsl.settings
-import com.algolia.search.model.APIKey
-import com.algolia.search.model.ApplicationID
-import com.algolia.search.model.IndexName
-import com.algolia.search.model.response.ResponseSearch
-import com.algolia.search.model.search.Query
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-import com.riyazuddin.zing.BuildConfig
 import com.riyazuddin.zing.other.Constants.USERS_COLLECTION
 import com.riyazuddin.zing.other.Resource
 import com.riyazuddin.zing.other.safeCall
 import com.riyazuddin.zing.repositories.network.abstraction.AuthRepository
-import io.ktor.client.features.logging.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext

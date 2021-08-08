@@ -31,8 +31,15 @@ import com.riyazuddin.zing.other.NavGraphArgsConstants.LIKED_BY_ARG
 import com.riyazuddin.zing.other.snackBar
 import com.riyazuddin.zing.ui.main.MainActivity
 import com.riyazuddin.zing.ui.main.viewmodels.BasePostViewModel
+import com.riyazuddin.zing.ui.main.viewmodels.GetStreamViewModel
 import com.riyazuddin.zing.ui.main.viewmodels.HomeViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import io.getstream.chat.android.client.ChatClient
+import io.getstream.chat.android.client.events.MarkAllReadEvent
+import io.getstream.chat.android.client.events.NewMessageEvent
+import io.getstream.chat.android.client.events.NotificationMarkReadEvent
+import io.getstream.chat.android.client.events.NotificationMessageNewEvent
+import io.getstream.chat.android.client.subscribeFor
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -58,6 +65,10 @@ class HomeFragment : BasePostFragment(R.layout.fragment_home) {
 
     private val currentUserUid: String? = Firebase.auth.uid
 
+    @Inject
+    lateinit var chatClient: ChatClient
+    private val getStreamViewModel by viewModels<GetStreamViewModel>()
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -75,7 +86,6 @@ class HomeFragment : BasePostFragment(R.layout.fragment_home) {
         currentUserUid?.let {
             viewModel.onlineOfflineToggle(it)
             viewModel.getCurrentUser(it)
-            viewModel.checkForUnSeenMessage(it)
         }
     }
 
@@ -97,23 +107,41 @@ class HomeFragment : BasePostFragment(R.layout.fragment_home) {
             }
         }
 
-        if (currentUser != null) {
-            binding.ibRecentChat.isVisible = true
-        } else {
+        if (currentUser == null) {
             viewModel.getCurrentUser(currentUserUid ?: return)
         }
 
+        chatClient.subscribeFor(
+            NewMessageEvent::class,
+            NotificationMessageNewEvent::class,
+            MarkAllReadEvent::class,
+            NotificationMarkReadEvent::class
+        ) { event ->
+            var unreadChannels = 0
+            when (event) {
+                is NewMessageEvent -> unreadChannels = event.unreadChannels
+                is NotificationMessageNewEvent -> unreadChannels = event.unreadChannels
+                is MarkAllReadEvent -> unreadChannels = event.unreadChannels
+                is NotificationMarkReadEvent -> unreadChannels = event.unreadChannels
+                else -> { }
+            }
+            updateHaveUnSeenMessages(unreadChannels)
+        }
+    }
+
+    private fun updateHaveUnSeenMessages(count: Int){
+        if (count > 0){
+            val a = if (count in 1..99) count.toString() else "99+"
+            binding.tvHaveUnseenMessages.text = a
+            binding.tvHaveUnseenMessages.isVisible = true
+        }else
+            binding.tvHaveUnseenMessages.isVisible = false
+        binding.tvHaveUnseenMessages.startAnimation(animation)
     }
 
     private fun subscribeToObservers() {
         viewModel.feedPagingFlow.observe(viewLifecycleOwner, {
             postAdapter.submitData(viewLifecycleOwner.lifecycle, it)
-        })
-        viewModel.deletePostStatus.observe(viewLifecycleOwner, EventObserver(
-            onError = { snackBar(it) },
-            onLoading = { snackBar(getString(R.string.deleting)) }
-        ) { deletedPost ->
-            viewModel.removePostFromLiveData(deletedPost)
         })
         viewModel.loadCurrentUserStatus.observe(viewLifecycleOwner, EventObserver(
             onError = {
@@ -139,9 +167,29 @@ class HomeFragment : BasePostFragment(R.layout.fragment_home) {
             onLoading = { Log.i(TAG, "subscribeToObservers: loading current user") }
         ) {
             currentUser = it
-            binding.ibRecentChat.isVisible = true
             if (it.privacy == PRIVATE)
                 viewModel.checkDoesUserHaveFollowerRequests()
+
+            val user = io.getstream.chat.android.client.models.User(
+                id = it.uid,
+                extraData = mutableMapOf(
+                    "name" to it.name,
+                    "image" to it.profilePicUrl,
+                )
+            )
+            getStreamViewModel.connectUser(user)
+        })
+        getStreamViewModel.connectUserStatus.observe(viewLifecycleOwner, EventObserver(
+            onError = {
+                if (it != "User cannot be set until previous one is disconnected.") {
+                    snackBar(it)
+                    Log.e(TAG, "subscribeToObservers: $it")
+                }
+            }
+        ) {
+            binding.ibRecentChat.isVisible = true
+            updateHaveUnSeenMessages(it.unreadChannels)
+            Log.i(TAG, "subscribeToObservers: stream connection succeed")
         })
         viewModel.doesUserHaveFollowingRequests.observe(viewLifecycleOwner, EventObserver {
             if (it) {
@@ -161,17 +209,7 @@ class HomeFragment : BasePostFragment(R.layout.fragment_home) {
                 }
             }
         })
-        viewModel.haveUnSeenMessages.observe(viewLifecycleOwner, EventObserver(
-            onError = {
-                snackBar(it)
-            }
-        ) {
-            if (it) {
-                binding.tvHaveUnseenMessages.isVisible = true
-                binding.tvHaveUnseenMessages.startAnimation(animation)
-            } else
-                binding.tvHaveUnseenMessages.isVisible = false
-        })
+
     }
 
     private fun setupClickListeners() {
@@ -204,7 +242,7 @@ class HomeFragment : BasePostFragment(R.layout.fragment_home) {
             val bundle = Bundle().apply {
                 putSerializable(CURRENT_USER_ARG, currentUser)
             }
-            findNavController().navigate(R.id.action_homeFragment_to_recentChatListFragment, bundle)
+            findNavController().navigate(R.id.action_homeFragment_to_channelFragment, bundle)
         }
     }
 

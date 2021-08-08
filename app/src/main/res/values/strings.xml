@@ -13,16 +13,16 @@
     <string name="add_a_comment">Add a comment</string>
     <string name="comment">Comment</string>
     <string name="like">Like</string>
-    <string name="postimage">PostImage</string>
+    <string name="postImage">PostImage</string>
     <string name="riyazuddin515">riyazuddin515</string>
     <string name="search_user">Search User</string>
-    <string name="createpostimageview">CreatePostImageView</string>
+    <string name="createPostImageView">CreatePostImageView</string>
     <string name="select_image">Select Image</string>
     <string name="enter_caption">Enter Caption</string>
     <string name="bio">Bio</string>
     <string name="follow">Follow</string>
     <string name="forgot_password">Forgot Password?</string>
-    <string name="trashimage">TrashImage</string>
+    <string name="trashImage">TrashImage</string>
     <string name="home">Home</string>
     <string name="search">Search</string>
     <string name="post">Post</string>
@@ -72,6 +72,7 @@
     <string name="delete_post_dialog_negative">No</string>
     <string name="unfollow">UnFollow</string>
     <string name="log_out">Log Out</string>
+    <string name="logOut">LogOut</string>
     <string name="send">send</string>
     <string name="profile">Profile</string>
     <string name="personal_information">Personal Information</string>
@@ -89,7 +90,6 @@
     <string name="close">close</string>
     <string name="image">Image</string>
     <string name="button">button</string>
-    <string name="enter_your_message">Enter your message</string>
     <string name="new_chat">New Chat</string>
     <string name="posts">Posts</string>
     <string name="following">Following</string>
@@ -155,4 +155,11 @@
     <string name="verify_your_email">Verify Your Email</string>
     <string name="send_email">Send Email</string>
     <string name="reply">Reply</string>
+    <string name="bell_icon">bell icon</string>
+    <string name="delete">Delete</string>
+    <string name="update_notification_token">Update Notification Token</string>
+    <string name="update_notification_toke_message">If you are unable to receive chat notifications then click on update to set notification token</string>
+    <string name="battery_optimization">Stop Battery Optimization</string>
+    <string name="battery_optimization_message">Turn off battery optimization for Zing in case you are not receiving notifications.</string>
+    <string name="turn_off">Turn Off</string>
 </resources>

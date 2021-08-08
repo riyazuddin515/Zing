@@ -1,7 +1,6 @@
 package com.riyazuddin.zing.ui.main.fragments
 
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import androidx.core.view.isVisible
 import androidx.core.widget.addTextChangedListener
@@ -17,12 +16,8 @@ import com.riyazuddin.zing.R
 import com.riyazuddin.zing.adapters.UserAdapter
 import com.riyazuddin.zing.data.entities.User
 import com.riyazuddin.zing.databinding.FragmentSearchBinding
-import com.riyazuddin.zing.other.Constants.NAME
-import com.riyazuddin.zing.other.Constants.PROFILE_PIC_URL
 import com.riyazuddin.zing.other.Constants.SEARCH_TIME_DELAY
-import com.riyazuddin.zing.other.Constants.USERNAME
 import com.riyazuddin.zing.other.EventObserver
-import com.riyazuddin.zing.other.snackBar
 import com.riyazuddin.zing.ui.main.viewmodels.SearchViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Job

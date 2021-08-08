@@ -24,11 +24,9 @@ import com.riyazuddin.zing.other.Constants.ALGOLIA_USER_SEARCH_INDEX
 import com.riyazuddin.zing.other.Constants.BIO
 import com.riyazuddin.zing.other.Constants.COMMENTS_COLLECTION
 import com.riyazuddin.zing.other.Constants.DEFAULT_PROFILE_PICTURE_URL
-import com.riyazuddin.zing.other.Constants.FOLLOWERS
 import com.riyazuddin.zing.other.Constants.FOLLOWERS_COLLECTION
 import com.riyazuddin.zing.other.Constants.FOLLOWERS_COUNT
 import com.riyazuddin.zing.other.Constants.FOLLOWER_REQUESTS_COLLECTION
-import com.riyazuddin.zing.other.Constants.FOLLOWING
 import com.riyazuddin.zing.other.Constants.FOLLOWING_COLLECTION
 import com.riyazuddin.zing.other.Constants.FOLLOWING_COUNT
 import com.riyazuddin.zing.other.Constants.FOLLOWING_REQUESTS_COLLECTION
@@ -55,8 +53,9 @@ import com.riyazuddin.zing.other.Constants.USERS_METADATA_COLLECTION
 import com.riyazuddin.zing.other.Constants.USERS_STAT_COLLECTION
 import com.riyazuddin.zing.other.Resource
 import com.riyazuddin.zing.other.safeCall
-import com.riyazuddin.zing.repositories.local.ChatDatabase
 import com.riyazuddin.zing.repositories.network.abstraction.MainRepository
+import io.getstream.chat.android.client.ChatClient
+import io.getstream.chat.android.client.call.await
 import io.ktor.client.features.logging.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.tasks.await
@@ -71,8 +70,7 @@ class DefaultMainRepository @Inject constructor(
     private val auth: FirebaseAuth,
     private val firestore: FirebaseFirestore,
     private val database: FirebaseDatabase,
-    private val chatDatabase: ChatDatabase,
-    private val cloudStorage: FirebaseStorage
+    private val cloudStorage: FirebaseStorage,
 ) : MainRepository {
 
     companion object {
@@ -84,14 +82,10 @@ class DefaultMainRepository @Inject constructor(
     private val usersStatCollection = firestore.collection(USERS_STAT_COLLECTION)
     private val postsCollection = firestore.collection(POSTS_COLLECTION)
     private val commentsCollection = firestore.collection(COMMENTS_COLLECTION)
-
-//    private val followingCollection = firestore.collection(FOLLOWING_COLLECTION)
-//    private val followersCollection = firestore.collection(FOLLOWERS_COLLECTION)
-
     private val postLikesCollection = firestore.collection(POST_LIKES_COLLECTION)
-
     private val followingRequestsCollection = firestore.collection(FOLLOWING_REQUESTS_COLLECTION)
     private val followerRequestsCollection = firestore.collection(FOLLOWER_REQUESTS_COLLECTION)
+
 
     override suspend fun onlineOfflineToggleWithDeviceToken(uid: String) {
         withContext(Dispatchers.IO) {
@@ -119,7 +113,8 @@ class DefaultMainRepository @Inject constructor(
                     object : ValueEventListener {
                         override fun onDataChange(snapshot: DataSnapshot) {
                             if (snapshot.value == false) {
-                                usersStatCollection.document(uid).set(isOfflineForFirestore, SetOptions.merge())
+                                usersStatCollection.document(uid)
+                                    .set(isOfflineForFirestore, SetOptions.merge())
                                 return
                             }
 
@@ -143,9 +138,27 @@ class DefaultMainRepository @Inject constructor(
 
     override suspend fun removeDeviceToken(uid: String) = withContext(Dispatchers.IO) {
         safeCall {
+            val userStat =
+                usersStatCollection.document(uid).get().await().toObject(UserStat::class.java)!!
             usersStatCollection.document(uid).update(TOKEN, "").await()
-            chatDatabase.clearAllTables()
-            Resource.Success(true)
+            val getDevicesResult = ChatClient.instance().getDevices().await()
+            if (getDevicesResult.isSuccess){
+                val f = getDevicesResult.data().filter {
+                    it.id == userStat.token
+                }
+                if (f.isNotEmpty()){
+                    val result = ChatClient.instance().deleteDevice(userStat.token).await()
+                    if (result.isSuccess)
+                        return@safeCall Resource.Success(true)
+                    else
+                        return@safeCall Resource.Error(result.error().message ?: "Unable to Log Out")
+                }
+                else{
+                    return@safeCall Resource.Success(true)
+                }
+            }
+            else
+                Resource.Error(getDevicesResult.error().message ?: "Unable to Log Out")
         }
     }
 
@@ -153,8 +166,9 @@ class DefaultMainRepository @Inject constructor(
         safeCall {
             val uid = auth.uid!!
             val postID = UUID.randomUUID().toString()
-            val postDownloadUrl = cloudStorage.reference.child("posts/$uid/$postID").putFile(imageUri)
-                .await().metadata?.reference?.downloadUrl?.await().toString()
+            val postDownloadUrl =
+                cloudStorage.reference.child("posts/$uid/$postID").putFile(imageUri)
+                    .await().metadata?.reference?.downloadUrl?.await().toString()
             firestore.runBatch { batch ->
                 val post = Post(postID, uid, postDownloadUrl, caption)
                 batch.set(postsCollection.document(postID), post)
@@ -189,7 +203,8 @@ class DefaultMainRepository @Inject constructor(
                 val currentUid = auth.uid!!
                 if (uid != currentUid) {
                     val currentUserFollowing = usersCollection.document(currentUid).collection(
-                        FOLLOWING_COLLECTION).document(uid).get().await()
+                        FOLLOWING_COLLECTION
+                    ).document(uid).get().await()
 
                     user.isFollowing = currentUserFollowing.exists()
                 }
@@ -272,7 +287,11 @@ class DefaultMainRepository @Inject constructor(
             firestore.runTransaction { transition ->
                 transition.delete(commentsCollection.document(post.postId))
                 transition.delete(postsCollection.document(post.postId))
-                transition.update(usersMetadataCollection.document(post.postedBy), POST_COUNT, FieldValue.increment(-1))
+                transition.update(
+                    usersMetadataCollection.document(post.postedBy),
+                    POST_COUNT,
+                    FieldValue.increment(-1)
+                )
                 transition.delete(postLikesCollection.document(post.postId))
             }.await()
             cloudStorage.getReferenceFromUrl(post.imageUrl).delete().await()
@@ -288,13 +307,22 @@ class DefaultMainRepository @Inject constructor(
             firestore.runTransaction { transition ->
 
                 val currentUserFollowingDocumentSnapshot =
-                    transition.get(usersCollection.document(currentUserUid).collection(FOLLOWING_COLLECTION).document(uid))
+                    transition.get(
+                        usersCollection.document(currentUserUid).collection(FOLLOWING_COLLECTION)
+                            .document(uid)
+                    )
 
                 isFollowing = currentUserFollowingDocumentSnapshot.exists()
 
                 if (isFollowing) {
-                    transition.delete(usersCollection.document(currentUserUid).collection(FOLLOWING_COLLECTION).document(uid))
-                    transition.delete(usersCollection.document(uid).collection(FOLLOWERS_COLLECTION).document(currentUserUid))
+                    transition.delete(
+                        usersCollection.document(currentUserUid).collection(FOLLOWING_COLLECTION)
+                            .document(uid)
+                    )
+                    transition.delete(
+                        usersCollection.document(uid).collection(FOLLOWERS_COLLECTION)
+                            .document(currentUserUid)
+                    )
                     transition.update(
                         usersMetadataCollection.document(currentUserUid),
                         FOLLOWING_COUNT,
@@ -306,9 +334,15 @@ class DefaultMainRepository @Inject constructor(
                         FieldValue.increment(-1)
                     )
                     Log.i(TAG, "toggleFollowForUser: UnFollow Success")
-                }else{
-                    transition.set(usersCollection.document(currentUserUid).collection(FOLLOWING_COLLECTION).document(uid), Following(uid))
-                    transition.set(usersCollection.document(uid).collection(FOLLOWERS_COLLECTION).document(currentUserUid), Followers(currentUserUid))
+                } else {
+                    transition.set(
+                        usersCollection.document(currentUserUid).collection(FOLLOWING_COLLECTION)
+                            .document(uid), Following(uid)
+                    )
+                    transition.set(
+                        usersCollection.document(uid).collection(FOLLOWERS_COLLECTION)
+                            .document(currentUserUid), Followers(currentUserUid)
+                    )
                     transition.update(
                         usersMetadataCollection.document(currentUserUid),
                         FOLLOWING_COUNT,
@@ -348,7 +382,8 @@ class DefaultMainRepository @Inject constructor(
                     val storageRef =
                         cloudStorage.reference.child("profilePics/${updateProfile.uidToUpdate}")
                     if (updateProfile.profilePicUrl != DEFAULT_PROFILE_PICTURE_URL) {
-                        cloudStorage.getReferenceFromUrl(updateProfile.profilePicUrl).delete().await()
+                        cloudStorage.getReferenceFromUrl(updateProfile.profilePicUrl).delete()
+                            .await()
                     }
                     storageRef.putFile(imageUri).await().metadata?.reference?.downloadUrl?.await()
                         .toString()
@@ -364,7 +399,7 @@ class DefaultMainRepository @Inject constructor(
                     usersCollection.document(updateProfile.uidToUpdate).set(user).await()
                     usersMetadataCollection.document(uid).set(UserMetadata(uid)).await()
 
-                }else{
+                } else {
                     val map = mutableMapOf(
                         NAME to updateProfile.name,
                         USERNAME to updateProfile.username,
@@ -485,13 +520,20 @@ class DefaultMainRepository @Inject constructor(
                     val other = transition.get(followerRequestsCollection.document(uid))
 
                     if (!cur.exists())
-                        transition.set(followingRequestsCollection.document(currentUid), FollowingRequest(uid = currentUid))
+                        transition.set(
+                            followingRequestsCollection.document(currentUid),
+                            FollowingRequest(uid = currentUid)
+                        )
 
                     if (!other.exists())
-                        transition.set(followerRequestsCollection.document(uid), FollowerRequest(uid = uid))
+                        transition.set(
+                            followerRequestsCollection.document(uid),
+                            FollowerRequest(uid = uid)
+                        )
 
 
-                    val curList = cur.toObject(FollowingRequest::class.java)?.requestedToUids ?: listOf()
+                    val curList =
+                        cur.toObject(FollowingRequest::class.java)?.requestedToUids ?: listOf()
                     sent = uid in curList
 
                     if (sent) {
@@ -566,29 +608,39 @@ class DefaultMainRepository @Inject constructor(
 
                 if (action) {
                     transition.set(
-                        usersCollection.document(uid).collection(FOLLOWING_COLLECTION).document(currentUserUid),
+                        usersCollection.document(uid).collection(FOLLOWING_COLLECTION)
+                            .document(currentUserUid),
                         Following(currentUserUid)
                     )
                     transition.set(
-                        usersCollection.document(currentUserUid).collection(FOLLOWERS_COLLECTION).document(uid),
+                        usersCollection.document(currentUserUid).collection(FOLLOWERS_COLLECTION)
+                            .document(uid),
                         Followers(uid)
                     )
 
                     transition.update(
                         usersMetadataCollection.document(uid),
-                        FOLLOWING_COUNT,FieldValue.increment(1)
+                        FOLLOWING_COUNT, FieldValue.increment(1)
                     )
                     transition.update(
                         usersMetadataCollection.document(currentUserUid),
-                        FOLLOWERS_COUNT,FieldValue.increment(1)
+                        FOLLOWERS_COUNT, FieldValue.increment(1)
                     )
                 }
 
                 if (a.exists())
-                    transition.update(followingRequestsCollection.document(uid),REQUESTED_TO_UIDS,FieldValue.arrayRemove(currentUserUid))
+                    transition.update(
+                        followingRequestsCollection.document(uid),
+                        REQUESTED_TO_UIDS,
+                        FieldValue.arrayRemove(currentUserUid)
+                    )
 
                 if (b.exists())
-                    transition.update(followerRequestsCollection.document(currentUserUid), REQUESTED_UIDS, FieldValue.arrayRemove(uid))
+                    transition.update(
+                        followerRequestsCollection.document(currentUserUid),
+                        REQUESTED_UIDS,
+                        FieldValue.arrayRemove(uid)
+                    )
 
             }.await()
             Resource.Success(uid)

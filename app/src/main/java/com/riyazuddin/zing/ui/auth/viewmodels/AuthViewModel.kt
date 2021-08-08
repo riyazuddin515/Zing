@@ -1,6 +1,5 @@
 package com.riyazuddin.zing.ui.auth.viewmodels
 
-import android.util.Log
 import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -9,12 +8,10 @@ import androidx.lifecycle.viewModelScope
 import com.riyazuddin.zing.other.Event
 import com.riyazuddin.zing.other.Resource
 import com.riyazuddin.zing.repositories.network.abstraction.AuthRepository
-import com.riyazuddin.zing.repositories.network.abstraction.MainRepository
 import kotlinx.coroutines.launch
 
 class AuthViewModel @ViewModelInject constructor(
     private val repository: AuthRepository,
-    private val mainRepository: MainRepository,
 ) : ViewModel() {
 
     private val _registerStatus = MutableLiveData<Event<Resource<Boolean>>>()

@@ -3,16 +3,12 @@ package com.riyazuddin.zing.ui.main
 import android.app.NotificationManager
 import android.content.Context
 import android.content.Intent
-import android.os.Build
 import android.os.Bundle
-import android.os.PowerManager
-import android.provider.Settings
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.ui.setupWithNavController
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import com.riyazuddin.zing.R
@@ -62,27 +58,6 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    private fun powerOptimization() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            val powerManager = getSystemService(POWER_SERVICE) as PowerManager
-            if (!powerManager.isIgnoringBatteryOptimizations(packageName)){
-                MaterialAlertDialogBuilder(this, R.style.MaterialAlertDialog_Round).apply {
-                    setIcon(R.drawable.ic_warning)
-                    setTitle("Warning")
-                    setMessage("Turn off battery optimization for Zing")
-                    setPositiveButton("Turn Off"){ _, _ ->
-                        val intent = Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS)
-                        startActivity(intent)
-                    }
-                    setNegativeButton("Cancel"){ dialogInterface,_ ->
-                        dialogInterface.cancel()
-                    }
-
-                }.show()
-            }
-        }
-    }
-
     override fun onStart() {
         super.onStart()
         val auth = Firebase.auth
@@ -108,6 +83,5 @@ class MainActivity : AppCompatActivity() {
 
     companion object {
         const val TAG = "MainActivityTag"
-        const val REQUEST_BATTERY_OPTIMIZATION_CODE = 1
     }
 }

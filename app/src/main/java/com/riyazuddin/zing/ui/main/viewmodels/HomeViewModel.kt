@@ -1,58 +1,39 @@
 package com.riyazuddin.zing.ui.main.viewmodels
 
 import androidx.hilt.lifecycle.ViewModelInject
-import androidx.lifecycle.*
-import androidx.paging.*
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.asLiveData
+import androidx.lifecycle.viewModelScope
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.PagingData
+import androidx.paging.cachedIn
 import com.google.firebase.firestore.FirebaseFirestore
 import com.riyazuddin.zing.data.entities.Post
 import com.riyazuddin.zing.data.entities.User
 import com.riyazuddin.zing.other.Constants.POST_PAGE_SIZE
 import com.riyazuddin.zing.other.Event
 import com.riyazuddin.zing.other.Resource
-import com.riyazuddin.zing.repositories.network.abstraction.ChatRepository
 import com.riyazuddin.zing.repositories.network.abstraction.MainRepository
-import com.riyazuddin.zing.repositories.network.implementation.DefaultChatRepository
-import com.riyazuddin.zing.repositories.network.pagingsource.FeedPagingSourceNew
+import com.riyazuddin.zing.repositories.network.pagingsource.FeedPagingSource
 import kotlinx.coroutines.launch
 import javax.inject.Singleton
 
 @Singleton
 class HomeViewModel @ViewModelInject constructor(
-    private val repository: MainRepository,
-    private val chatRepository: ChatRepository
+    private val repository: MainRepository
 ) : BasePostViewModel(repository) {
 
     private val _loadCurrentUserStatus = MutableLiveData<Event<Resource<User>>>()
     val loadCurrentUserStatus: LiveData<Event<Resource<User>>> = _loadCurrentUserStatus
 
     private val _feedPagingFlow = Pager(PagingConfig(POST_PAGE_SIZE)) {
-        FeedPagingSourceNew(FirebaseFirestore.getInstance())
+        FeedPagingSource(FirebaseFirestore.getInstance())
     }.flow.cachedIn(viewModelScope).asLiveData().let {
         it as MutableLiveData<PagingData<Post>>
     }
     val feedPagingFlow: LiveData<PagingData<Post>> = _feedPagingFlow
-
-    fun removePostFromLiveData(post: Post) {
-        feedPagingFlow.value?.filter {
-            it.postId != post.postId
-        }.let {
-            _feedPagingFlow.postValue(it)
-        }
-    }
-
-    val haveUnSeenMessages = (chatRepository as DefaultChatRepository).haveUnSeenMessages
-
-    fun checkForUnSeenMessage(uid: String) {
-        viewModelScope.launch {
-            chatRepository.checkForUnSeenMessage(uid)
-        }
-    }
-
-    fun removeUnSeenMessageListener() {
-        viewModelScope.launch {
-            chatRepository.removeUnSeenMessageListener()
-        }
-    }
 
     fun onlineOfflineToggle(uid: String) {
         viewModelScope.launch {

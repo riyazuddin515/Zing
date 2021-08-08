@@ -7,9 +7,9 @@ import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
 import androidx.paging.*
 import com.google.firebase.firestore.FirebaseFirestore
-import com.riyazuddin.zing.data.entities.UserMetadata
 import com.riyazuddin.zing.data.entities.Post
 import com.riyazuddin.zing.data.entities.User
+import com.riyazuddin.zing.data.entities.UserMetadata
 import com.riyazuddin.zing.other.Constants.POST_PAGE_SIZE
 import com.riyazuddin.zing.other.Event
 import com.riyazuddin.zing.other.Resource

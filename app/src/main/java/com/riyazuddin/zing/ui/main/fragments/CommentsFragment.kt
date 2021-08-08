@@ -106,7 +106,9 @@ class CommentsFragment : Fragment(R.layout.fragment_comments) {
         commentAdapter.setOnCommentDeleteClickListener {
             CustomDialog(
                 getString(R.string.delete_comment_dialog_title),
-                getString(R.string.delete_comment_dialog_message)
+                getString(R.string.delete_comment_dialog_message),
+                getString(R.string.delete),
+                getString(R.string.cancel)
             ).apply {
                 setPositiveListener {
                     viewModel.deleteComment(it)

@@ -1,5 +1,6 @@
 package com.riyazuddin.zing.repositories.network.pagingsource
 
+import android.util.Log
 import androidx.paging.PagingSource
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
@@ -35,7 +36,6 @@ class FollowingAndFollowersPagingSource(
                 .get()
                 .await()
 
-
             if (currentPage.size() <= 0)
                 return LoadResult.Page(result, null, null)
 
@@ -66,6 +66,7 @@ class FollowingAndFollowersPagingSource(
             return LoadResult.Page(result, null, nextQuery)
 
         } catch (e: Exception) {
+            Log.e(TAG, "load: ", e)
             return LoadResult.Error(e)
         }
     }

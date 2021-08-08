@@ -21,6 +21,9 @@ import com.riyazuddin.zing.other.Constants.NORMAL_NOTIFICATION_CHANNEL_ID
 import com.riyazuddin.zing.other.Constants.NO_ONE
 import com.riyazuddin.zing.other.Constants.UID
 import dagger.hilt.android.HiltAndroidApp
+import io.getstream.chat.android.client.ChatClient
+import io.getstream.chat.android.livedata.ChatDomain
+import javax.inject.Inject
 
 @HiltAndroidApp
 class ZingApplication : Application() {
@@ -28,6 +31,9 @@ class ZingApplication : Application() {
     companion object{
         const val TAG = "ZingApplication"
     }
+
+    @Inject
+    lateinit var chatClient: ChatClient
 
     override fun onCreate() {
         super.onCreate()
@@ -39,6 +45,9 @@ class ZingApplication : Application() {
         Firebase.auth.uid?.let {
             FirebaseCrashlytics.getInstance().setUserId(it)
         }?: FirebaseCrashlytics.getInstance().setUserId("")
+
+        ChatDomain.Builder(chatClient, applicationContext).build()
+
     }
 
     private fun initFirebaseRemoteConfig() {

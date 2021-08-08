@@ -2,7 +2,6 @@ package com.riyazuddin.zing.ui.main.fragments.settings
 
 import android.os.Bundle
 import android.view.View
-import android.widget.Toast
 import androidx.core.view.isVisible
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment

@@ -1,15 +1,8 @@
 package com.riyazuddin.zing.other
 
 import android.content.Context
-import android.graphics.PorterDuff
 import android.view.View
 import android.view.animation.AnimationUtils
-import android.widget.TextView
-import androidx.annotation.ColorInt
-import androidx.annotation.ColorRes
-import androidx.annotation.DimenRes
-import androidx.annotation.DrawableRes
-import androidx.core.content.ContextCompat
 import androidx.interpolator.view.animation.FastOutSlowInInterpolator
 import com.riyazuddin.zing.R
 

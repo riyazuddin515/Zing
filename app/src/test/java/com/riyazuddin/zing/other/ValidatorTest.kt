@@ -21,7 +21,7 @@ import org.robolectric.annotation.Config
 @Config(sdk = [Build.VERSION_CODES.O_MR1])
 class ValidatorTest {
 
-    private var context: Context = ApplicationProvider.getApplicationContext<Context>()
+    private var context: Context = ApplicationProvider.getApplicationContext()
     private var validate: Validator = Validator(context)
 
     //---------------> Tests for Name <---------------------

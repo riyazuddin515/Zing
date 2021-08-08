@@ -2,7 +2,6 @@ package com.riyazuddin.zing.repositories.network.abstraction
 
 import android.net.Uri
 import com.algolia.search.model.response.ResponseSearch
-import com.riyazuddin.zing.data.entities.UserMetadata
 import com.riyazuddin.zing.data.entities.*
 import com.riyazuddin.zing.other.Resource
 

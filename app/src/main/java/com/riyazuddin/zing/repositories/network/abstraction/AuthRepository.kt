@@ -1,6 +1,5 @@
 package com.riyazuddin.zing.repositories.network.abstraction
 
-import com.algolia.search.model.response.ResponseSearch
 import com.riyazuddin.zing.other.Resource
 
 interface AuthRepository {

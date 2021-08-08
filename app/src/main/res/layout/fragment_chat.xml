@@ -1,249 +1,49 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/background">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context=".ui.main.fragments.stream_chat.ChatFragment"
+    android:background="@color/white">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/constraintLayout2"
-        android:layout_width="match_parent"
+    <io.getstream.chat.android.ui.message.list.header.MessageListHeaderView
+        android:id="@+id/messageListHeaderView"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:background="@drawable/top_menu_background"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toTopOf="parent" />
 
-        <ImageView
-            android:id="@+id/ivBack"
-            android:layout_width="50dp"
-            android:layout_height="?attr/actionBarSize"
-            android:contentDescription="@string/image"
-            android:padding="10dp"
-            android:src="@drawable/ic_arrow_back"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/CIVProfilePic"
-            app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <de.hdodenhof.circleimageview.CircleImageView
-            android:id="@+id/CIVProfilePic"
-            android:layout_width="50dp"
-            android:layout_height="?attr/actionBarSize"
-            android:padding="3dp"
-            app:layout_constraintBottom_toBottomOf="@+id/ivBack"
-            app:layout_constraintEnd_toStartOf="@+id/toolbar"
-            app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toEndOf="@+id/ivBack"
-            app:layout_constraintTop_toTopOf="@+id/ivBack"
-            tools:src="@drawable/default_profile_pic" />
-
-        <com.google.android.material.appbar.MaterialToolbar
-            android:id="@+id/toolbar"
-            android:layout_width="0dp"
-            android:layout_height="?attr/actionBarSize"
-            android:gravity="center_vertical"
-            android:textColor="@color/black"
-            android:textStyle="bold"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toEndOf="@+id/CIVProfilePic"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_goneMarginStart="5dp"
-            tools:title="@string/username" />
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
-
-    <com.google.android.material.progressindicator.LinearProgressIndicator
-        android:id="@+id/linearProgressIndicator"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:indeterminate="true"
-        android:visibility="gone"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/constraintLayout2" />
-
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rvChat"
-        android:layout_width="match_parent"
+    <io.getstream.chat.android.ui.message.list.MessageListView
+        android:id="@+id/messageListView"
+        android:layout_width="0dp"
         android:layout_height="0dp"
-        android:paddingBottom="3dp"
-        app:layout_constraintBottom_toTopOf="@+id/inputLayout"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="1.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/linearProgressIndicator" />
-
-    <androidx.cardview.widget.CardView
-        android:id="@+id/reply_layout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="5dp"
-        android:layout_marginEnd="5dp"
-        android:layout_marginBottom="3dp"
-        android:visibility="gone"
-        app:cardBackgroundColor="@color/white"
-        app:cardCornerRadius="15dp"
-        app:layout_constraintBottom_toTopOf="@+id/inputLayout"
+        app:layout_constraintBottom_toTopOf="@+id/messageInputView"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        tools:visibility="visible">
+        app:streamUiEditMessageEnabled="false"
+        app:streamUiThreadsEnabled="false"
+        app:streamUiFlagMessageEnabled="false"
+        app:streamUiMuteUserEnabled="false"
+        app:streamUiMessageTextColorMine="@color/white"
+        app:streamUiMessageBackgroundColorMine="@color/colorPrimary"
+        app:streamUiMessageReplyBackgroundColorMine="@color/white"
+        app:streamUiMessageLinkBackgroundColorMine="@color/colorPrimary"
+        app:streamUiDeleteConfirmationEnabled="false"
+        app:layout_constraintTop_toBottomOf="@+id/messageListHeaderView" />
 
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:visibility="visible">
-
-            <View
-                android:id="@+id/viewLine"
-                android:layout_width="5dp"
-                android:layout_height="0dp"
-                android:background="@color/colorPrimary"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
-
-            <com.google.android.material.textview.MaterialTextView
-                android:id="@+id/replyToUsername"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="2dp"
-                android:padding="2dp"
-                android:textColor="@color/colorPrimary"
-                android:textStyle="bold"
-                app:layout_constraintEnd_toStartOf="@+id/replyToImage"
-                app:layout_constraintStart_toEndOf="@+id/viewLine"
-                app:layout_constraintTop_toTopOf="parent"
-                tools:text="Name" />
-
-            <com.google.android.material.textview.MaterialTextView
-                android:id="@+id/replyToMessage"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="2dp"
-                android:ellipsize="end"
-                android:includeFontPadding="false"
-                android:lines="1"
-                android:padding="3dp"
-                android:textColor="@color/black"
-                android:textSize="14sp"
-                android:visibility="visible"
-                app:layout_constrainedWidth="false"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@+id/replyToImage"
-                app:layout_constraintStart_toEndOf="@+id/viewLine"
-                app:layout_constraintTop_toBottomOf="@+id/replyToUsername"
-                app:layout_constraintVertical_bias="0.0"
-                tools:text="h ghgdhg fgd kgsldg fd gosodfg; fkf pf pfgkf fk gpd fgfl lgk fof gf gpf" />
-
-            <ImageView
-                android:id="@+id/replyToImage"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:contentDescription="@string/image"
-                android:scaleType="centerCrop"
-                android:visibility="visible"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                tools:src="@drawable/default_profile_pic" />
-
-            <ImageButton
-                android:id="@+id/closeReplyLayout"
-                android:layout_width="20dp"
-                android:layout_height="20dp"
-                android:layout_marginTop="2dp"
-                android:layout_marginEnd="2dp"
-                android:background="@android:color/transparent"
-                android:contentDescription="@string/close"
-                android:src="@drawable/ic_close"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:tint="@color/replyBg" />
-
-        </androidx.constraintlayout.widget.ConstraintLayout>
-
-
-    </androidx.cardview.widget.CardView>
-
-
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/inputLayout"
-        android:layout_width="match_parent"
+    <io.getstream.chat.android.ui.message.input.MessageInputView
+        android:id="@+id/messageInputView"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:background="@drawable/bottom_menu_background"
-        android:padding="5dp"
+        app:streamUiCommandsEnabled="false"
+        app:streamUiSendButtonEnabledIconColor="@color/colorPrimary"
+        app:streamUiLightningButtonEnabled="false"
+        app:streamUiMentionsEnabled="false"
+        app:streamUiMessageInputScrollbarEnabled="true"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toStartOf="parent">
-
-
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/TILMessage"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="5dp"
-            app:hintTextColor="@color/colorPrimary"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/btnAttachFile"
-            app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintHorizontal_chainStyle="packed"
-            app:layout_constraintStart_toStartOf="parent">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/TIEMessage"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="@string/enter_your_message"
-                android:maxLength="500"
-                android:maxLines="5"
-                android:scrollbars="vertical"
-                android:textColor="@color/black"
-                android:textColorHint="@color/black"
-                tools:text="A paragraph is a series of related sentences developing a central idea, called the topic. Try to think about paragraphs in terms of thematic unity: a paragraph is a sentence or a group of sentences that supports one central, unified idea. Paragraphs add one idea at a time to your broader argument. A paragraph is a series of related sentences developing a central idea, called the topic. Try to think about paragraphs in terms of thematic unity: a paragraph is a sentence or a group of sentences that supports one central, unified idea. Paragraphs add one idea at a time to your broader argument." />
-
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <ImageView
-            android:id="@+id/btnAttachFile"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_margin="5dp"
-            android:layout_marginBottom="4dp"
-            android:background="@android:color/transparent"
-            android:contentDescription="@string/image"
-            android:padding="5dp"
-            android:src="@drawable/ic_attach_file"
-            android:visibility="visible"
-            app:layout_constraintBottom_toBottomOf="@+id/TILMessage"
-            app:layout_constraintEnd_toStartOf="@+id/btnSend"
-            app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toEndOf="@+id/TILMessage"
-            app:tint="@color/black" />
-
-        <ImageView
-            android:id="@+id/btnSend"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_margin="5dp"
-            android:background="@android:color/transparent"
-            android:contentDescription="@string/image"
-            android:padding="5dp"
-            android:src="@drawable/ic_send"
-            app:layout_constraintBottom_toBottomOf="@+id/TILMessage"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toEndOf="@+id/btnAttachFile" />
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
+        app:layout_constraintStart_toStartOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
