@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/layout_white_and_dark_background">
+    android:background="@color/white_and_black">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/appBarLayout"
@@ -97,8 +97,10 @@
         android:text="@string/post"
         android:textAllCaps="false"
         android:textSize="20sp"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="@+id/TILCaption"
-        app:layout_constraintTop_toBottomOf="@+id/TILCaption" />
+        app:layout_constraintTop_toBottomOf="@+id/TILCaption"
+        app:layout_constraintVertical_bias="0.0" />
 
     <com.google.android.material.progressindicator.LinearProgressIndicator
         android:id="@+id/progressBar"

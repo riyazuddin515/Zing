@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:drawable="@color/white_and_black" />
+    <item
+        android:drawable="@drawable/ic_zing_logo_without_ring"
+        android:gravity="center" />
+
+</layer-list>

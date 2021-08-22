@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".ui.main.fragments.stream_chat.ChannelFragment"
-    android:background="@color/layout_white_and_dark_background">
+    android:background="@color/white_and_black">
 
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/toolbar"

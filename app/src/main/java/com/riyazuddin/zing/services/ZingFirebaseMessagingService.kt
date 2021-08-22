@@ -87,16 +87,22 @@ class ZingFirebaseMessagingService : FirebaseMessagingService() {
 
     @SuppressLint("UnspecifiedImmutableFlag")
     override fun onTaskRemoved(rootIntent: Intent?) {
-        Log.i(TAG, "onTaskRemoved: fcm service task removed")
-        val restartServiceIntent = Intent(applicationContext, ZingFirebaseMessagingService::class.java)
-        restartServiceIntent.setPackage(packageName)
-        val restartServicePendingIntent = PendingIntent
-            .getService(applicationContext, 1, restartServiceIntent, PendingIntent.FLAG_ONE_SHOT)
-        val alarmService = applicationContext.getSystemService(ALARM_SERVICE) as AlarmManager
-        alarmService[AlarmManager.ELAPSED_REALTIME, SystemClock.elapsedRealtime() + 1000] =
-            restartServicePendingIntent
-        Log.d(TAG, "onTaskRemoved: fcm service completed")
-        super.onTaskRemoved(rootIntent)
+        try {
+            Log.i(TAG, "onTaskRemoved: fcm service task removed")
+            val restartServiceIntent = Intent(applicationContext, ZingFirebaseMessagingService::class.java)
+            restartServiceIntent.setPackage(packageName)
+            val restartServicePendingIntent = PendingIntent
+                .getService(applicationContext, 1, restartServiceIntent, PendingIntent.FLAG_ONE_SHOT)
+            val alarmService = applicationContext.getSystemService(ALARM_SERVICE) as AlarmManager
+            alarmService[AlarmManager.ELAPSED_REALTIME, SystemClock.elapsedRealtime() + 1000] =
+                restartServicePendingIntent
+            Log.d(TAG, "onTaskRemoved: fcm service completed")
+        }catch (e: Exception){
+            Log.e(TAG, "onTaskRemoved: ", e)
+        }
+        finally {
+            super.onTaskRemoved(rootIntent)
+        }
     }
 
     companion object {

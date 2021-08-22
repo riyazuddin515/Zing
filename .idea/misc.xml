@@ -13,7 +13,10 @@
         <entry key="..\:/Users/riyaz/AndroidStudioProjects/Zing/app/src/main/res/drawable/ic_delete.xml" value="0.26614583333333336" />
         <entry key="..\:/Users/riyaz/AndroidStudioProjects/Zing/app/src/main/res/drawable/ic_launcher_foreground.xml" value="0.26614583333333336" />
         <entry key="..\:/Users/riyaz/AndroidStudioProjects/Zing/app/src/main/res/drawable/ic_like.xml" value="0.26614583333333336" />
+        <entry key="..\:/Users/riyaz/AndroidStudioProjects/Zing/app/src/main/res/drawable/ic_logout.xml" value="0.2564814814814815" />
         <entry key="..\:/Users/riyaz/AndroidStudioProjects/Zing/app/src/main/res/drawable/ic_search.xml" value="0.26614583333333336" />
+        <entry key="..\:/Users/riyaz/AndroidStudioProjects/Zing/app/src/main/res/drawable/ic_zing_logo_without_ring.xml" value="0.26614583333333336" />
+        <entry key="..\:/Users/riyaz/AndroidStudioProjects/Zing/app/src/main/res/drawable/splash_drawable.xml" value="0.26614583333333336" />
         <entry key="..\:/Users/riyaz/AndroidStudioProjects/Zing/app/src/main/res/drawable/top_menu_background.xml" value="0.26614583333333336" />
         <entry key="..\:/Users/riyaz/AndroidStudioProjects/Zing/app/src/main/res/drawable/top_menu_background_red.xml" value="0.26614583333333336" />
         <entry key="..\:/Users/riyaz/AndroidStudioProjects/Zing/app/src/main/res/layout/activity_auth.xml" value="0.25" />
@@ -32,7 +35,7 @@
         <entry key="..\:/Users/riyaz/AndroidStudioProjects/Zing/app/src/main/res/layout/fragment_home.xml" value="0.25" />
         <entry key="..\:/Users/riyaz/AndroidStudioProjects/Zing/app/src/main/res/layout/fragment_login.xml" value="0.25" />
         <entry key="..\:/Users/riyaz/AndroidStudioProjects/Zing/app/src/main/res/layout/fragment_new_chat.xml" value="0.25" />
-        <entry key="..\:/Users/riyaz/AndroidStudioProjects/Zing/app/src/main/res/layout/fragment_others_profile.xml" value="0.264" />
+        <entry key="..\:/Users/riyaz/AndroidStudioProjects/Zing/app/src/main/res/layout/fragment_others_profile.xml" value="0.25" />
         <entry key="..\:/Users/riyaz/AndroidStudioProjects/Zing/app/src/main/res/layout/fragment_post.xml" value="0.25" />
         <entry key="..\:/Users/riyaz/AndroidStudioProjects/Zing/app/src/main/res/layout/fragment_privacy_policy_and_terms_and_conditions.xml" value="0.25" />
         <entry key="..\:/Users/riyaz/AndroidStudioProjects/Zing/app/src/main/res/layout/fragment_profile.xml" value="0.25" />

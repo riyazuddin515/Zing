@@ -2,17 +2,21 @@
 <resources>
 
     <color name="layout_background">#132235</color>
-    <color name="layout_white_and_dark_background">#132235</color>
+    <color name="layout_white_and_dark_background">#000000</color>
     <color name="layout_light_white_and_dark_background">#132235</color>
-    <color name="top_menu_background">#28324D</color>
-    <color name="top_menu_background_red">#28324D</color>
-    <color name="card_background">#28324D</color>
+    <color name="top_menu_background">#000000</color>
+    <color name="top_menu_background_red">#000000</color>
+    <color name="card_background">#000000</color>
     <color name="text_color">#FFFFFF</color>
 
     <color name="black_and_white">#FFFFFF</color>
     <color name="white_and_black">#000000</color>
+    <color name="white_and_light_black">#121212</color>
+
+    <color name="bottom_sheet">#303438</color>
 
     <color name="red_and_white">#FFFFFF</color>
+    <color name="red_and_black">#000000</color>
     <color name="white_and_red">#FF0036</color>
 
     <color name="black_and_light_dark">#54628A</color>

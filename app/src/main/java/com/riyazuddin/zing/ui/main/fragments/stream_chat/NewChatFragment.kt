@@ -75,7 +75,7 @@ class NewChatFragment : BindingFragment<FragmentNewChatBinding>() {
             }
         ) {
             val bundle = Bundle().apply {
-                putString("channelId", it)
+                putString("cid", it)
             }
             findNavController().navigate(R.id.action_newChatFragment_to_chatFragment, bundle)
         })

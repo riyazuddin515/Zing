@@ -163,6 +163,7 @@ class OthersProfileFragment : BasePostFragment(R.layout.fragment_others_profile)
     private fun setUpRecyclerView() {
         binding.rvPostList.apply {
             adapter = postAdapter
+            itemAnimator = null
             adapter?.stateRestorationPolicy =
                 RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
             layoutManager = LinearLayoutManager(requireContext())

@@ -270,6 +270,7 @@ class HomeFragment : BasePostFragment(R.layout.fragment_home) {
     private fun setUpRecyclerView() {
         binding.rvPostList.apply {
             adapter = postAdapter
+            itemAnimator = null
             adapter?.stateRestorationPolicy =
                 RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
             layoutManager = LinearLayoutManager(requireContext())
