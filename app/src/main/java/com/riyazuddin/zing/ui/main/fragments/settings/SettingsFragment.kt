@@ -1,19 +1,16 @@
 package com.riyazuddin.zing.ui.main.fragments.settings
 
 import android.app.DownloadManager
+import android.content.ComponentName
 import android.content.Context
-import android.content.Context.POWER_SERVICE
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
 import android.os.Environment
-import android.os.PowerManager
-import android.provider.Settings
 import android.util.Log
 import android.view.View
 import android.widget.Toast
-import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
@@ -34,7 +31,6 @@ import com.riyazuddin.zing.other.snackBar
 import com.riyazuddin.zing.ui.auth.AuthActivity
 import com.riyazuddin.zing.ui.bottomsheet.AccountPrivacyBottomSheetFragment
 import com.riyazuddin.zing.ui.dialogs.CustomDialog
-import com.riyazuddin.zing.ui.main.fragments.HomeFragment
 import com.riyazuddin.zing.ui.main.viewmodels.SettingsViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import io.getstream.chat.android.client.ChatClient
@@ -66,12 +62,8 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
         super.onViewCreated(view, savedInstanceState)
         binding = FragmentSettingsBinding.bind(view)
 
-        binding.switchPrivateAccount.isClickable = currentUser != null
-
-        powerOptimization()
         subscribeToObservers()
         setClickListeners()
-
 
         val version = "Version : ${com.riyazuddin.zing.BuildConfig.VERSION_NAME}"
         binding.tvVersion.text = version
@@ -251,37 +243,196 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
                 }
             )
         }
-    }
-
-    private fun powerOptimization() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            val powerManager = requireContext().getSystemService(POWER_SERVICE) as PowerManager
-            if (!powerManager.isIgnoringBatteryOptimizations(requireContext().packageName)) {
-                binding.switchBatteryOptimization.isVisible = true
-                binding.switchBatteryOptimization.isChecked = false
-                binding.switchBatteryOptimization.setOnClickListener {
-                    binding.switchBatteryOptimization.isChecked =
-                        !binding.switchBatteryOptimization.isChecked
-                    CustomDialog(
-                        getString(R.string.warning),
-                        getString(R.string.battery_optimization_message),
-                        getString(R.string.turn_off),
-                        getString(R.string.cancel)
-                    ).apply {
-                        setPositiveListener {
-                            val intent =
-                                Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS)
-                            startActivity(intent)
-                        }
-                    }.show(childFragmentManager, null)
-                }
-            } else
-                binding.switchBatteryOptimization.isVisible = false
+        binding.tvAutoStart.setOnClickListener {
+            autoStart()
         }
     }
 
-    override fun onResume() {
-        super.onResume()
-        powerOptimization()
+    private fun autoStart() {
+        try {
+            val intents = arrayOf(
+                Intent().setComponent(
+                    ComponentName(
+                        "com.miui.securitycenter",
+                        "com.miui.permcenter.autostart.AutoStartManagementActivity"
+                    )
+                ),
+                Intent().setComponent(
+                    ComponentName(
+                        "com.letv.android.letvsafe",
+                        "com.letv.android.letvsafe.AutobootManageActivity"
+                    )
+                ),
+                Intent().setComponent(
+                    ComponentName(
+                        "com.huawei.systemmanager",
+                        "com.huawei.systemmanager.appcontrol.activity.StartupAppControlActivity"
+                    )
+                ),
+                Intent().setComponent(
+                    ComponentName(
+                        "com.huawei.systemmanager",
+                        "com.huawei.systemmanager.optimize.process.ProtectActivity"
+                    )
+                ),
+                Intent().setComponent(
+                    ComponentName(
+                        "com.coloros.safecenter",
+                        "com.coloros.safecenter.permission.startup.StartupAppListActivity"
+                    )
+                ),
+                Intent().setComponent(
+                    ComponentName(
+                        "com.coloros.safecenter",
+                        "com.coloros.safecenter.startupapp.StartupAppListActivity"
+                    )
+                ),
+                Intent().setComponent(
+                    ComponentName(
+                        "com.coloros.safecenter",
+                        "com.coloros.safecenter.permission.startup.FakeActivity"
+                    )
+                ),
+                Intent().setComponent(
+                    ComponentName(
+                        "com.coloros.safecenter",
+                        "com.coloros.safecenter.permission.startupapp.StartupAppListActivity"
+                    )
+                ),
+                Intent().setComponent(
+                    ComponentName(
+                        "com.coloros.safecenter",
+                        "com.coloros.safecenter.permission.startupmanager.StartupAppListActivity"
+                    )
+                ),
+                Intent().setComponent(
+                    ComponentName(
+                        "com.coloros.safe",
+                        "com.coloros.safe.permission.startup.StartupAppListActivity"
+                    )
+                ),
+                Intent().setComponent(
+                    ComponentName(
+                        "com.coloros.safe",
+                        "com.coloros.safe.permission.startupapp.StartupAppListActivity"
+                    )
+                ),
+                Intent().setComponent(
+                    ComponentName(
+                        "com.coloros.safe",
+                        "com.coloros.safe.permission.startupmanager.StartupAppListActivity"
+                    )
+                ),
+                Intent().setComponent(
+                    ComponentName(
+                        "com.coloros.safecenter",
+                        "com.coloros.safecenter.permission.startsettings"
+                    )
+                ),
+                Intent().setComponent(
+                    ComponentName(
+                        "com.coloros.safecenter",
+                        "com.coloros.safecenter.permission.startupapp.startupmanager"
+                    )
+                ),
+                Intent().setComponent(
+                    ComponentName(
+                        "com.coloros.safecenter",
+                        "com.coloros.safecenter.permission.startupmanager.startupActivity"
+                    )
+                ),
+                Intent().setComponent(
+                    ComponentName(
+                        "com.coloros.safecenter",
+                        "com.coloros.safecenter.permission.startup.startupapp.startupmanager"
+                    )
+                ),
+                Intent().setComponent(
+                    ComponentName(
+                        "com.coloros.safecenter",
+                        "com.coloros.privacypermissionsentry.PermissionTopActivity.Startupmanager"
+                    )
+                ),
+                Intent().setComponent(
+                    ComponentName(
+                        "com.coloros.safecenter",
+                        "com.coloros.privacypermissionsentry.PermissionTopActivity"
+                    )
+                ),
+                Intent().setComponent(
+                    ComponentName(
+                        "com.coloros.safecenter",
+                        "com.coloros.safecenter.FakeActivity"
+                    )
+                ),
+                Intent().setComponent(
+                    ComponentName(
+                        "com.iqoo.secure",
+                        "com.iqoo.secure.ui.phoneoptimize.AddWhiteListActivity"
+                    )
+                ),
+                Intent().setComponent(
+                    ComponentName(
+                        "com.iqoo.secure",
+                        "com.iqoo.secure.ui.phoneoptimize.BgStartUpManager"
+                    )
+                ),
+                Intent().setComponent(
+                    ComponentName(
+                        "com.vivo.permissionmanager",
+                        "com.vivo.permissionmanager.activity.BgStartUpManagerActivity"
+                    )
+                ),
+                Intent().setComponent(
+                    ComponentName(
+                        "com.huawei.systemmanager",
+                        "com.huawei.systemmanager.startupmgr.ui.StartupNormalAppListActivity"
+                    )
+                ),
+                Intent().setComponent(
+                    ComponentName(
+                        "com.oppo.safe",
+                        "com.oppo.safe.permission.startup.StartupAppListActivity"
+                    )
+                ),
+                Intent().setComponent(
+                    ComponentName(
+                        "com.samsung.android.lool",
+                        "com.samsung.android.sm.ui.battery.BatteryActivity"
+                    )
+                ),
+                Intent().setComponent(
+                    ComponentName(
+                        "com.htc.pitroad",
+                        "com.htc.pitroad.landingpage.activity.LandingPageActivity"
+                    )
+                ),
+                Intent().setComponent(
+                    ComponentName(
+                        "com.asus.mobilemanager",
+                        "com.asus.mobilemanager.MainActivity"
+                    )
+                )
+            )
+
+            var necessary = false
+            for (intent in intents)
+                if (requireContext().packageManager.resolveActivity(
+                        intent,
+                        PackageManager.MATCH_DEFAULT_ONLY
+                    ) != null
+                ) {
+                    startActivity(intent)
+                    necessary = true
+                    break
+                }
+
+            if (!necessary)
+                snackBar("Not Necessary")
+
+        } catch (e: Exception) {
+            Log.e(TAG, "autoStart: ", e)
+        }
+
     }
 }

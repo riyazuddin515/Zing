@@ -1,6 +1,5 @@
 package com.riyazuddin.zing.ui.main.viewmodels
 
-import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.*
 import androidx.paging.*
 import com.google.firebase.auth.ktx.auth
@@ -15,11 +14,14 @@ import com.riyazuddin.zing.other.Event
 import com.riyazuddin.zing.other.Resource
 import com.riyazuddin.zing.repositories.network.abstraction.MainRepository
 import com.riyazuddin.zing.repositories.network.pagingsource.PostCommentsPagingSource
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class CommentViewModel @ViewModelInject constructor(
+@HiltViewModel
+class CommentViewModel @Inject constructor(
     private val repository: MainRepository,
     private val dispatcher: CoroutineDispatcher = Dispatchers.Main,
     private val firestore: FirebaseFirestore
@@ -36,6 +38,7 @@ class CommentViewModel @ViewModelInject constructor(
     val userProfileStatus: LiveData<Event<Resource<User>>> = _userProfileStatus
 
     private lateinit var postId: String
+
     /**
      * Just Store the postId in global postId variable
      * From which pager load comments
@@ -47,7 +50,8 @@ class CommentViewModel @ViewModelInject constructor(
     private var _postComments: MutableLiveData<PagingData<Comment>> =
         Pager(PagingConfig(COMMENT_PAGE_SIZE)) {
             PostCommentsPagingSource(
-                firestore.collection(COMMENTS_COLLECTION).document(postId).collection(COMMENTS_COLLECTION),
+                firestore.collection(COMMENTS_COLLECTION).document(postId)
+                    .collection(COMMENTS_COLLECTION),
                 firestore.collection(USERS_COLLECTION)
             )
         }.flow.cachedIn(viewModelScope).asLiveData().let {

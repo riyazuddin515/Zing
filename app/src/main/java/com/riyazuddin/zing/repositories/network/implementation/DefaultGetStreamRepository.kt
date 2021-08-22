@@ -8,6 +8,7 @@ import com.riyazuddin.zing.repositories.network.abstraction.GetStreamRepository
 import com.riyazuddin.zing.repositories.network.abstraction.GetStreamTokenApi
 import io.getstream.chat.android.client.ChatClient
 import io.getstream.chat.android.client.call.await
+import io.getstream.chat.android.client.models.Device
 import io.getstream.chat.android.client.models.User
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable

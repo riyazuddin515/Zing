@@ -1,6 +1,5 @@
 package com.riyazuddin.zing.ui.main.viewmodels
 
-import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.asLiveData
@@ -15,9 +14,12 @@ import com.riyazuddin.zing.other.Event
 import com.riyazuddin.zing.other.Resource
 import com.riyazuddin.zing.repositories.network.abstraction.MainRepository
 import com.riyazuddin.zing.repositories.network.pagingsource.ProfilePostPagingSource
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class ProfileViewModel @ViewModelInject constructor(
+@HiltViewModel
+class ProfileViewModel @Inject constructor(
     private val repository: MainRepository
 ) : BasePostViewModel(repository) {
 

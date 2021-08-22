@@ -1,9 +1,14 @@
 package com.riyazuddin.zing.ui.main
 
+import android.annotation.SuppressLint
 import android.app.NotificationManager
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
+import android.os.Build
 import android.os.Bundle
+import android.os.PowerManager
+import android.provider.Settings
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.fragment.NavHostFragment
@@ -15,6 +20,8 @@ import com.riyazuddin.zing.R
 import com.riyazuddin.zing.databinding.ActivityMainBinding
 import com.riyazuddin.zing.ui.auth.AuthActivity
 import dagger.hilt.android.AndroidEntryPoint
+import io.getstream.chat.android.client.ChatClient
+
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
@@ -54,8 +61,6 @@ class MainActivity : AppCompatActivity() {
         val notificationManager: NotificationManager =
             getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.cancelAll()
-
-
     }
 
     override fun onStart() {
@@ -78,7 +83,25 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
-//        powerOptimization()
+        checkForBatteryOptimization()
+    }
+
+    @SuppressLint("BatteryLife")
+    private fun checkForBatteryOptimization() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            val intent = Intent()
+            val pm = getSystemService(Context.POWER_SERVICE) as PowerManager?
+            if (!pm!!.isIgnoringBatteryOptimizations(packageName)) {
+                intent.action = Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS
+                intent.data = Uri.parse("package:$packageName")
+                startActivity(intent)
+            }
+        }
+    }
+
+    override fun onStop() {
+        super.onStop()
+        ChatClient.instance().disconnect()
     }
 
     companion object {

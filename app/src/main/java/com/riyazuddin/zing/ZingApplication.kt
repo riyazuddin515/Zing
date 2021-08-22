@@ -9,28 +9,31 @@ import android.media.AudioAttributes
 import android.net.Uri
 import android.os.Build
 import android.util.Log
+import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.PeriodicWorkRequestBuilder
+import androidx.work.WorkManager
 import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig
 import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings
-import com.riyazuddin.zing.other.Constants.CHATTING_WITH
 import com.riyazuddin.zing.other.Constants.CHAT_CHANNEL_ID
 import com.riyazuddin.zing.other.Constants.NORMAL_NOTIFICATION_CHANNEL_ID
-import com.riyazuddin.zing.other.Constants.NO_ONE
-import com.riyazuddin.zing.other.Constants.UID
+import com.riyazuddin.zing.workers.ServiceChecker
 import dagger.hilt.android.HiltAndroidApp
 import io.getstream.chat.android.client.ChatClient
 import io.getstream.chat.android.livedata.ChatDomain
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 @HiltAndroidApp
 class ZingApplication : Application() {
 
-    companion object{
-        const val TAG = "ZingApplication"
+    companion object {
+        val TAG: String = ZingApplication::class.java.name
     }
+
 
     @Inject
     lateinit var chatClient: ChatClient
@@ -38,16 +41,24 @@ class ZingApplication : Application() {
     override fun onCreate() {
         super.onCreate()
 
-        setSharedPreference()
         createNotificationChannel()
         initFirebaseRemoteConfig()
 
         Firebase.auth.uid?.let {
             FirebaseCrashlytics.getInstance().setUserId(it)
-        }?: FirebaseCrashlytics.getInstance().setUserId("")
+        } ?: FirebaseCrashlytics.getInstance().setUserId("")
 
         ChatDomain.Builder(chatClient, applicationContext).build()
 
+//        val workRequest = PeriodicWorkRequestBuilder<ServiceChecker>(15, TimeUnit.MINUTES)
+//            .addTag(TAG)
+//            .build()
+//
+//        WorkManager.getInstance(this).enqueueUniquePeriodicWork(
+//            TAG,
+//            ExistingPeriodicWorkPolicy.KEEP,
+//            workRequest
+//        )
     }
 
     private fun initFirebaseRemoteConfig() {
@@ -63,38 +74,32 @@ class ZingApplication : Application() {
                     val update = it.result
                     if (it.isSuccessful) {
                         Log.d(TAG, "initFirebaseRemoteConfig: ${it.result}")
-                    }else
+                    } else
                         Log.d(TAG, "initFirebaseRemoteConfig: $update")
                 }.addOnFailureListener {
                     throw it
                 }
             }
-        }catch (e: Exception){
+        } catch (e: Exception) {
             Log.e(TAG, "initFirebaseRemoteConfig: ", e)
             FirebaseCrashlytics.getInstance().recordException(e)
         }
-        
-    }
 
-    private fun setSharedPreference() {
-        val sp = getSharedPreferences(CHATTING_WITH, MODE_PRIVATE)
-        sp.edit().let {
-            it.putString(UID, NO_ONE)
-            it.apply()
-        }
     }
 
     private fun createNotificationChannel() {
         // Create the NotificationChannel, but only on API 26+ because
         // the NotificationChannel class is new and not in the support library
-        val soundUri = Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://" + applicationContext.packageName + "/" + R.raw.notification)
+        val soundUri =
+            Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://" + applicationContext.packageName + "/" + R.raw.notification)
         val audioAttributes = AudioAttributes.Builder()
             .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
             .setUsage(AudioAttributes.USAGE_NOTIFICATION)
             .build()
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val name = "Chat"
-            val descriptionText = "This channel used for chat messages, it cam make sound and show pop up notification"
+            val descriptionText =
+                "This channel used for chat messages, it cam make sound and show pop up notification"
             val importance = NotificationManager.IMPORTANCE_HIGH
 
             val channel = NotificationChannel(CHAT_CHANNEL_ID, name, importance).apply {
@@ -108,13 +113,15 @@ class ZingApplication : Application() {
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val name = "Normal"
-            val descriptionText = "This channel used for Normal notification like New Follower, Comment, Like etc..."
+            val descriptionText =
+                "This channel used for Normal notification like New Follower, Comment, Like etc..."
             val importance = NotificationManager.IMPORTANCE_HIGH
 
-            val channel = NotificationChannel(NORMAL_NOTIFICATION_CHANNEL_ID, name, importance).apply {
-                description = descriptionText
-                setSound(soundUri, audioAttributes)
-            }
+            val channel =
+                NotificationChannel(NORMAL_NOTIFICATION_CHANNEL_ID, name, importance).apply {
+                    description = descriptionText
+                    setSound(soundUri, audioAttributes)
+                }
             // Register the channel with the system
             val notificationManager: NotificationManager =
                 getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager

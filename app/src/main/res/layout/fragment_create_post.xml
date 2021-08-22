@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/white">
+    android:background="@color/layout_white_and_dark_background">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/appBarLayout"
@@ -16,7 +16,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-
         <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/materialToolbar"
             android:layout_width="0dp"
@@ -26,7 +25,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:title="Select an Image"
-            app:titleTextColor="@color/black" />
+            app:titleTextColor="@color/black_and_white" />
 
         <ImageButton
             android:id="@+id/btnClose"
@@ -86,7 +85,7 @@
             android:maxLength="250"
             android:maxLines="10"
             android:scrollbars="vertical"
-            android:textColor="@color/black" />
+            android:textColor="@color/black_and_white" />
 
     </com.google.android.material.textfield.TextInputLayout>
 
@@ -117,7 +116,7 @@
         android:id="@+id/divider"
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:background="?android:attr/listDivider"
+        android:background="@color/black_and_white"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/IMVCreatePost" />

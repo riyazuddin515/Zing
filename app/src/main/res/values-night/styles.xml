@@ -13,8 +13,8 @@
     </style>
 
     <style name="Outline_TextInputLayoutStyle" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
-        <item name="boxStrokeColor">@color/black</item>
-        <item name="hintTextColor">@color/black</item>
+        <item name="boxStrokeColor">@color/white</item>
+        <item name="hintTextColor">@color/white</item>
         <item name="backgroundColor">@color/white_and_black</item>
         <item name="boxStrokeWidth">1dp</item>
         <item name="boxCornerRadiusTopStart">10dp</item>
@@ -40,6 +40,8 @@
     </style>
     <style name="shapeAppearanceOverlay.MaterialAlertDialog.Rounded" parent="">
         <item name="cornerSize">20dp</item>
+        <item name="android:textColor">@color/black_and_white</item>
+        <item name="backgroundColor">@color/layout_white_and_dark_background</item>
     </style>
 
 

@@ -236,7 +236,7 @@
         android:label="fragment_stream_chat"
         tools:layout="@layout/fragment_chat" >
         <argument
-            android:name="channelId"
+            android:name="cid"
             app:argType="string" />
     </fragment>
 

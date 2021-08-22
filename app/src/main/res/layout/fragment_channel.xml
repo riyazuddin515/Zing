@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".ui.main.fragments.stream_chat.ChannelFragment"
-    android:background="@color/background">
+    android:background="@color/layout_white_and_dark_background">
 
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/toolbar"
@@ -17,7 +17,7 @@
         app:layout_constraintTop_toTopOf="parent"
         app:title="Chat"
         app:navigationIcon="@drawable/ic_arrow_back"
-        app:titleTextColor="@color/black">
+        app:titleTextColor="@color/black_and_white">
 
         <ImageButton
             android:id="@+id/ibNotificationUpdate"
@@ -38,6 +38,7 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_marginTop="2dp"
+        app:streamUiBackgroundLayoutColor="@color/layout_white_and_dark_background"
         app:streamUiChannelDeleteEnabled="false"
         app:streamUiChannelOptionsEnabled="false"
         app:streamUiSwipeEnabled="false"

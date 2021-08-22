@@ -1,6 +1,5 @@
 package com.riyazuddin.zing.ui.main.viewmodels
 
-import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.*
 import androidx.paging.*
 import com.google.firebase.auth.ktx.auth
@@ -12,9 +11,12 @@ import com.riyazuddin.zing.other.Event
 import com.riyazuddin.zing.other.Resource
 import com.riyazuddin.zing.repositories.network.abstraction.MainRepository
 import com.riyazuddin.zing.repositories.network.pagingsource.UsersPagingSource
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class FollowerRequestsViewModel @ViewModelInject constructor(
+@HiltViewModel
+class FollowerRequestsViewModel @Inject constructor(
     private val firestore: FirebaseFirestore,
     private val repository: MainRepository
 ) : ViewModel() {

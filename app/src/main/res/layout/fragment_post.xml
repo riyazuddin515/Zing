@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/auth_background"
+    android:background="@color/layout_background"
     tools:context=".ui.main.fragments.PostFragment">
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -25,7 +25,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:title="Post"
-            app:titleTextColor="@color/black" />
+            app:titleTextColor="@color/black_and_white" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -34,7 +34,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:visibility="gone"
-        app:indicatorColor="@color/white"
+        android:progress="80"
+        app:indicatorColor="@color/white_and_red"
         app:layout_constraintTop_toBottomOf="@id/appBarLayout"
         tools:visibility="visible" />
 

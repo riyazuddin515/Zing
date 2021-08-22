@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="5dp"
-    app:cardBackgroundColor="@color/white"
+    app:cardBackgroundColor="@color/card_background"
     app:cardCornerRadius="20dp"
     app:cardElevation="25dp">
 
@@ -32,7 +32,7 @@
             android:ellipsize="end"
             android:fontFamily="sans-serif-medium"
             android:lines="1"
-            android:textColor="@color/black"
+            android:textColor="@color/black_and_white"
             android:textSize="22sp"
             app:layout_constraintEnd_toStartOf="@+id/ivArrow"
             app:layout_constraintHorizontal_bias="0.0"
@@ -47,7 +47,7 @@
             android:ellipsize="end"
             android:fontFamily="sans-serif-light"
             android:lines="1"
-            android:textColor="@color/black"
+            android:textColor="@color/black_and_white"
             android:textSize="20sp"
             app:layout_constraintEnd_toStartOf="@+id/ivArrow"
             app:layout_constraintHorizontal_bias="0.0"
@@ -64,8 +64,7 @@
             android:src="@drawable/ic_arrow_forward"
             app:layout_constraintBottom_toBottomOf="@+id/tvUsername"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/tvName"
-            app:tint="@color/black" />
+            app:layout_constraintTop_toTopOf="@+id/tvName" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnDeny"

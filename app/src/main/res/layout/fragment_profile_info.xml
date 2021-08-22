@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/white">
+    android:background="@color/layout_white_and_dark_background">
 
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/toolbar"
@@ -75,7 +75,7 @@
             android:inputType="textPersonName"
             android:lines="1"
             android:maxLength="20"
-            android:textColor="@color/black" />
+            android:textColor="@color/black_and_white" />
 
     </com.google.android.material.textfield.TextInputLayout>
 
@@ -98,7 +98,7 @@
             android:inputType="text|textNoSuggestions"
             android:lines="1"
             android:maxLength="15"
-            android:textColor="@color/black" />
+            android:textColor="@color/black_and_white" />
 
     </com.google.android.material.textfield.TextInputLayout>
 
@@ -122,7 +122,7 @@
             android:inputType="textPersonName"
             android:lines="1"
             android:maxLength="140"
-            android:textColor="@color/black" />
+            android:textColor="@color/black_and_white" />
 
     </com.google.android.material.textfield.TextInputLayout>
 

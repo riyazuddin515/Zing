@@ -10,6 +10,7 @@ import com.riyazuddin.zing.other.Resource
 import com.riyazuddin.zing.repositories.network.abstraction.MainRepository
 import kotlinx.coroutines.launch
 
+
 abstract class BasePostViewModel(
     private val repository: MainRepository
 ) : ViewModel() {

@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/background">
+    android:background="@color/layout_white_and_dark_background">
 
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/toolbar"
@@ -13,12 +13,11 @@
         android:background="@drawable/top_menu_background"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
-
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:navigationIcon="@drawable/ic_arrow_back"
         app:title="Comments"
-        app:titleTextColor="@color/black" />
+        app:titleTextColor="@color/black_and_white" />
 
 
     <com.google.android.material.progressindicator.LinearProgressIndicator
@@ -82,7 +81,7 @@
 
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/TILComment"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            style="@style/Outline_TextInputLayoutStyle"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="2"
@@ -94,12 +93,12 @@
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/TIEComment"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_marginStart="5dp"
                 android:maxLength="200"
                 android:maxLines="5"
                 android:scrollbars="vertical"
-                android:textColor="@color/black" />
+                android:textColor="@color/black_and_white" />
 
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -108,7 +107,7 @@
             android:layout_width="60dp"
             android:layout_height="wrap_content"
             android:layout_marginEnd="5dp"
-            android:background="@color/white"
+            android:background="@android:color/transparent"
             android:contentDescription="@string/send"
             android:padding="10dp"
             android:src="@drawable/ic_send"

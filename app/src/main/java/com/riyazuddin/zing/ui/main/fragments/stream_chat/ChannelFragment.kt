@@ -10,6 +10,7 @@ import androidx.navigation.fragment.navArgs
 import androidx.viewbinding.ViewBinding
 import com.riyazuddin.zing.R
 import com.riyazuddin.zing.databinding.FragmentChannelBinding
+import com.riyazuddin.zing.other.Constants.CID
 import com.riyazuddin.zing.other.EventObserver
 import com.riyazuddin.zing.other.NavGraphArgsConstants.CURRENT_USER_ARG
 import com.riyazuddin.zing.other.snackBar
@@ -75,7 +76,7 @@ class ChannelFragment : BindingFragment<FragmentChannelBinding>() {
     private fun setupClickListeners() {
         binding.channelListView.setChannelItemClickListener { channel ->
             val bundle = Bundle().apply {
-                putString("channelId", channel.cid)
+                putString(CID, channel.cid)
             }
             findNavController().navigate(R.id.action_channelFragment_to_streamChatFragment, bundle)
         }

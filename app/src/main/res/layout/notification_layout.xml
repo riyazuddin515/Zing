@@ -5,6 +5,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:background="@color/layout_white_and_dark_background"
     android:orientation="horizontal">
 
     <ImageView
@@ -29,6 +30,7 @@
             android:layout_height="wrap_content"
             android:maxLines="1"
             android:textSize="16sp"
+            android:textColor="@color/black_and_white"
             app:layout_constraintEnd_toEndOf="parent"
             tools:text="Title" />
 
@@ -38,6 +40,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textSize="14sp"
+            android:textColor="@color/black_and_white"
             tools:text="Body" />
 
     </LinearLayout>

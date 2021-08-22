@@ -9,7 +9,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.riyazuddin.zing.other.Constants.NEW_CHAT_PAGE_SIZE
 import com.riyazuddin.zing.repositories.network.pagingsource.NewChatPagingSource
 
-class NewChatViewModel: ViewModel() {
+class NewChatViewModel : ViewModel() {
 
     fun flow(uid: String) = Pager(PagingConfig(NEW_CHAT_PAGE_SIZE)) {
         NewChatPagingSource(uid, FirebaseFirestore.getInstance())

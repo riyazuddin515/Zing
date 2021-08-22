@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     app:layoutDescription="@xml/scene"
-    android:background="@drawable/auth_background">
+    android:background="@color/layout_background">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/appBarLayout"
@@ -24,7 +24,8 @@
             app:layout_constraintEnd_toStartOf="@+id/ivMore"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:titleTextColor="@color/black" />
+            tools:title="@string/riyazuddin515"
+            app:titleTextColor="@color/black_and_white" />
 
         <ImageView
             android:id="@+id/ivMore"
@@ -36,7 +37,7 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:tint="@color/black" />
+            app:tint="@color/black_and_white" />
 
         <ImageView
             android:id="@+id/ivMoreBadge"
@@ -60,7 +61,7 @@
         android:layout_marginStart="5dp"
         android:layout_marginTop="5dp"
         android:layout_marginEnd="5dp"
-        app:cardBackgroundColor="@color/white"
+        app:cardBackgroundColor="@color/card_background"
         app:cardCornerRadius="15dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -108,7 +109,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="5dp"
-                android:textColor="@color/black"
+                android:textColor="@color/black_and_white"
                 android:textSize="20sp"
                 android:textStyle="bold"
                 app:layout_constraintBottom_toTopOf="@+id/tvBio"
@@ -126,7 +127,7 @@
                 android:layout_marginTop="3dp"
                 android:layout_marginBottom="5dp"
                 android:gravity="start"
-                android:textColor="@color/black"
+                android:textColor="@color/black_and_white"
                 android:textSize="18sp"
                 android:textStyle="normal"
                 app:layout_constraintBottom_toBottomOf="parent"
@@ -141,7 +142,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:gravity="center"
-                android:textColor="@color/black"
+                android:textColor="@color/black_and_white"
                 android:textSize="18sp"
                 app:layout_constraintBottom_toTopOf="@+id/tvPost"
                 app:layout_constraintEnd_toEndOf="@+id/tvPost"
@@ -153,7 +154,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/posts"
-                android:textColor="@color/black"
+                android:textColor="@color/black_and_white"
                 android:textSize="18sp"
                 app:layout_constraintBottom_toBottomOf="@+id/tvFollowing"
                 app:layout_constraintEnd_toStartOf="@+id/tvFollowing"
@@ -166,7 +167,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:gravity="center"
-                android:textColor="@color/black"
+                android:textColor="@color/black_and_white"
                 android:textSize="18sp"
                 app:layout_constraintBottom_toTopOf="@+id/tvFollowing"
                 app:layout_constraintEnd_toEndOf="@+id/tvFollowing"
@@ -178,7 +179,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/following"
-                android:textColor="@color/black"
+                android:textColor="@color/black_and_white"
                 android:textSize="18sp"
                 app:layout_constraintBottom_toBottomOf="@+id/tvFollowers"
                 app:layout_constraintEnd_toStartOf="@+id/tvFollowers"
@@ -192,7 +193,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:gravity="center"
-                android:textColor="@color/black"
+                android:textColor="@color/black_and_white"
                 android:textSize="18sp"
                 app:layout_constraintBottom_toTopOf="@+id/tvFollowers"
                 app:layout_constraintEnd_toEndOf="@+id/tvFollowers"
@@ -204,7 +205,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/followers"
-                android:textColor="@color/black"
+                android:textColor="@color/black_and_white"
                 android:textSize="18sp"
                 app:layout_constraintBottom_toBottomOf="@+id/CIVProfilePic"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -244,12 +245,12 @@
                 android:layout_height="wrap_content"
                 android:text="@string/edit_profile"
                 android:textAllCaps="false"
-                android:textColor="@color/black"
+                android:textColor="@color/black_and_white"
                 android:textSize="20sp"
                 app:layout_constraintEnd_toStartOf="@id/guideline3"
                 app:layout_constraintStart_toEndOf="@id/guideline1"
                 app:layout_constraintTop_toBottomOf="@id/btnToggleFollow"
-                app:strokeColor="@color/black"
+                app:strokeColor="@color/black_and_white"
                 app:strokeWidth="1dp" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>

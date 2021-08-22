@@ -4,6 +4,7 @@ import android.net.Uri
 import com.algolia.search.model.response.ResponseSearch
 import com.riyazuddin.zing.data.entities.*
 import com.riyazuddin.zing.other.Resource
+import javax.inject.Singleton
 
 interface MainRepository {
 

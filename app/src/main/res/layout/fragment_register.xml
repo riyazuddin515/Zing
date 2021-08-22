@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/auth_background">
+    android:background="@color/layout_light_white_and_dark_background">
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/guideline1"
@@ -19,7 +19,7 @@
         android:layout_height="wrap_content"
         android:fontFamily="serif"
         android:text="@string/app_name"
-        android:textColor="@color/white"
+        android:textColor="@color/red_and_white"
         android:textSize="70sp"
         android:layout_marginBottom="20dp"
         android:textStyle="bold|italic"
@@ -32,7 +32,7 @@
         android:id="@+id/cardViewImage"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:cardBackgroundColor="@color/white"
+        app:cardBackgroundColor="@color/card_background"
         app:cardCornerRadius="20dp"
         app:cardElevation="25dp"
         android:layout_margin="16dp"
@@ -74,7 +74,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:inputType="textEmailAddress"
-                    android:textColor="@android:color/black" />
+                    android:textColor="@color/black_and_white" />
 
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -97,7 +97,7 @@
                     android:inputType="textPassword"
                     android:maxLength="15"
                     android:maxLines="1"
-                    android:textColor="@android:color/black" />
+                    android:textColor="@color/black_and_white" />
 
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -120,7 +120,7 @@
                     android:inputType="textPassword"
                     android:maxLength="15"
                     android:maxLines="1"
-                    android:textColor="@android:color/black" />
+                    android:textColor="@color/black_and_white" />
 
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -160,7 +160,7 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="20dp"
         android:text="@string/already_have_an_account"
-        android:textColor="@color/white"
+        android:textColor="@color/black_and_white"
         android:textSize="16sp"
         android:textStyle="normal"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -175,7 +175,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="5dp"
         android:text="@string/login_here"
-        android:textColor="@color/white"
+        android:textColor="@color/colorPrimary"
         android:textSize="20sp"
         android:textStyle="bold|italic"
         app:layout_constraintBaseline_toBaselineOf="@+id/materialTextView4"

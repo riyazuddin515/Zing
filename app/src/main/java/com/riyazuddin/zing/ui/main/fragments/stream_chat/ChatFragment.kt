@@ -75,7 +75,7 @@ class ChatFragment : BindingFragment<FragmentChatBinding>() {
     }
 
     private fun bind() {
-        val factory = MessageListViewModelFactory(args.channelId)
+        val factory = MessageListViewModelFactory(args.cid)
         val messageListHeaderViewModel: MessageListHeaderViewModel by viewModels { factory }
         val messageListViewModel: MessageListViewModel by viewModels { factory }
         val messageInputViewModel: MessageInputViewModel by viewModels { factory }
@@ -122,5 +122,10 @@ class ChatFragment : BindingFragment<FragmentChatBinding>() {
         val notificationManager: NotificationManager =
             requireActivity().getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.cancel(NOTIFICATION_ID)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        clearNotifications()
     }
 }

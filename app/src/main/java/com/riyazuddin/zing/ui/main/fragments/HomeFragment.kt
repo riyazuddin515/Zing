@@ -1,9 +1,15 @@
 package com.riyazuddin.zing.ui.main.fragments
 
+import android.annotation.SuppressLint
 import android.app.NotificationManager
 import android.content.Context
 import android.content.Context.MODE_PRIVATE
+import android.content.Intent
+import android.net.Uri
+import android.os.Build
 import android.os.Bundle
+import android.os.PowerManager
+import android.provider.Settings
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -18,6 +24,8 @@ import androidx.navigation.fragment.findNavController
 import androidx.paging.LoadState
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.work.OneTimeWorkRequest
+import androidx.work.WorkManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -25,7 +33,6 @@ import com.google.firebase.ktx.Firebase
 import com.riyazuddin.zing.R
 import com.riyazuddin.zing.data.entities.User
 import com.riyazuddin.zing.databinding.FragmentHomeBinding
-import com.riyazuddin.zing.other.Constants
 import com.riyazuddin.zing.other.Constants.NO_USER_DOCUMENT
 import com.riyazuddin.zing.other.Constants.PRIVATE
 import com.riyazuddin.zing.other.EventObserver
@@ -36,6 +43,7 @@ import com.riyazuddin.zing.ui.main.MainActivity
 import com.riyazuddin.zing.ui.main.viewmodels.BasePostViewModel
 import com.riyazuddin.zing.ui.main.viewmodels.GetStreamViewModel
 import com.riyazuddin.zing.ui.main.viewmodels.HomeViewModel
+import com.riyazuddin.zing.workers.NotificationWorker
 import dagger.hilt.android.AndroidEntryPoint
 import io.getstream.chat.android.client.ChatClient
 import io.getstream.chat.android.client.events.MarkAllReadEvent
@@ -46,6 +54,7 @@ import io.getstream.chat.android.client.subscribeFor
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+
 
 @AndroidEntryPoint
 class HomeFragment : BasePostFragment(R.layout.fragment_home) {
@@ -134,18 +143,19 @@ class HomeFragment : BasePostFragment(R.layout.fragment_home) {
                 is NotificationMessageNewEvent -> unreadChannels = event.unreadChannels
                 is MarkAllReadEvent -> unreadChannels = event.unreadChannels
                 is NotificationMarkReadEvent -> unreadChannels = event.unreadChannels
-                else -> { }
+                else -> {
+                }
             }
             updateHaveUnSeenMessages(unreadChannels)
         }
     }
 
-    private fun updateHaveUnSeenMessages(count: Int){
-        if (count > 0){
+    private fun updateHaveUnSeenMessages(count: Int) {
+        if (count > 0) {
             val a = if (count in 1..99) count.toString() else "99+"
             binding.tvHaveUnseenMessages.text = a
             binding.tvHaveUnseenMessages.isVisible = true
-        }else
+        } else
             binding.tvHaveUnseenMessages.isVisible = false
         binding.tvHaveUnseenMessages.startAnimation(animation)
     }
@@ -221,7 +231,6 @@ class HomeFragment : BasePostFragment(R.layout.fragment_home) {
                 }
             }
         })
-
     }
 
     private fun setupClickListeners() {
@@ -280,6 +289,11 @@ class HomeFragment : BasePostFragment(R.layout.fragment_home) {
         val notificationManager: NotificationManager =
             requireActivity().getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.cancelAll()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        clearNotifications()
     }
 
 }
