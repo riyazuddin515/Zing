@@ -1,5 +1,6 @@
 package com.riyazuddin.zing.di
 
+import android.content.SharedPreferences
 import com.riyazuddin.zing.repositories.network.abstraction.GetStreamRepository
 import com.riyazuddin.zing.repositories.network.abstraction.GetStreamTokenApi
 import com.riyazuddin.zing.repositories.network.implementation.DefaultGetStreamRepository
@@ -18,6 +19,7 @@ object GetStreamModule {
     @Singleton
     fun provideGetStreamRepository(
         chatClient: ChatClient,
-        getStreamTokenApi: GetStreamTokenApi
-    ) = DefaultGetStreamRepository(chatClient, getStreamTokenApi) as GetStreamRepository
+        getStreamTokenApi: GetStreamTokenApi,
+        sharedPreferences: SharedPreferences
+    ) = DefaultGetStreamRepository(chatClient, getStreamTokenApi, sharedPreferences) as GetStreamRepository
 }

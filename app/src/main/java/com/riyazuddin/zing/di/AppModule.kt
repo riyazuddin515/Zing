@@ -1,6 +1,9 @@
 package com.riyazuddin.zing.di
 
 import android.content.Context
+import android.content.SharedPreferences
+import androidx.security.crypto.EncryptedSharedPreferences
+import androidx.security.crypto.MasterKey
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.request.RequestOptions
@@ -10,6 +13,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 import com.riyazuddin.zing.BuildConfig
 import com.riyazuddin.zing.R
+import com.riyazuddin.zing.other.Constants.ENCRYPTED_SHARED_PREF_NAME
 import com.riyazuddin.zing.other.Constants.STREAM_TOKEN_API_URL
 import com.riyazuddin.zing.repositories.network.abstraction.GetStreamTokenApi
 import dagger.Module
@@ -106,4 +110,20 @@ object AppModule {
         .build()
         .create(GetStreamTokenApi::class.java)
 
+    @Singleton
+    @Provides
+    fun provideEncryptedSharedPreferences(
+        @ApplicationContext context: Context
+    ): SharedPreferences {
+        val masterKey = MasterKey.Builder(context)
+            .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+            .build()
+        return EncryptedSharedPreferences.create(
+            context,
+            ENCRYPTED_SHARED_PREF_NAME,
+            masterKey,
+            EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+            EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+        )
+    }
 }

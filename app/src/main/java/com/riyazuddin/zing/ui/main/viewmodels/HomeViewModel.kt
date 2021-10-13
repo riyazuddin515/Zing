@@ -11,7 +11,7 @@ import androidx.paging.cachedIn
 import com.google.firebase.firestore.FirebaseFirestore
 import com.riyazuddin.zing.data.entities.Post
 import com.riyazuddin.zing.data.entities.User
-import com.riyazuddin.zing.other.Constants.POST_PAGE_SIZE
+import com.riyazuddin.zing.other.Constants.FEED_PAGE_SIZE
 import com.riyazuddin.zing.other.Event
 import com.riyazuddin.zing.other.Resource
 import com.riyazuddin.zing.repositories.network.abstraction.MainRepository
@@ -28,7 +28,7 @@ class HomeViewModel @Inject constructor(
     private val _loadCurrentUserStatus = MutableLiveData<Event<Resource<User>>>()
     val loadCurrentUserStatus: LiveData<Event<Resource<User>>> = _loadCurrentUserStatus
 
-    private val _feedPagingFlow = Pager(PagingConfig(POST_PAGE_SIZE)) {
+    private val _feedPagingFlow = Pager(PagingConfig(FEED_PAGE_SIZE)) {
         FeedPagingSource(FirebaseFirestore.getInstance())
     }.flow.cachedIn(viewModelScope).asLiveData().let {
         it as MutableLiveData<PagingData<Post>>

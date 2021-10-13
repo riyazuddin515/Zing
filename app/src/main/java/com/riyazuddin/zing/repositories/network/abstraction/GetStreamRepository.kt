@@ -5,6 +5,8 @@ import io.getstream.chat.android.client.models.User
 
 interface GetStreamRepository {
 
+    suspend fun getToken(userId: String): Resource<String>
+
     suspend fun connectUser(user: User): Resource<User>
 
     suspend fun createChatChannel(currentUid: String, otherEndUserUid: String): Resource<String>

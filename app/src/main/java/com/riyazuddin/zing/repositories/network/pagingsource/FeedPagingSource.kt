@@ -47,6 +47,8 @@ class FeedPagingSource(
                 .get()
                 .await()
 
+            Log.i(TAG, "load: ${currentPage.size()}")
+
             if (currentPage.size() <= 0)
                 return LoadResult.Page(resultList, null, null)
 

@@ -20,6 +20,10 @@ object Constants {
         "https://firebasestorage.googleapis.com/v0/b/zing515.appspot.com/o/img_avatar.png?alt=media&token=b40984fc-155d-4acc-b031-a38076a98628"
     const val STREAM_TOKEN_API_URL = "https://asia-south1-zing515.cloudfunctions.net"
 
+    const val ENCRYPTED_SHARED_PREF_NAME = "enc_shared_pref"
+    const val STREAM_TOKEN_KEY = "stream_token_key"
+    const val NO_TOKEN = "no_token"
+
     const val ALGOLIA_USER_SEARCH_INDEX = "user_search"
 
     const val USERS_COLLECTION = "users"
@@ -71,7 +75,7 @@ object Constants {
     const val COMMENT_PAGE_SIZE = 10
     const val NEW_CHAT_PAGE_SIZE = 10
     const val USER_PAGE_SIZE = 10
-    const val FEED_PAGE_SIZE = 5
+    const val FEED_PAGE_SIZE = 3
 
     const val VALID = "VALID"
     const val INVALID = "INVALID"
