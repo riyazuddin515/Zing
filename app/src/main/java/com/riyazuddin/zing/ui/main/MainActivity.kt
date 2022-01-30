@@ -24,6 +24,11 @@ import com.riyazuddin.zing.ui.auth.AuthActivity
 import dagger.hilt.android.AndroidEntryPoint
 import io.getstream.chat.android.client.ChatClient
 import javax.inject.Inject
+import android.content.pm.PackageManager
+
+import android.content.ComponentName
+import android.util.Log
+import com.riyazuddin.zing.services.ZingFirebaseMessagingService
 
 
 @AndroidEntryPoint
@@ -70,6 +75,13 @@ class MainActivity : AppCompatActivity() {
         notificationManager.cancelAll()
 
         checkForBatteryRestrictions()
+
+        val componentName = ComponentName(this, ZingFirebaseMessagingService::class.java)
+        packageManager.setComponentEnabledSetting(
+            componentName, PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
+            PackageManager.DONT_KILL_APP
+        )
+
     }
 
     override fun onStart() {
@@ -115,7 +127,6 @@ class MainActivity : AppCompatActivity() {
                     .create()
                     .show()
             }
-            checkForBatteryOptimization()
         }
     }
 
@@ -133,8 +144,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onStop() {
-        super.onStop()
+        chatClient.disconnectSocket()
         chatClient.disconnect()
+        super.onStop()
     }
 
     companion object {

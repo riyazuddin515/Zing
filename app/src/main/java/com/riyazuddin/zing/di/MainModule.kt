@@ -1,5 +1,6 @@
 package com.riyazuddin.zing.di
 
+import android.content.SharedPreferences
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.firestore.FirebaseFirestore
@@ -22,12 +23,14 @@ object MainModule {
         auth: FirebaseAuth,
         firestore: FirebaseFirestore,
         database: FirebaseDatabase,
-        cloudStorage: FirebaseStorage
+        cloudStorage: FirebaseStorage,
+        @SharedPreferencesAnnotated sharedPreferences: SharedPreferences
     ) =
         DefaultMainRepository(
             auth,
             firestore,
             database,
-            cloudStorage
+            cloudStorage,
+            sharedPreferences
         ) as MainRepository
 }

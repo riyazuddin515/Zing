@@ -49,6 +49,8 @@ class ProfileInfo : Fragment(R.layout.fragment_profile_info) {
     private lateinit var binding: FragmentProfileInfoBinding
     private val viewModel: SettingsViewModel by viewModels()
 
+    private var isUsernameAvailable = false
+
     private var imageUri: Uri? = null
     private lateinit var cropContent: ActivityResultLauncher<String>
     private val cropImageActivityResultContract = object : ActivityResultContract<String, Uri?>() {
@@ -102,6 +104,8 @@ class ProfileInfo : Fragment(R.layout.fragment_profile_info) {
                 editable?.let {
                     if (it.toString() != user.username) {
                         validator.validateUsername(it.toString()).apply {
+                            isUsernameAvailable = false
+                            enableOrDisableUpdateButton()
                             if (this != Constants.VALID) {
                                 binding.TILUsername.error = this
                             } else {
@@ -123,7 +127,6 @@ class ProfileInfo : Fragment(R.layout.fragment_profile_info) {
         }
 
         binding.btnUpdate.setOnClickListener {
-
             val name = binding.TIEName.text.toString().trim()
             val username = binding.TIEUsername.text.toString().trim()
 
@@ -154,6 +157,16 @@ class ProfileInfo : Fragment(R.layout.fragment_profile_info) {
             viewModel.updateProfile(updateProfile, imageUri)
         }
 
+    }
+
+    private fun enableOrDisableUpdateButton() {
+        if (isUsernameAvailable) {
+            binding.btnUpdate.isEnabled = true
+            binding.btnUpdate.isClickable = true
+        }else{
+            binding.btnUpdate.isEnabled = false
+            binding.btnUpdate.isClickable = false
+        }
     }
 
     private fun subscribeToObservers() {
@@ -197,17 +210,22 @@ class ProfileInfo : Fragment(R.layout.fragment_profile_info) {
 
         viewModel.isUsernameAvailable.observe(viewLifecycleOwner, EventObserver(
             onError = {
+                isUsernameAvailable = false
                 binding.TILUsername.endIconMode = TextInputLayout.END_ICON_NONE
                 binding.TILUsername.error = it
+                enableOrDisableUpdateButton()
             },
             onLoading = {
+                isUsernameAvailable = false
                 binding.TILUsername.error = null
                 binding.TILUsername.endIconMode = TextInputLayout.END_ICON_NONE
             }
         ) {
+            isUsernameAvailable = true
             binding.TILUsername.endIconMode = TextInputLayout.END_ICON_CUSTOM
             binding.TILUsername.endIconDrawable =
                 ResourcesCompat.getDrawable(resources, R.drawable.ic_outline_check_circle, null)
+            enableOrDisableUpdateButton()
         })
     }
 }

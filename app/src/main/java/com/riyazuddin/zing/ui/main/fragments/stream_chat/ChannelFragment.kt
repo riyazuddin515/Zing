@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import androidx.core.view.isVisible
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
@@ -35,7 +36,7 @@ class ChannelFragment : BindingFragment<FragmentChannelBinding>() {
 
     private val args: ChannelFragmentArgs by navArgs()
 
-    private val getStreamViewModel by viewModels<GetStreamViewModel>()
+    private val getStreamViewModel by activityViewModels<GetStreamViewModel>()
 
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -52,7 +53,8 @@ class ChannelFragment : BindingFragment<FragmentChannelBinding>() {
             Filters.`in`("members", listOf(args.currentUser.uid))
         )
         val viewModelFactory =
-            ChannelListViewModelFactory(filter, ChannelListViewModel.DEFAULT_SORT)
+            ChannelListViewModelFactory(filter, ChannelListViewModel.DEFAULT_SORT, limit = 30)
+
         val viewModel: ChannelListViewModel by viewModels { viewModelFactory }
 
         viewModel.bindView(binding.channelListView, viewLifecycleOwner)

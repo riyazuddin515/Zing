@@ -37,7 +37,7 @@ object Constants {
     const val FOLLOWERS_COLLECTION = "followers"
     const val POST_LIKES_COLLECTION = "postLikes"
     const val FOLLOWING_REQUESTS_COLLECTION = "followingRequests"
-    const val FOLLOWER_REQUESTS_COLLECTION = "followerRequsts"
+    const val FOLLOWER_REQUESTS_COLLECTION = "followerRequests"
 
     /**
      * For User Stat

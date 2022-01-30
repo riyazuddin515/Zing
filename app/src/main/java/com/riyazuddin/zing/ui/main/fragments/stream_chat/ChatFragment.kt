@@ -80,22 +80,22 @@ class ChatFragment : BindingFragment<FragmentChatBinding>() {
         val messageListViewModel: MessageListViewModel by viewModels { factory }
         val messageInputViewModel: MessageInputViewModel by viewModels { factory }
 
-        messageListHeaderViewModel.bindView(binding.messageListHeaderView, this)
-        messageListViewModel.bindView(binding.messageListView, this)
-        messageInputViewModel.bindView(binding.messageInputView, this)
+        messageListHeaderViewModel.bindView(binding.messageListHeaderView, viewLifecycleOwner)
+        messageListViewModel.bindView(binding.messageListView, viewLifecycleOwner)
+        messageInputViewModel.bindView(binding.messageInputView, viewLifecycleOwner)
 
-        messageListViewModel.mode.observe(viewLifecycleOwner) { mode ->
-            when (mode) {
-                is MessageListViewModel.Mode.Thread -> {
-                    messageListHeaderViewModel.setActiveThread(mode.parentMessage)
-                    messageInputViewModel.setActiveThread(mode.parentMessage)
-                }
-                is MessageListViewModel.Mode.Normal -> {
-                    messageListHeaderViewModel.resetThread()
-                    messageInputViewModel.resetThread()
-                }
-            }
-        }
+//        messageListViewModel.mode.observe(viewLifecycleOwner) { mode ->
+//            when (mode) {
+//                is MessageListViewModel.Mode.Thread -> {
+//                    messageListHeaderViewModel.setActiveThread(mode.parentMessage)
+//                    messageInputViewModel.setActiveThread(mode.parentMessage)
+//                }
+//                is MessageListViewModel.Mode.Normal -> {
+//                    messageListHeaderViewModel.resetThread()
+//                    messageInputViewModel.resetThread()
+//                }
+//            }
+//        }
 
         // Step 4 - Let the message input know when we are editing a message
 //        binding.messageListView.setMessageEditHandler(messageInputViewModel::postMessageToEdit)

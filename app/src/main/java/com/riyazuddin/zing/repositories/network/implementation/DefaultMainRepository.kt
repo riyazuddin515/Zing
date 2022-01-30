@@ -1,5 +1,6 @@
 package com.riyazuddin.zing.repositories.network.implementation
 
+import android.content.SharedPreferences
 import android.net.Uri
 import android.util.Log
 import com.algolia.search.client.ClientSearch
@@ -20,6 +21,7 @@ import com.google.firebase.messaging.FirebaseMessaging
 import com.google.firebase.storage.FirebaseStorage
 import com.riyazuddin.zing.BuildConfig
 import com.riyazuddin.zing.data.entities.*
+import com.riyazuddin.zing.di.SharedPreferencesAnnotated
 import com.riyazuddin.zing.other.Constants.ALGOLIA_USER_SEARCH_INDEX
 import com.riyazuddin.zing.other.Constants.BIO
 import com.riyazuddin.zing.other.Constants.COMMENTS_COLLECTION
@@ -71,6 +73,7 @@ class DefaultMainRepository @Inject constructor(
     private val firestore: FirebaseFirestore,
     private val database: FirebaseDatabase,
     private val cloudStorage: FirebaseStorage,
+    @SharedPreferencesAnnotated private val sharedPreferences: SharedPreferences
 ) : MainRepository {
 
     companion object {
@@ -142,22 +145,22 @@ class DefaultMainRepository @Inject constructor(
                 usersStatCollection.document(uid).get().await().toObject(UserStat::class.java)!!
             usersStatCollection.document(uid).update(TOKEN, "").await()
             val getDevicesResult = ChatClient.instance().getDevices().await()
-            if (getDevicesResult.isSuccess){
+            if (getDevicesResult.isSuccess) {
                 val f = getDevicesResult.data().filter {
                     it.id == userStat.token
                 }
-                if (f.isNotEmpty()){
+                if (f.isNotEmpty()) {
                     val result = ChatClient.instance().deleteDevice(userStat.token).await()
                     if (result.isSuccess)
                         return@safeCall Resource.Success(true)
                     else
-                        return@safeCall Resource.Error(result.error().message ?: "Unable to Log Out")
-                }
-                else{
+                        return@safeCall Resource.Error(
+                            result.error().message ?: "Unable to Log Out"
+                        )
+                } else {
                     return@safeCall Resource.Success(true)
                 }
-            }
-            else
+            } else
                 Resource.Error(getDevicesResult.error().message ?: "Unable to Log Out")
         }
     }
@@ -196,20 +199,57 @@ class DefaultMainRepository @Inject constructor(
         }
     }
 
+    private suspend fun syncCurrentUserProfile() = withContext(Dispatchers.IO) {
+        safeCall {
+            val user = usersCollection.document(auth.uid!!).get().await().toObject(User::class.java)
+            user?.let {
+                with(sharedPreferences.edit()) {
+                    putString(UID, it.uid)
+                    putString(NAME, it.name)
+                    putString(USERNAME, it.username)
+                    putString(PROFILE_PIC_URL, it.profilePicUrl)
+                    putString(BIO, it.bio)
+                    putString(PRIVACY, it.privacy)
+                    apply()
+                }
+                Resource.Success(it)
+            } ?: Resource.Error(NO_USER_DOCUMENT)
+        }
+    }
+
     override suspend fun getUserProfile(uid: String) = withContext(Dispatchers.IO) {
         safeCall {
-            val user = usersCollection.document(uid).get().await().toObject(User::class.java)
-            user?.let {
-                val currentUid = auth.uid!!
-                if (uid != currentUid) {
-                    val currentUserFollowing = usersCollection.document(currentUid).collection(
-                        FOLLOWING_COLLECTION
-                    ).document(uid).get().await()
-
-                    user.isFollowing = currentUserFollowing.exists()
+            val currentUid = auth.uid!!
+            if (currentUid == uid) {
+                // Fetch Current User
+                val spUid = sharedPreferences.getString("uid", UID)
+                if (spUid == null || spUid == UID) {
+                    syncCurrentUserProfile()
+                } else {
+                    Log.i(TAG, "getUserProfile: Getting User from SharedPreferences")
+                    val name = sharedPreferences.getString(NAME, NAME)!!
+                    val username = sharedPreferences.getString(USERNAME, USERNAME)!!
+                    val profilePicUrl =
+                        sharedPreferences.getString(PROFILE_PIC_URL, PROFILE_PIC_URL)!!
+                    val bio = sharedPreferences.getString(BIO, BIO)!!
+                    val privacy = sharedPreferences.getString(PRIVACY, PRIVACY)!!
+                    val user = User(name, uid, username, profilePicUrl, bio, privacy)
+                    Resource.Success(user)
                 }
-                Resource.Success(user)
-            } ?: Resource.Error(NO_USER_DOCUMENT)
+            } else {
+                // Fetch User with given uid
+                val user = usersCollection.document(uid).get().await().toObject(User::class.java)
+                user?.let {
+                    if (uid != currentUid) {
+                        val currentUserFollowing = usersCollection.document(currentUid).collection(
+                            FOLLOWING_COLLECTION
+                        ).document(uid).get().await()
+
+                        user.isFollowing = currentUserFollowing.exists()
+                    }
+                    Resource.Success(user)
+                } ?: Resource.Error(NO_USER_DOCUMENT)
+            }
         }
     }
 
@@ -232,7 +272,6 @@ class DefaultMainRepository @Inject constructor(
                         .toObjects(User::class.java)
                 resultList.addAll(usersList)
             }
-
             Resource.Success(resultList.toList())
         }
     }
@@ -378,6 +417,7 @@ class DefaultMainRepository @Inject constructor(
     override suspend fun updateProfile(updateProfile: UpdateProfile, imageUri: Uri?) =
         withContext(Dispatchers.IO) {
             safeCall {
+                val isSuccess: Boolean
                 val imageDownloadUrl = imageUri?.let {
                     val storageRef =
                         cloudStorage.reference.child("profilePics/${updateProfile.uidToUpdate}")
@@ -388,7 +428,6 @@ class DefaultMainRepository @Inject constructor(
                     storageRef.putFile(imageUri).await().metadata?.reference?.downloadUrl?.await()
                         .toString()
                 }
-
                 val existing = usersCollection.document(updateProfile.uidToUpdate).get().await()
                 if (!existing.exists()) {
                     val uid = updateProfile.uidToUpdate
@@ -398,7 +437,7 @@ class DefaultMainRepository @Inject constructor(
                     }
                     usersCollection.document(updateProfile.uidToUpdate).set(user).await()
                     usersMetadataCollection.document(uid).set(UserMetadata(uid)).await()
-
+                    isSuccess = true
                 } else {
                     val map = mutableMapOf(
                         NAME to updateProfile.name,
@@ -409,8 +448,15 @@ class DefaultMainRepository @Inject constructor(
                         map[PROFILE_PIC_URL] = it
                     }
                     usersCollection.document(updateProfile.uidToUpdate).update(map.toMap()).await()
+                    isSuccess = true
                 }
-                Resource.Success(Any())
+                if (isSuccess) {
+                    when (syncCurrentUserProfile()) {
+                        is Resource.Success -> Resource.Success(Any())
+                        else -> Resource.Error("Profile Syncing Failed")
+                    }
+                } else
+                    Resource.Error("Failed to Update")
             }
         }
 
@@ -504,6 +550,7 @@ class DefaultMainRepository @Inject constructor(
                     )
                     transition.delete(followingRequestsCollection.document(uid))
                 }.await()
+                syncCurrentUserProfile()
                 Resource.Success(privacy)
             }
         }

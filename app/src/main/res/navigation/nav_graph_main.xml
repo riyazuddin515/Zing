@@ -44,7 +44,11 @@
             app:destination="@id/profileInfo" />
         <action
             android:id="@+id/action_homeFragment_to_channelFragment"
-            app:destination="@id/channelFragment" />
+            app:destination="@id/channelFragment"
+            app:enterAnim="@anim/slide_in_from_left"
+            app:exitAnim="@anim/slide_out_to_right"
+            app:popEnterAnim="@anim/slide_in_from_right"
+            app:popExitAnim="@anim/slide_out_to_left" />
     </fragment>
 
     <fragment
@@ -92,20 +96,18 @@
         <action
             android:id="@+id/action_settingsFragment_to_profileInfo"
             app:destination="@id/profileInfo"
-            app:enterAnim="@anim/slide_in_from_left"
-            app:exitAnim="@anim/slide_out_to_right"
-            app:popEnterAnim="@anim/slide_in_from_bottom"
+            app:enterAnim="@anim/slide_in_from_bottom"
             app:popExitAnim="@anim/slide_out_to_bottom" />
         <action
             android:id="@+id/action_settingsFragment_to_currentPasswordVerification"
             app:destination="@id/currentPasswordVerification"
-            app:enterAnim="@anim/slide_in_from_left"
-            app:exitAnim="@anim/slide_out_to_right"
-            app:popEnterAnim="@anim/slide_in_from_bottom"
+            app:enterAnim="@anim/slide_in_from_bottom"
             app:popExitAnim="@anim/slide_out_to_bottom" />
         <action
             android:id="@+id/action_settingsFragment_to_privacyPolicyAndTermsAndConditionsFragment"
-            app:destination="@id/privacyPolicyAndTermsAndConditionsFragment" />
+            app:destination="@id/privacyPolicyAndTermsAndConditionsFragment"
+            app:enterAnim="@anim/slide_in_from_bottom"
+            app:popExitAnim="@anim/slide_out_to_bottom" />
         <deepLink
             android:id="@+id/deepLink"
             app:uri="www.zing.com/settings" />
@@ -225,10 +227,18 @@
             app:argType="com.riyazuddin.zing.data.entities.User" />
         <action
             android:id="@+id/action_channelFragment_to_newChatFragment"
-            app:destination="@id/newChatFragment" />
+            app:destination="@id/newChatFragment"
+            app:enterAnim="@anim/slide_in_from_left"
+            app:exitAnim="@anim/slide_out_to_right"
+            app:popEnterAnim="@anim/slide_in_from_right"
+            app:popExitAnim="@anim/slide_out_to_left" />
         <action
             android:id="@+id/action_channelFragment_to_streamChatFragment"
-            app:destination="@id/streamChatFragment" />
+            app:destination="@id/streamChatFragment"
+            app:enterAnim="@anim/slide_in_from_left"
+            app:exitAnim="@anim/slide_out_to_right"
+            app:popEnterAnim="@anim/slide_in_from_right"
+            app:popExitAnim="@anim/slide_out_to_left" />
     </fragment>
     <fragment
         android:id="@+id/streamChatFragment"

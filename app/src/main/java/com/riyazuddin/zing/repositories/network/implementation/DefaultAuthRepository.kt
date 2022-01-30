@@ -58,6 +58,5 @@ class DefaultAuthRepository @Inject constructor(
                     Resource.Success(false)
             }
         }
-
     }
 }

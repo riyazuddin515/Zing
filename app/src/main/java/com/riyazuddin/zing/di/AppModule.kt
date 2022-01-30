@@ -22,6 +22,7 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import io.getstream.chat.android.client.ChatClient
+import io.getstream.chat.android.livedata.ChatDomain
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import retrofit2.Retrofit
@@ -99,8 +100,11 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideChatClient(context: Context) =
+    fun provideChatClient(context: Context): ChatClient = run {
         ChatClient.Builder(BuildConfig.STREAM_KEY, context).build()
+        ChatDomain.Builder(ChatClient.instance(), context).offlineEnabled().build()
+        ChatClient.instance()
+    }
 
     @Provides
     @Singleton
@@ -110,6 +114,7 @@ object AppModule {
         .build()
         .create(GetStreamTokenApi::class.java)
 
+    @EncryptedSharedPreferencesAnnotated
     @Singleton
     @Provides
     fun provideEncryptedSharedPreferences(
@@ -126,4 +131,11 @@ object AppModule {
             EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
         )
     }
+
+    @SharedPreferencesAnnotated
+    @Singleton
+    @Provides
+    fun provideUserSharedPreference(
+        @ApplicationContext context: Context
+    ): SharedPreferences = context.getSharedPreferences("user", Context.MODE_PRIVATE)
 }

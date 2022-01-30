@@ -39,6 +39,7 @@ import com.riyazuddin.zing.other.EventObserver
 import com.riyazuddin.zing.other.NavGraphArgsConstants.CURRENT_USER_ARG
 import com.riyazuddin.zing.other.NavGraphArgsConstants.LIKED_BY_ARG
 import com.riyazuddin.zing.other.snackBar
+import com.riyazuddin.zing.ui.dialogs.CustomDialog
 import com.riyazuddin.zing.ui.main.MainActivity
 import com.riyazuddin.zing.ui.main.viewmodels.BasePostViewModel
 import com.riyazuddin.zing.ui.main.viewmodels.GetStreamViewModel
@@ -130,25 +131,6 @@ class HomeFragment : BasePostFragment(R.layout.fragment_home) {
 
     }
 
-    private fun listenForNewMessages() {
-        chatClient.subscribeFor(
-            NewMessageEvent::class,
-            NotificationMessageNewEvent::class,
-            MarkAllReadEvent::class,
-            NotificationMarkReadEvent::class
-        ) { event ->
-            var unreadChannels = 0
-            when (event) {
-                is NewMessageEvent -> unreadChannels = event.unreadChannels
-                is NotificationMessageNewEvent -> unreadChannels = event.unreadChannels
-                is MarkAllReadEvent -> unreadChannels = event.unreadChannels
-                is NotificationMarkReadEvent -> unreadChannels = event.unreadChannels
-                else -> {
-                }
-            }
-            updateHaveUnSeenMessages(unreadChannels)
-        }
-    }
 
     private fun updateHaveUnSeenMessages(count: Int) {
         if (count > 0) {
@@ -161,25 +143,24 @@ class HomeFragment : BasePostFragment(R.layout.fragment_home) {
     }
 
     private fun subscribeToObservers() {
-        viewModel.feedPagingFlow.observe(viewLifecycleOwner, {
+        viewModel.feedPagingFlow.observe(viewLifecycleOwner) {
             postAdapter.submitData(viewLifecycleOwner.lifecycle, it)
-        })
+        }
         viewModel.loadCurrentUserStatus.observe(viewLifecycleOwner, EventObserver(
             onError = {
                 if (it == NO_USER_DOCUMENT) {
-                    MaterialAlertDialogBuilder(
-                        requireContext(),
-                        R.style.MaterialAlertDialog_Round
+                    CustomDialog(
+                        getString(R.string.setup_your_account),
+                        getString(R.string.setup_your_account_message),
+                        getString(R.string.setup),
+                        "",
+                        false
                     ).apply {
-                        setTitle(getString(R.string.setup_your_account))
-                        setMessage(getString(R.string.setup_your_account_message))
-                        setCancelable(false)
-                        setPositiveButton(getString(R.string.setup)) { dialogInterface, _ ->
+                        setPositiveListener {
                             currentUser = null
                             findNavController().navigate(R.id.action_homeFragment_to_profileInfo)
-                            dialogInterface.dismiss()
                         }
-                    }.show()
+                    }.show(childFragmentManager, null)
                 } else {
                     snackBar(it)
                     Log.e(TAG, "subscribeToObservers: $it")
@@ -202,13 +183,10 @@ class HomeFragment : BasePostFragment(R.layout.fragment_home) {
         })
         getStreamViewModel.connectUserStatus.observe(viewLifecycleOwner, EventObserver(
             onError = {
-                if (it != "User cannot be set until previous one is disconnected.") {
-                    snackBar(it)
-                    Log.e(TAG, "subscribeToObservers: $it")
-                }
+                snackBar(it)
+                Log.e(TAG, "subscribeToObservers: $it")
             }
         ) {
-            listenForNewMessages()
             binding.ibRecentChat.isVisible = true
             updateHaveUnSeenMessages(it.unreadChannels)
             Log.i(TAG, "subscribeToObservers: stream connection succeed")
@@ -263,6 +241,7 @@ class HomeFragment : BasePostFragment(R.layout.fragment_home) {
             val bundle = Bundle().apply {
                 putSerializable(CURRENT_USER_ARG, currentUser)
             }
+            updateHaveUnSeenMessages(0)
             findNavController().navigate(R.id.action_homeFragment_to_channelFragment, bundle)
         }
     }

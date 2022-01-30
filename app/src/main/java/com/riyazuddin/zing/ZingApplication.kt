@@ -34,21 +34,18 @@ class ZingApplication : Application() {
         val TAG: String = ZingApplication::class.java.name
     }
 
-
-    @Inject
-    lateinit var chatClient: ChatClient
-
     override fun onCreate() {
         super.onCreate()
 
         createNotificationChannel()
         initFirebaseRemoteConfig()
 
+
+
+
         Firebase.auth.uid?.let {
             FirebaseCrashlytics.getInstance().setUserId(it)
         } ?: FirebaseCrashlytics.getInstance().setUserId("")
-
-        ChatDomain.Builder(chatClient, applicationContext).build()
 
 //        val workRequest = PeriodicWorkRequestBuilder<ServiceChecker>(15, TimeUnit.MINUTES)
 //            .addTag(TAG)

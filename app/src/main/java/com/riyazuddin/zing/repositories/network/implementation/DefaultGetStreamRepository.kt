@@ -3,6 +3,7 @@ package com.riyazuddin.zing.repositories.network.implementation
 import android.content.SharedPreferences
 import android.util.Log
 import com.google.firebase.messaging.FirebaseMessaging
+import com.riyazuddin.zing.di.EncryptedSharedPreferencesAnnotated
 import com.riyazuddin.zing.other.Constants.NO_TOKEN
 import com.riyazuddin.zing.other.Constants.STREAM_TOKEN_KEY
 import com.riyazuddin.zing.other.Resource
@@ -11,9 +12,12 @@ import com.riyazuddin.zing.repositories.network.abstraction.GetStreamRepository
 import com.riyazuddin.zing.repositories.network.abstraction.GetStreamTokenApi
 import io.getstream.chat.android.client.ChatClient
 import io.getstream.chat.android.client.call.await
+import io.getstream.chat.android.client.events.MarkAllReadEvent
+import io.getstream.chat.android.client.events.NewMessageEvent
+import io.getstream.chat.android.client.events.NotificationMarkReadEvent
+import io.getstream.chat.android.client.events.NotificationMessageNewEvent
 import io.getstream.chat.android.client.models.User
-import io.getstream.chat.android.client.models.image
-import io.getstream.chat.android.client.models.name
+import io.getstream.chat.android.client.subscribeFor
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.tasks.await
@@ -25,7 +29,7 @@ import javax.inject.Singleton
 class DefaultGetStreamRepository @Inject constructor(
     private val chatClient: ChatClient,
     private val getStreamTokenApi: GetStreamTokenApi,
-    private val sharedPreferences: SharedPreferences
+    @EncryptedSharedPreferencesAnnotated private val sharedPreferences: SharedPreferences
 ) : GetStreamRepository {
 
     companion object {
@@ -57,6 +61,9 @@ class DefaultGetStreamRepository @Inject constructor(
         withContext(Dispatchers.IO + NonCancellable) {
             safeCall {
 //                val a = chatClient.getCurrentUser()
+//                a?.let {
+//
+//                }
 //                if (a != null && user.name == a.name && user.image == a.image)
 //                    return@safeCall Resource.Success(a)
 
@@ -99,6 +106,4 @@ class DefaultGetStreamRepository @Inject constructor(
                 Resource.Error("Update Failed")
         }
     }
-
-
 }

@@ -10,7 +10,8 @@ class CustomDialog(
     private val title: String,
     private val message: String,
     private val positiveButtonText: String,
-    private val negativeButtonText: String
+    private val negativeButtonText: String,
+    private val showNegativeButton: Boolean = true
 ) : DialogFragment() {
 
     private var positiveListener: (() -> Unit)? = null
@@ -19,7 +20,7 @@ class CustomDialog(
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        return MaterialAlertDialogBuilder(requireContext(), R.style.MaterialAlertDialog_Round)
+        val materialAlertDialogBuilder =  MaterialAlertDialogBuilder(requireContext(), R.style.MaterialAlertDialog_Round)
             .setTitle(title)
             .setMessage(message)
             .setPositiveButton(positiveButtonText) { _, _ ->
@@ -27,9 +28,10 @@ class CustomDialog(
                     click()
                 }
             }
-            .setNegativeButton(negativeButtonText) { dialogInterface, _ ->
+        if(showNegativeButton)
+            materialAlertDialogBuilder.setNegativeButton(negativeButtonText) { dialogInterface, _ ->
                 dialogInterface.cancel()
             }
-            .create()
+        return materialAlertDialogBuilder.create()
     }
 }

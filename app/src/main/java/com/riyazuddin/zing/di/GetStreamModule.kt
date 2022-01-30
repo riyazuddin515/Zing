@@ -20,6 +20,10 @@ object GetStreamModule {
     fun provideGetStreamRepository(
         chatClient: ChatClient,
         getStreamTokenApi: GetStreamTokenApi,
-        sharedPreferences: SharedPreferences
-    ) = DefaultGetStreamRepository(chatClient, getStreamTokenApi, sharedPreferences) as GetStreamRepository
+        @EncryptedSharedPreferencesAnnotated sharedPreferences: SharedPreferences
+    ) = DefaultGetStreamRepository(
+        chatClient,
+        getStreamTokenApi,
+        sharedPreferences
+    ) as GetStreamRepository
 }

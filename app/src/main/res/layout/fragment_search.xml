@@ -27,6 +27,7 @@
             app:endIconMode="clear_text"
             app:boxStrokeWidth="0dp"
             app:boxStrokeWidthFocused="0dp"
+            app:boxBackgroundColor="@android:color/transparent"
             app:boxStrokeColor="@android:color/transparent"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
