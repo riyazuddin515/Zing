@@ -246,6 +246,11 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
         binding.tvAutoStart.setOnClickListener {
             autoStart()
         }
+        binding.tvReportABug.setOnClickListener {
+            findNavController().navigate(
+                R.id.action_settingsFragment_to_bugReportFragment
+            )
+        }
     }
 
     private fun autoStart() {

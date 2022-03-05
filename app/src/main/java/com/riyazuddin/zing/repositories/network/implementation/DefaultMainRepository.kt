@@ -24,6 +24,7 @@ import com.riyazuddin.zing.data.entities.*
 import com.riyazuddin.zing.di.SharedPreferencesAnnotated
 import com.riyazuddin.zing.other.Constants.ALGOLIA_USER_SEARCH_INDEX
 import com.riyazuddin.zing.other.Constants.BIO
+import com.riyazuddin.zing.other.Constants.BUG_REPORT_COLLECTION
 import com.riyazuddin.zing.other.Constants.COMMENTS_COLLECTION
 import com.riyazuddin.zing.other.Constants.DEFAULT_PROFILE_PICTURE_URL
 import com.riyazuddin.zing.other.Constants.FOLLOWERS_COLLECTION
@@ -88,6 +89,7 @@ class DefaultMainRepository @Inject constructor(
     private val postLikesCollection = firestore.collection(POST_LIKES_COLLECTION)
     private val followingRequestsCollection = firestore.collection(FOLLOWING_REQUESTS_COLLECTION)
     private val followerRequestsCollection = firestore.collection(FOLLOWER_REQUESTS_COLLECTION)
+    private val bugReportCollection = firestore.collection(BUG_REPORT_COLLECTION)
 
 
     override suspend fun onlineOfflineToggleWithDeviceToken(uid: String) {
@@ -716,4 +718,12 @@ class DefaultMainRepository @Inject constructor(
                 Resource.Success(result)
             }
         }
+
+    override suspend fun reportBug(bugReport: BugReport): Resource<Boolean> = withContext(Dispatchers.IO){
+        safeCall {
+            val bugID = UUID.randomUUID().toString()
+            bugReportCollection.document(bugID).set(bugReport).await()
+            Resource.Success(true)
+        }
+    }
 }

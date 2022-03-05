@@ -124,9 +124,9 @@ class CommentsFragment : Fragment(R.layout.fragment_comments) {
     }
 
     private fun subscribeToObservers() {
-        viewModel.postComments.observe(viewLifecycleOwner, {
+        viewModel.postComments.observe(viewLifecycleOwner) {
             commentAdapter.submitData(viewLifecycleOwner.lifecycle, it)
-        })
+        }
 
         viewModel.userProfileStatus.observe(viewLifecycleOwner, EventObserver(
             onError = { snackBar(it) }
