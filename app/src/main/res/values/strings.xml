@@ -160,4 +160,9 @@
     <string name="update_notification_token">Update Notification Token</string>
     <string name="update_notification_toke_message">If you are unable to receive chat notifications then click on update to set notification token</string>
     <string name="turn_on_auto_start">Turn On Auto Start</string>
+    <string name="title">Title</string>
+    <string name="description">Description</string>
+    <string name="pick_image_button">Pick image button</string>
+    <string name="pick_image">Pick Image</string>
+    <string name="bug_reported">Bug Reported.</string>
 </resources>

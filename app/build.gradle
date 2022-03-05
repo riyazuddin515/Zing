@@ -11,8 +11,8 @@ plugins {
 }
 
 def versionMajor = 1
-def versionMinor = 5
-def versionPatch = 4
+def versionMinor = 0
+def versionPatch = 0
 
 android {
     signingConfigs {
@@ -117,7 +117,7 @@ dependencies {
     implementation "androidx.hilt:hilt-lifecycle-viewmodel:1.0.0-alpha03"
     kapt "androidx.hilt:hilt-compiler:1.0.0"
 
-    def work_version = "2.5.0"
+    def work_version = "2.7.1"
     // Kotlin + coroutines
     implementation "androidx.work:work-runtime-ktx:$work_version"
 

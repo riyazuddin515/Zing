@@ -4,7 +4,6 @@ import android.net.Uri
 import com.algolia.search.model.response.ResponseSearch
 import com.riyazuddin.zing.data.entities.*
 import com.riyazuddin.zing.other.Resource
-import javax.inject.Singleton
 
 interface MainRepository {
 
@@ -170,4 +169,12 @@ interface MainRepository {
      * @return Resource<ResponseSearch>
      */
     suspend fun algoliaUsernameSearch(searchQuery: String): Resource<ResponseSearch>
+
+    /**
+     * @since 5-3-2022
+     * @param bugReport
+     * @return Resource<Boolean>
+     */
+    suspend fun reportBug(bugReport: BugReport): Resource<Boolean>
+
 }
