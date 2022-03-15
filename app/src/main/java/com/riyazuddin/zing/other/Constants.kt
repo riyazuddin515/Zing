@@ -8,6 +8,8 @@ object Constants {
     const val NOTIFICATION_ID = 1
     const val CHAT_CHANNEL_ID = "chat_channel_id"
     const val NORMAL_NOTIFICATION_CHANNEL_ID = "normal_notification_channel_id"
+    const val DIRECT_REPLY = "direct_reply"
+
     const val CHAT_TYPE = "CHAT_TYPE"
     const val FOLLOW_TYPE = "FOLLOW_TYPE"
     const val POST_LIKE_TYPE = "POST_LIKE_TYPE"
@@ -15,6 +17,7 @@ object Constants {
     const val TYPE = "type"
     const val KEY = "key"
     const val CID = "cid"
+    const val NOTIFICATION_TAG = "notification_tag"
 
     const val DEFAULT_PROFILE_PICTURE_URL =
         "https://firebasestorage.googleapis.com/v0/b/zing515.appspot.com/o/img_avatar.png?alt=media&token=b40984fc-155d-4acc-b031-a38076a98628"

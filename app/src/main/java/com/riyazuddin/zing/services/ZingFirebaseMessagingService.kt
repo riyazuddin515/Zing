@@ -13,7 +13,7 @@ import com.google.firebase.messaging.FirebaseMessaging
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import com.google.gson.Gson
-import com.riyazuddin.zing.data.Notification
+import com.riyazuddin.zing.data.entities.Notification
 import com.riyazuddin.zing.other.Constants.CHAT_TYPE
 import com.riyazuddin.zing.other.Constants.CID
 import com.riyazuddin.zing.other.Constants.COMMENT_TYPE
@@ -29,16 +29,6 @@ import serializeToMap
 
 
 class ZingFirebaseMessagingService : FirebaseMessagingService() {
-
-    override fun onCreate() {
-        super.onCreate()
-        Log.i(TAG, "onCreate: fcm created")
-    }
-
-    override fun onDestroy() {
-        Log.i(TAG, "onDestroy: fcm destroyed")
-        super.onDestroy()
-    }
 
     override fun onNewToken(token: String) {
         super.onNewToken(token)
