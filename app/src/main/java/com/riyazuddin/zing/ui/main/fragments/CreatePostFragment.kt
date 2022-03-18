@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.view.View
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContract
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -32,12 +33,15 @@ class CreatePostFragment : Fragment(R.layout.fragment_create_post) {
     private lateinit var binding: FragmentCreatePostBinding
     private val viewModel: CreatePostViewModel by viewModels()
     private lateinit var cropContent: ActivityResultLauncher<String>
-
     private var currentImageUri: Uri? = null
 
-    private val cropImageActivityResultContract = object : ActivityResultContract<String, Uri?>() {
+    private val pickImage = registerForActivityResult(ActivityResultContracts.GetContent()) {
+        viewModel.setImageUri(it)
+    }
+
+    private val cropContact = object : ActivityResultContract<String, Uri?>() {
         override fun createIntent(context: Context, input: String?): Intent {
-            return CropImage.activity()
+            return CropImage.activity(viewModel.currentImageUri.value)
                 .setGuidelines(CropImageView.Guidelines.ON)
                 .setOutputCompressQuality(50)
                 .setActivityTitle(getString(R.string.crop_image))
@@ -51,9 +55,9 @@ class CreatePostFragment : Fragment(R.layout.fragment_create_post) {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        cropContent = registerForActivityResult(cropImageActivityResultContract) {
+        cropContent = registerForActivityResult(cropContact) {
             it?.let {
-                viewModel.setImageUri(it)
+                viewModel.setCroppedImageUri(it)
             }
         }
     }
@@ -68,10 +72,10 @@ class CreatePostFragment : Fragment(R.layout.fragment_create_post) {
             findNavController().popBackStack()
         }
         binding.btnSelectImage.setOnClickListener {
-            cropContent.launch("image/*")
+            pickImage.launch("image/*")
         }
         binding.IMVCreatePost.setOnClickListener {
-            cropContent.launch("image/*")
+            pickImage.launch("image/*")
         }
 
         binding.btnPost.setOnClickListener {
@@ -93,6 +97,10 @@ class CreatePostFragment : Fragment(R.layout.fragment_create_post) {
 
     private fun subscribeToObservers() {
         viewModel.currentImageUri.observe(viewLifecycleOwner) {
+            cropContent.launch(null)
+        }
+
+        viewModel.croppedImageUri.observe(viewLifecycleOwner) {
             currentImageUri = it
             binding.btnSelectImage.isVisible = false
             glide.load(it).into(binding.IMVCreatePost)

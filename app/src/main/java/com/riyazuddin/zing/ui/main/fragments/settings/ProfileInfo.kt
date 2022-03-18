@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.view.View
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContract
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.view.isVisible
 import androidx.core.widget.addTextChangedListener
@@ -51,15 +52,19 @@ class ProfileInfo : Fragment(R.layout.fragment_profile_info) {
 
     private var isUsernameAvailable = false
 
-    private var imageUri: Uri? = null
+    private var currentImageUri: Uri? = null
     private lateinit var cropContent: ActivityResultLauncher<String>
-    private val cropImageActivityResultContract = object : ActivityResultContract<String, Uri?>() {
+
+    private val pickImage = registerForActivityResult(ActivityResultContracts.GetContent()) {
+        viewModel.setImageUri(it)
+    }
+
+    private val cropContact = object : ActivityResultContract<String, Uri?>() {
         override fun createIntent(context: Context, input: String?): Intent {
-            return CropImage.activity()
-                .setAspectRatio(1, 1)
-                .setOutputCompressQuality(40)
-                .setActivityTitle(getString(R.string.crop_image))
+            return CropImage.activity(viewModel.currentImageUri.value)
                 .setGuidelines(CropImageView.Guidelines.ON)
+                .setOutputCompressQuality(50)
+                .setActivityTitle(getString(R.string.crop_image))
                 .getIntent(requireContext())
         }
 
@@ -71,9 +76,9 @@ class ProfileInfo : Fragment(R.layout.fragment_profile_info) {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         validator = Validator(requireContext())
-        cropContent = registerForActivityResult(cropImageActivityResultContract) {
+        cropContent = registerForActivityResult(cropContact) {
             it?.let {
-                viewModel.setImage(it)
+                viewModel.setCroppedImageUri(it)
             }
         }
     }
@@ -91,7 +96,7 @@ class ProfileInfo : Fragment(R.layout.fragment_profile_info) {
         viewModel.getUserProfile(Firebase.auth.uid!!)
 
         binding.tvChangeProfileImage.setOnClickListener {
-            cropContent.launch("image/*")
+            pickImage.launch("image/*")
         }
 
         var job: Job? = null
@@ -154,7 +159,7 @@ class ProfileInfo : Fragment(R.layout.fragment_profile_info) {
                 bio = binding.TIEBio.text.toString(),
                 profilePicUrl = user.profilePicUrl
             )
-            viewModel.updateProfile(updateProfile, imageUri)
+            viewModel.updateProfile(updateProfile, currentImageUri)
         }
 
     }
@@ -170,8 +175,12 @@ class ProfileInfo : Fragment(R.layout.fragment_profile_info) {
     }
 
     private fun subscribeToObservers() {
-        viewModel.imageUri.observe(viewLifecycleOwner) {
-            imageUri = it
+        viewModel.currentImageUri.observe(viewLifecycleOwner) {
+            cropContent.launch(null)
+        }
+
+        viewModel.croppedImageUri.observe(viewLifecycleOwner) {
+            currentImageUri = it
             glide.load(it).into(binding.CIVProfilePic)
         }
 

@@ -30,6 +30,13 @@ class CreatePostViewModel @Inject constructor(
         _currentImageUri.postValue(imageUri)
     }
 
+    private val _croppedImageUri = MutableLiveData<Uri>()
+    val croppedImageUri: LiveData<Uri> = _croppedImageUri
+
+    fun setCroppedImageUri(imageUri: Uri) {
+        _croppedImageUri.postValue(imageUri)
+    }
+
     fun createPost(imageUri: Uri, caption: String) {
         _createPostStatus.postValue(Event(Resource.Loading()))
         viewModelScope.launch(dispatcher) {

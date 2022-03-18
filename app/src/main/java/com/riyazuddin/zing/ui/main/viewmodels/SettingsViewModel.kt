@@ -20,10 +20,18 @@ class SettingsViewModel @Inject constructor(
     private val repository: MainRepository
 ) : ViewModel() {
 
-    private val _imageUri = MutableLiveData<Uri>()
-    val imageUri: LiveData<Uri> = _imageUri
-    fun setImage(uri: Uri) {
-        _imageUri.postValue(uri)
+    private val _currentImageUri = MutableLiveData<Uri>()
+    val currentImageUri: LiveData<Uri> = _currentImageUri
+
+    fun setImageUri(imageUri: Uri) {
+        _currentImageUri.postValue(imageUri)
+    }
+
+    private val _croppedImageUri = MutableLiveData<Uri>()
+    val croppedImageUri: LiveData<Uri> = _croppedImageUri
+
+    fun setCroppedImageUri(imageUri: Uri) {
+        _croppedImageUri.postValue(imageUri)
     }
 
     private val _userProfileStatus = MutableLiveData<Event<Resource<User>>>()
