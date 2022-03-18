@@ -46,7 +46,7 @@ import javax.inject.Inject
 class HomeFragment : BasePostFragment(R.layout.fragment_home) {
 
     companion object {
-        const val TAG = "HomeFragment"
+        const val TAG = "HomeFragmentLog"
     }
 
     @Inject
@@ -154,6 +154,7 @@ class HomeFragment : BasePostFragment(R.layout.fragment_home) {
             onLoading = { Log.i(TAG, "subscribeToObservers: loading current user") }
         ) {
             currentUser = it
+            Log.i(TAG, "subscribeToObservers: $it")
             if (it.privacy == PRIVATE)
                 viewModel.checkDoesUserHaveFollowerRequests()
 

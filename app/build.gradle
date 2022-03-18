@@ -2,7 +2,7 @@ plugins {
     id 'com.android.application'
     id 'kotlin-android'
     id 'kotlin-kapt'
-    id "androidx.navigation.safeargs.kotlin"
+    id "androidx.navigation.safeargs"
     id 'dagger.hilt.android.plugin'
     id 'com.google.gms.google-services'
     id 'com.google.secrets_gradle_plugin' version '0.5'
@@ -44,8 +44,7 @@ android {
     buildTypes {
         debug {
             applicationIdSuffix ".debug"
-            versionNameSuffix ".debug"
-            resValue "string", "app_version", "${defaultConfig.versionName}${versionNameSuffix}"
+            resValue "string", "app_version", "${defaultConfig.versionName}"
         }
         release {
             minifyEnabled = true
@@ -100,8 +99,8 @@ dependencies {
     implementation "androidx.lifecycle:lifecycle-runtime-ktx:2.3.1"
 
     // Navigation Component
-    implementation "androidx.navigation:navigation-fragment-ktx:2.3.5"
-    implementation "androidx.navigation:navigation-ui-ktx:2.3.5"
+    implementation "androidx.navigation:navigation-fragment-ktx:2.4.1"
+    implementation "androidx.navigation:navigation-ui-ktx:2.4.1"
 
     // Glide
     implementation 'com.github.bumptech.glide:glide:4.11.0'

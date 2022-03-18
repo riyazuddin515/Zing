@@ -60,13 +60,6 @@ class DefaultGetStreamRepository @Inject constructor(
     override suspend fun connectUser(user: User): Resource<User> =
         withContext(Dispatchers.IO + NonCancellable) {
             safeCall {
-//                val a = chatClient.getCurrentUser()
-//                a?.let {
-//
-//                }
-//                if (a != null && user.name == a.name && user.image == a.image)
-//                    return@safeCall Resource.Success(a)
-
                 val token = getToken(user.id)
                 if (token.data != null && token.data != NO_TOKEN) {
                     val result = chatClient.connectUser(user, token.data).await()

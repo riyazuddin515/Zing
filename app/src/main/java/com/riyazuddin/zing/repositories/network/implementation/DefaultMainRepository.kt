@@ -153,13 +153,14 @@ class DefaultMainRepository @Inject constructor(
                 }
                 if (f.isNotEmpty()) {
                     val result = ChatClient.instance().deleteDevice(userStat.token).await()
-                    if (result.isSuccess)
+                    if (result.isSuccess) {
+                        sharedPreferences.edit().clear().apply()
                         return@safeCall Resource.Success(true)
+                    }
                     else
-                        return@safeCall Resource.Error(
-                            result.error().message ?: "Unable to Log Out"
-                        )
+                        return@safeCall Resource.Error(result.error().message ?: "Unable to Log Out")
                 } else {
+                    sharedPreferences.edit().clear().apply()
                     return@safeCall Resource.Success(true)
                 }
             } else
@@ -224,15 +225,14 @@ class DefaultMainRepository @Inject constructor(
             val currentUid = auth.uid!!
             if (currentUid == uid) {
                 // Fetch Current User
-                val spUid = sharedPreferences.getString("uid", UID)
+                val spUid = sharedPreferences.getString(UID, UID)
                 if (spUid == null || spUid == UID) {
                     syncCurrentUserProfile()
                 } else {
                     Log.i(TAG, "getUserProfile: Getting User from SharedPreferences")
                     val name = sharedPreferences.getString(NAME, NAME)!!
                     val username = sharedPreferences.getString(USERNAME, USERNAME)!!
-                    val profilePicUrl =
-                        sharedPreferences.getString(PROFILE_PIC_URL, PROFILE_PIC_URL)!!
+                    val profilePicUrl = sharedPreferences.getString(PROFILE_PIC_URL, PROFILE_PIC_URL)!!
                     val bio = sharedPreferences.getString(BIO, BIO)!!
                     val privacy = sharedPreferences.getString(PRIVACY, PRIVACY)!!
                     val user = User(name, uid, username, profilePicUrl, bio, privacy)

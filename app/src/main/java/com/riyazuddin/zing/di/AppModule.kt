@@ -102,7 +102,7 @@ object AppModule {
     @Singleton
     fun provideChatClient(context: Context): ChatClient = run {
         ChatClient.Builder(BuildConfig.STREAM_KEY, context).build()
-        ChatDomain.Builder(ChatClient.instance(), context).offlineEnabled().build()
+        ChatDomain.Builder(ChatClient.instance(), context).offlineEnabled().enableBackgroundSync().build()
         ChatClient.instance()
     }
 
