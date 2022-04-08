@@ -165,4 +165,8 @@
     <string name="pick_image_button">Pick image button</string>
     <string name="pick_image">Pick Image</string>
     <string name="bug_reported">Bug Reported.</string>
+    <string name="chat_channel_name">Chat</string>
+    <string name="chat_channel_description">This channel used for chat messages, it cam make sound and show pop up notification</string>
+    <string name="normal_channel_description">This channel used for Normal notification like New Follower, Comment, Like etc...</string>
+    <string name="normal_channel_name">Normal</string>
 </resources>

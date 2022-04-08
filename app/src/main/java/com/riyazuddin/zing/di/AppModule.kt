@@ -58,7 +58,7 @@ object AppModule {
     fun provideFirebaseAuth() = run {
         val auth = FirebaseAuth.getInstance()
 //        if (BuildConfig.DEBUG) {
-//            auth.useEmulator("192.168.0.7", 1111)
+//            auth.useEmulator("192.168.0.8", 1111)
 //        }
         auth
     }
@@ -69,7 +69,7 @@ object AppModule {
         val instance = FirebaseFirestore.getInstance()
 //        if (BuildConfig.DEBUG) {
 //            val settings = FirebaseFirestoreSettings.Builder()
-//                .setHost("192.168.0.7:2221")
+//                .setHost("192.168.0.8:2221")
 //                .setSslEnabled(false)
 //                .setPersistenceEnabled(false)
 //                .build()
@@ -83,7 +83,7 @@ object AppModule {
     fun providesFirebaseDatabase() = run {
         val database = FirebaseDatabase.getInstance()
 //        if (BuildConfig.DEBUG) {
-//            database.useEmulator("192.168.0.7", 3331)
+//            database.useEmulator("192.168.0.8", 3331)
 //        }
         database
     }
@@ -93,7 +93,7 @@ object AppModule {
     fun provideCloudStorage() = run {
         val storage = FirebaseStorage.getInstance()
 //        if (BuildConfig.DEBUG) {
-//            storage.useEmulator("192.168.0.7", 5555)
+//            storage.useEmulator("192.168.0.8", 5555)
 //        }
         storage
     }
@@ -102,7 +102,8 @@ object AppModule {
     @Singleton
     fun provideChatClient(context: Context): ChatClient = run {
         ChatClient.Builder(BuildConfig.STREAM_KEY, context).build()
-        ChatDomain.Builder(ChatClient.instance(), context).offlineEnabled().enableBackgroundSync().build()
+        ChatDomain.Builder(ChatClient.instance(), context).offlineEnabled().enableBackgroundSync()
+            .build()
         ChatClient.instance()
     }
 

@@ -3,8 +3,10 @@ package com.riyazuddin.zing.ui.main
 import android.annotation.SuppressLint
 import android.app.ActivityManager
 import android.app.NotificationManager
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -20,15 +22,11 @@ import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import com.riyazuddin.zing.R
 import com.riyazuddin.zing.databinding.ActivityMainBinding
+import com.riyazuddin.zing.services.ZingFirebaseMessagingService
 import com.riyazuddin.zing.ui.auth.AuthActivity
 import dagger.hilt.android.AndroidEntryPoint
 import io.getstream.chat.android.client.ChatClient
 import javax.inject.Inject
-import android.content.pm.PackageManager
-
-import android.content.ComponentName
-import android.util.Log
-import com.riyazuddin.zing.services.ZingFirebaseMessagingService
 
 
 @AndroidEntryPoint
@@ -143,10 +141,10 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    override fun onStop() {
+    override fun onDestroy() {
         chatClient.disconnectSocket()
         chatClient.disconnect()
-        super.onStop()
+        super.onDestroy()
     }
 
     companion object {

@@ -12,12 +12,7 @@ import com.riyazuddin.zing.repositories.network.abstraction.GetStreamRepository
 import com.riyazuddin.zing.repositories.network.abstraction.GetStreamTokenApi
 import io.getstream.chat.android.client.ChatClient
 import io.getstream.chat.android.client.call.await
-import io.getstream.chat.android.client.events.MarkAllReadEvent
-import io.getstream.chat.android.client.events.NewMessageEvent
-import io.getstream.chat.android.client.events.NotificationMarkReadEvent
-import io.getstream.chat.android.client.events.NotificationMessageNewEvent
 import io.getstream.chat.android.client.models.User
-import io.getstream.chat.android.client.subscribeFor
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.tasks.await
@@ -62,13 +57,16 @@ class DefaultGetStreamRepository @Inject constructor(
             safeCall {
                 val token = getToken(user.id)
                 if (token.data != null && token.data != NO_TOKEN) {
+                    chatClient.getCurrentUser()?.let {
+                        return@withContext Resource.Success(it)
+                    }
                     val result = chatClient.connectUser(user, token.data).await()
                     if (result.isSuccess) {
                         Resource.Success(result.data().user)
                     } else
                         Resource.Error(result.error().message ?: "Unknown Error")
                 } else {
-                    Resource.Error("Response failed")
+                    Resource.Error("Token response failed" + token.message)
                 }
             }
         }

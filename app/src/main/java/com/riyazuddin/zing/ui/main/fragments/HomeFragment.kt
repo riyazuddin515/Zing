@@ -67,6 +67,8 @@ class HomeFragment : BasePostFragment(R.layout.fragment_home) {
 
     private val currentUserUid: String? = Firebase.auth.uid
 
+    private var customDialog: CustomDialog? = null
+
     @Inject
     lateinit var chatClient: ChatClient
     private val getStreamViewModel by viewModels<GetStreamViewModel>()
@@ -116,7 +118,6 @@ class HomeFragment : BasePostFragment(R.layout.fragment_home) {
 
     }
 
-
     private fun updateHaveUnSeenMessages(count: Int) {
         if (count > 0) {
             val a = if (count in 1..99) count.toString() else "99+"
@@ -134,18 +135,7 @@ class HomeFragment : BasePostFragment(R.layout.fragment_home) {
         viewModel.loadCurrentUserStatus.observe(viewLifecycleOwner, EventObserver(
             onError = {
                 if (it == NO_USER_DOCUMENT) {
-                    CustomDialog(
-                        getString(R.string.setup_your_account),
-                        getString(R.string.setup_your_account_message),
-                        getString(R.string.setup),
-                        "",
-                        false
-                    ).apply {
-                        setPositiveListener {
-                            currentUser = null
-                            findNavController().navigate(R.id.action_homeFragment_to_profileInfo)
-                        }
-                    }.show(childFragmentManager, null)
+                    showAccountSetUpDialog()
                 } else {
                     snackBar(it)
                     Log.e(TAG, "subscribeToObservers: $it")
@@ -154,9 +144,9 @@ class HomeFragment : BasePostFragment(R.layout.fragment_home) {
             onLoading = { Log.i(TAG, "subscribeToObservers: loading current user") }
         ) {
             currentUser = it
-            Log.i(TAG, "subscribeToObservers: $it")
             if (it.privacy == PRIVATE)
                 viewModel.checkDoesUserHaveFollowerRequests()
+            customDialog?.dismiss()
 
             val user = io.getstream.chat.android.client.models.User(
                 id = it.uid,
@@ -175,7 +165,7 @@ class HomeFragment : BasePostFragment(R.layout.fragment_home) {
         ) {
             binding.ibRecentChat.isVisible = true
             updateHaveUnSeenMessages(it.unreadChannels)
-            Log.i(TAG, "subscribeToObservers: stream connection succeed")
+            Log.i(TAG, "subscribeToObservers: stream connection succeeded")
         })
         viewModel.doesUserHaveFollowingRequests.observe(viewLifecycleOwner, EventObserver {
             if (it) {
@@ -260,6 +250,25 @@ class HomeFragment : BasePostFragment(R.layout.fragment_home) {
     override fun onResume() {
         super.onResume()
         clearNotifications()
+        if (currentUser == null) {
+            viewModel.getCurrentUser(currentUserUid ?: return)
+        }
+    }
+
+    private fun showAccountSetUpDialog() {
+        customDialog = CustomDialog(
+            getString(R.string.setup_your_account),
+            getString(R.string.setup_your_account_message),
+            getString(R.string.setup),
+            "",
+            false
+        ).apply {
+            setPositiveListener {
+                currentUser = null
+                findNavController().navigate(R.id.action_homeFragment_to_profileInfo)
+            }
+        }
+        customDialog?.show(childFragmentManager, null)
     }
 
 }

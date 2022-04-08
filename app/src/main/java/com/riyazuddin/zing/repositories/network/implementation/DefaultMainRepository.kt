@@ -560,7 +560,6 @@ class DefaultMainRepository @Inject constructor(
     override suspend fun toggleSendFollowerRequest(uid: String): Resource<Boolean> =
         withContext(Dispatchers.IO) {
             safeCall {
-                Log.i(TAG, "toggleSendFollowingRequest: ")
                 var sent = false
                 val currentUid = Firebase.auth.uid!!
                 firestore.runTransaction { transition ->
